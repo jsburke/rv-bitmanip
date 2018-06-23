@@ -1,0 +1,6 @@
+# bluespec ignores
+*.bo
+*.ba
+
+# general ignore
+*.log
