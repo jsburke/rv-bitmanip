@@ -1,6 +1,10 @@
 # bluespec ignores
 *.bo
 *.ba
+*.bi
 
 # general ignore
 *.log
+~*
+*.sw?        # vim swaps
+.DS_Store    # guard against Apple
