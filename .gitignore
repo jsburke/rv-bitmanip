@@ -8,3 +8,6 @@
 ~*
 *.sw?        # vim swaps
 .DS_Store    # guard against Apple
+
+# lazy
+xbitmanip-draft.pdf  # I like having this local to the dir
