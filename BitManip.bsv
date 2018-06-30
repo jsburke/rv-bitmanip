@@ -54,7 +54,7 @@ endinterface: BitDouble_IFC
 //  a bit shifter
 //
 ////////////////////////////////////////////
-module mkBitZeroCountShift (BitSingleOpt_IFC #(sz, opt_sz));
+module mkBitZeroCountSerial (BitSingleOpt_IFC #(sz, opt_sz));
 
   Integer           int_msb    =  valueOf(sz) - 1;
   Reg #(Bool)       rg_busy    <- mkReg(False);
@@ -83,7 +83,7 @@ module mkBitZeroCountShift (BitSingleOpt_IFC #(sz, opt_sz));
     return rg_z_count;
   endmethod: res_get
   
-endmodule: mkBitZeroCountShift
+endmodule: mkBitZeroCountSerial
 
 //////////////////////////////////////////
 //
@@ -91,7 +91,7 @@ endmodule: mkBitZeroCountShift
 //
 //////////////////////////////////////////
 
-module mkBitPopCountShift (BitSingle_IFC #(sz));
+module mkBitPopCountSerial (BitSingle_IFC #(sz));
 
   Integer          int_msb      =  valueOf(sz) - 1;
   Reg #(Bool)      rg_busy      <- mkReg(False);
@@ -120,7 +120,7 @@ module mkBitPopCountShift (BitSingle_IFC #(sz));
     return rg_pop_count;
   endmethod: res_get
 
-endmodule: mkBitPopCountShift
+endmodule: mkBitPopCountSerial
 
 ////////////////////////////////////
 //
