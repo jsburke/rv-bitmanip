@@ -25,16 +25,26 @@ endfunction: fn_bit_reverse
 /////////////////////////////////////////////////
 // Interfaces
 
-interface ZeroCount_IFC #(numeric type sz);
-  method Action                   args_put (Bit #(sz) a, Bool rev_bits);
+// rev_bits --> Bit #(opt_sz) opt ??
+interface BitSingleOpt_IFC #(numeric type sz, numeric type opt_sz);
+  method Action                   args_put (Bit #(sz) rs1, Bit #(opt_sz) opt);
   method ActionValue #(Bit #(sz)) res_get;
-endinterface: ZeroCount_IFC
+endinterface: BitSingleOpt_IFC
 
-interface PopCount_IFC #(numeric type sz);
-  method Action                   args_put(Bit #(sz) a);
+interface BitSingle_IFC #(numeric type sz);
+  method Action                   args_put(Bit #(sz) rs1);
   method ActionValue #(Bit #(sz)) res_get;
-endinterface: PopCount_IFC
+endinterface: BitSingle_IFC
 
+interface BitDoubleOpt_IFC #(numeric type sz, numeric type opt_sz);
+  method Action                   args_put(Bit #(sz) rs1, Bit #(sz) rs2, Bit #(opt_sz) opt);
+  method ActionValue #(Bit #(sz)) reg_get;
+endinterface: BitDoubleOpt_IFC
+
+interface BitDouble_IFC #(numeric type sz);
+  method Action                   args_put(Bit #(sz) rs1, Bit #(sz) rs2);
+  method ActionValue #(Bit #(sz)) res_get;
+endinterface: BitDouble_IFC
 /////////////////////////////////////////////////
 // Generalized Modules
 
@@ -44,7 +54,7 @@ endinterface: PopCount_IFC
 //  a bit shifter
 //
 ////////////////////////////////////////////
-module mkZeroCountShift (ZeroCount_IFC #(sz));
+module mkBitZeroCountShift (BitSingleOpt_IFC #(sz, opt_sz));
 
   Integer           int_msb    =  valueOf(sz) - 1;
   Reg #(Bool)       rg_busy    <- mkReg(False);
@@ -62,9 +72,9 @@ module mkZeroCountShift (ZeroCount_IFC #(sz));
   /////////////////////////
   // Interface
 
-  method Action args_put (Bit #(sz) a, Bool rev_bits) if (!rg_busy);
+  method Action args_put (Bit #(sz) rs1, Bit #(opt_sz) opt) if (!rg_busy);
     rg_z_count <= 0;
-    rg_val     <= (rev_bits)? fn_bit_reverse(a) : a;
+    rg_val     <= (opt == 1)? fn_bit_reverse(rs1) : rs1;
     rg_busy    <= True;
   endmethod: args_put 
 
@@ -73,7 +83,7 @@ module mkZeroCountShift (ZeroCount_IFC #(sz));
     return rg_z_count;
   endmethod: res_get
   
-endmodule: mkZeroCountShift
+endmodule: mkBitZeroCountShift
 
 //////////////////////////////////////////
 //
@@ -81,7 +91,7 @@ endmodule: mkZeroCountShift
 //
 //////////////////////////////////////////
 
-module mkPopCountShift (PopCount_IFC #(sz));
+module mkBitPopCountShift (BitSingle_IFC #(sz));
 
   Integer          int_msb      =  valueOf(sz) - 1;
   Reg #(Bool)      rg_busy      <- mkReg(False);
@@ -99,9 +109,9 @@ module mkPopCountShift (PopCount_IFC #(sz));
   ///////////////////////
   // Interface
 
-  method Action args_put (Bit #(sz) a) if (!rg_busy);
+  method Action args_put (Bit #(sz) rs1) if (!rg_busy);
     rg_pop_count <= 0;
-    rg_val       <= a;
+    rg_val       <= rs1;
     rg_busy      <= True;
   endmethod: args_put
 
@@ -110,7 +120,23 @@ module mkPopCountShift (PopCount_IFC #(sz));
     return rg_pop_count;
   endmethod: res_get
 
-endmodule: mkPopCountShift
+endmodule: mkBitPopCountShift
 
+////////////////////////////////////
+//
+// And Complement
+//
+////////////////////////////////////
+interface BitAndC_IFC #(numeric type sz);
+  method ActionValue #(Bit #(sz)) eval (Bit #(sz) rs1, Bit #(sz) rs2);
+endinterface: BitAndC_IFC
+
+module mkBitAndC (BitAndC_IFC #(sz));
+  
+  method ActionValue #(Bit #(sz)) eval (Bit #(sz) rs1, Bit #(sz) rs2);
+    return rs1 & ~rs2;
+  endmethod: eval
+
+endmodule: mkBitAndC
 //////////////////////////////////
 endpackage : BitManip
