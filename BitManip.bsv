@@ -26,8 +26,8 @@ endfunction: fn_bit_reverse
 // Interfaces
 
 // rev_bits --> Bit #(opt_sz) opt ??
-interface BitSingleOpt_IFC #(numeric type sz, numeric type opt_sz);
-  method Action                   args_put (Bit #(sz) rs1, Bit #(opt_sz) opt);
+interface BitSingleOpt_IFC #(numeric type sz);
+  method Action                   args_put (Bit #(sz) rs1, Bit #(1) opt);
   method ActionValue #(Bit #(sz)) res_get;
 endinterface: BitSingleOpt_IFC
 
@@ -36,9 +36,9 @@ interface BitSingle_IFC #(numeric type sz);
   method ActionValue #(Bit #(sz)) res_get;
 endinterface: BitSingle_IFC
 
-interface BitDoubleOpt_IFC #(numeric type sz, numeric type opt_sz);
-  method Action                   args_put(Bit #(sz) rs1, Bit #(sz) rs2, Bit #(opt_sz) opt);
-  method ActionValue #(Bit #(sz)) reg_get;
+interface BitDoubleOpt_IFC #(numeric type sz);
+  method Action                   args_put(Bit #(sz) rs1, Bit #(sz) rs2, Bit #(2) opt);
+  method ActionValue #(Bit #(sz)) res_get;
 endinterface: BitDoubleOpt_IFC
 
 interface BitDouble_IFC #(numeric type sz);
@@ -54,7 +54,7 @@ endinterface: BitDouble_IFC
 //  a bit shifter
 //
 ////////////////////////////////////////////
-module mkBitZeroCountSerial (BitSingleOpt_IFC #(sz, opt_sz));
+module mkBitZeroCountSerial (BitSingleOpt_IFC #(sz));
 
   Integer           int_msb    =  valueOf(sz) - 1;
   Reg #(Bool)       rg_busy    <- mkReg(False);
@@ -72,7 +72,7 @@ module mkBitZeroCountSerial (BitSingleOpt_IFC #(sz, opt_sz));
   /////////////////////////
   // Interface
 
-  method Action args_put (Bit #(sz) rs1, Bit #(opt_sz) opt) if (!rg_busy);
+  method Action args_put (Bit #(sz) rs1, Bit #(1) opt) if (!rg_busy);
     rg_z_count <= 0;
     rg_val     <= (opt == 1)? fn_bit_reverse(rs1) : rs1;
     rg_busy    <= True;
@@ -128,7 +128,55 @@ endmodule: mkBitPopCountSerial
 //
 ////////////////////////////////////
 
-module mkShiftRotSerial (BitDoubleOpt_IFC #(sz, opt_sz));
+module mkShiftRotSerial (BitDoubleOpt_IFC #(sz))
+  provisos (SizedLiteral #(Bit #(sz), 1));
+
+  Integer                  int_msb       =  valueOf(sz) - 1;
+  Integer                  int_shamt_msb =  valueOf(TLog #(sz));
+  Reg #(Bit #(sz))         rg_val        <- mkRegU;
+  Reg #(Bit #(TLog #(sz))) rg_shamt      <- mkRegU;
+  Reg #(Bool)              rg_right      <- mkRegU;
+  Reg #(Bool)              rg_rot        <- mkRegU;
+  Reg #(Bool)              rg_busy       <- mkReg(False);
+
+  //////////////////////////////////
+  // Rules
+
+  rule rl_shift_ones_left (rg_busy && !rg_rot && !rg_right && (rg_shamt != 0));
+    rg_val   <= (rg_val << 1) & 1'b1;
+    rg_shamt <= rg_shamt - 1;
+  endrule: rl_shift_ones_left
+
+  rule rl_shift_ones_right (rg_busy && !rg_rot && rg_right && (rg_shamt != 0));
+    rg_val   <= (rg_val >> 1) & 1'b1;
+    rg_shamt <= rg_shamt - 1;
+  endrule: rl_shift_ones_right
+
+  rule rl_rotate_ones_left (rg_busy && rg_rot && !rg_right && (rg_shamt != 0));
+    rg_val   <= {rg_val[int_msb - 1 : 0], rg_val[int_msb]};
+    rg_shamt <= rg_shamt - 1;
+  endrule: rl_rotate_ones_left
+
+  rule rl_rotate_ones_right (rg_busy && rg_rot && rg_right && (rg_shamt != 1));
+    rg_val   <= {rg_val[0], rg_val[int_msb : 1]};
+    rg_shamt <= rg_shamt - 1;
+  endrule: rl_rotate_ones_right
+  
+  //////////////////////////////////
+  // Interface
+
+  method Action args_put (Bit #(sz) rs1, Bit #(sz) rs2, Bit #(2) opt) if (!rg_busy);
+    rg_val   <= rs1;
+    rg_shamt <= rs2[int_shamt_msb : 0];
+    rg_right <= unpack(opt[0]);
+    rg_rot   <= unpack(opt[1]);
+    rg_busy  <= True;
+  endmethod: args_put
+
+  method ActionValue #(Bit #(sz)) res_get if (rg_busy && (rg_shamt == 0));
+    rg_busy <= False;
+    return rg_val;
+  endmethod: res_get
 
 endmodule: mkShiftRotSerial
 
