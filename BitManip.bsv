@@ -132,12 +132,12 @@ module mkShiftRotSerial (BitDoubleOpt_IFC #(sz))
   // Rules
 
   rule rl_shift_ones_left (rg_busy && !rg_rot && !rg_right && (rg_shamt != 0));
-    rg_val   <= (rg_val << 1) & 1'b1;
+    rg_val   <= {rg_val[int_msb - 1: 0], 1'b1};
     rg_shamt <= rg_shamt - 1;
   endrule: rl_shift_ones_left
 
   rule rl_shift_ones_right (rg_busy && !rg_rot && rg_right && (rg_shamt != 0));
-    rg_val   <= (rg_val >> 1) & 1'b1;
+    rg_val   <= {1'b1, rg_val[int_msb : 1]};
     rg_shamt <= rg_shamt - 1;
   endrule: rl_shift_ones_right
 
