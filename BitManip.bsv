@@ -171,6 +171,43 @@ endmodule: mkShiftRotSerial
 
 ////////////////////////////////////
 //
+//  Generalized Reverse
+//  
+////////////////////////////////////
+
+module mkBitGrevSerial (BitDouble_IFC #(sz));
+
+  Integer                  int_msb       =  valueOf(sz) - 1;
+  Integer                  int_shamt_msb =  valueOf(TLog #(sz));
+  Reg #(Bit #(sz))         rg_val        <- mkRegU;
+  Reg #(Bit #(TLog #(sz))) rg_shamt      <- mkRegU;
+  Reg #(Bool)              rg_busy       <- mkReg(False);
+
+  /////////////////////////////////
+  // Rules
+
+  rule rl_grev (rg_busy && (rg_shamt != 0));
+
+  endrule: rl_grev
+
+  /////////////////////////////////
+  // Interface
+
+  method Action args_put (Bit #(sz) rs1, Bit #(sz) rs2) if (!rg_busy);
+    rg_val   <= rs1;
+    rg_shamt <= rs2[int_shamt_msb : 0];
+    rg_busy  <= True;
+  endmethod: args_put
+
+  method ActionValue #(Bit #(sz)) res_get if (rg_busy && (rg_shamt == 0));
+    rg_busy <= False;
+    return rg_val;
+  endmethod: res_get
+
+endmodule: mkBitGrevSerial
+
+////////////////////////////////////
+//
 // And Complement
 //
 ////////////////////////////////////
