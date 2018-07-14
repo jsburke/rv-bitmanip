@@ -181,13 +181,18 @@ module mkBitGrevSerial (BitDouble_IFC #(sz));
   Integer                  int_shamt_msb =  valueOf(TLog #(sz));
   Reg #(Bit #(sz))         rg_val        <- mkRegU;
   Reg #(Bit #(TLog #(sz))) rg_shamt      <- mkRegU;
-  Reg #(Bool)              rg_busy       <- mkReg(False);
+  Reg #(Bool)              rg_busy       <- mkReg(False);       
+  Reg #(Bit #(TLog #(sz))) rg_chunk      <- mkReg(1);
 
   /////////////////////////////////
   // Rules
 
   rule rl_grev (rg_busy && (rg_shamt != 0));
-
+    if (unpack(rg_shamt[int_shamt_msb])) begin 
+      
+    end
+    rg_shamt <= rg_shamt << 1;
+    rg_chunk <= rg_chunk << 1;
   endrule: rl_grev
 
   /////////////////////////////////
@@ -205,6 +210,32 @@ module mkBitGrevSerial (BitDouble_IFC #(sz));
   endmethod: res_get
 
 endmodule: mkBitGrevSerial
+
+////////////////////////////////////
+//
+// Generalized Zip
+//
+////////////////////////////////////
+
+module mkBitGenZip (BitDouble_IFC #(sz));
+
+endmodule: mkBitGenZip
+
+////////////////////////////////////
+//
+// Byte Swap
+//
+////////////////////////////////////
+
+module mkBitSwaps (BitSingleOpt_IFC #(sz));
+
+endmodule: mkBitSwaps
+
+////////////////////////////////////
+//
+// Bit Extract and Deposit
+//
+////////////////////////////////////
 
 ////////////////////////////////////
 //
