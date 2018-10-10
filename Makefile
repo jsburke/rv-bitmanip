@@ -1,4 +1,4 @@
 
 .PHONY: clean
 clean:
-	rm *.bo *.ba *.bi *.log
+	rm -rf *.bo *.ba *.bi *.log
