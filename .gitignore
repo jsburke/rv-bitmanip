@@ -6,8 +6,8 @@
 # general ignore
 *.log
 ~*
-*.sw?        # vim swaps
-.DS_Store    # guard against Apple
+*.sw?
+.DS_Store
 
 # lazy
-xbitmanip-draft.pdf  # I like having this local to the dir
+xbitmanip-draft.pdf
