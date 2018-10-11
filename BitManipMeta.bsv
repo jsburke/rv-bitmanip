@@ -16,7 +16,11 @@ typedef 64 XLEN;
 
 `endif
 
-Integer xlen = valueOf(XLEN);
+typedef TLog #(XLEN) LOG_XLEN;
+
+Integer xlen     = valueOf(XLEN);
+Integer log_xlen = valueOf(LOG_XLEN);
+
 typedef Bit #(XLEN) BitXL;
 
 /////////////////////////////////////////////////
