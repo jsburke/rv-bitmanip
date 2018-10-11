@@ -6,7 +6,7 @@ package BitManipCount;
 //                                             //
 /////////////////////////////////////////////////
 
-import BitManipCommon :: *;
+import BitManipMeta :: *;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -16,13 +16,14 @@ import BitManipCommon :: *;
 
 typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
 
-module mkIterCLZ (BitSingle_IFC #(bit_t))
-  provisos(Arith #(bit_t), Eq #(bit_t), Bitwise #(bit_t), Bits #(bit_t, bit_t_sz));
 
-  Integer           int_msb     = valueOf(bit_t_sz) - 1;
 
-  Reg #(bit_t)      rg_operand <- mkRegU;
-  Reg #(bit_t)      rg_count   <- mkRegU;
+module mkIterCLZ (BitSingle_IFC);
+
+  Integer           int_msb     = xlen - 1;
+
+  Reg #(BitXL)      rg_operand <- mkRegU;
+  Reg #(BitXL)      rg_count   <- mkRegU;
   Reg #(IterState)  rg_state   <- mkReg(Idle);
 
   rule rl_calc ((rg_state == Calc) && !unpack(rg_operand[int_msb]));
@@ -30,7 +31,7 @@ module mkIterCLZ (BitSingle_IFC #(bit_t))
     rg_operand <= rg_operand << 1;
   endrule: rl_calc
 
-  method Action args_put (bit_t arg0) if (rg_state == Idle);
+  method Action args_put (BitXL arg0) if (rg_state == Idle);
     rg_operand <= arg0;
     rg_count   <= 0;
     rg_state   <= Calc;
@@ -38,8 +39,7 @@ module mkIterCLZ (BitSingle_IFC #(bit_t))
 
 
   interface BitCommon_IFC common;
-
-    method Action kill;
+    method Action kill;  // consider conditioning kill on state being calc
       rg_state <= Idle;
     endmethod: kill
 
@@ -47,10 +47,9 @@ module mkIterCLZ (BitSingle_IFC #(bit_t))
       return ((rg_state == Calc) && !unpack(rg_operand[int_msb]));
     endmethod: valid_get
 
-    method bit_t value_get;
+    method BitXL value_get;
       return rg_count;
     endmethod: value_get
-
   endinterface: BitCommon_IFC
 
 endmodule: mkIterCLZ
