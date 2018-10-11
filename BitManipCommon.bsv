@@ -1,4 +1,23 @@
-package BitManip_IFC;
+package BitManipCommon;
+
+/////////////////////////////////////////////////
+//                                             //
+// Types and Aliases                           //
+//                                             //
+/////////////////////////////////////////////////
+
+`ifdef RV32
+
+typedef 32 XLEN;
+
+`elsif RV64
+
+typedef 64 XLEN;
+
+`endif
+
+Integer xlen = valueOf(XLEN);
+typedef Bit #(XLEN) BitXL;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -28,4 +47,4 @@ interface BitDouble_IFC #(type bit_t);
   interface BitCommon_IFC #(bit_t) common;
 endinterface: BitDouble_IFC
 
-endpackage: BitManip_IFC
+endpackage: BitManipCommon
