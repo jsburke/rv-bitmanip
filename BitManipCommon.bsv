@@ -1,4 +1,4 @@
-package BitManipCommon;
+package BitManipMeta;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -6,11 +6,11 @@ package BitManipCommon;
 //                                             //
 /////////////////////////////////////////////////
 
-`ifdef RV32
+`ifdef BIT32 
 
 typedef 32 XLEN;
 
-`elsif RV64
+`elsif BIT64
 
 typedef 64 XLEN;
 
@@ -25,10 +25,10 @@ typedef Bit #(XLEN) BitXL;
 //                                             //
 /////////////////////////////////////////////////
 
-interface BitCommon_IFC #(type bit_t);
+interface BitCommon_IFC;
   method Action kill;
   method Bool   valid_get;
-  method bit_t  value_get;
+  method BitXL  value_get;
 endinterface: BitCommon_IFC
 
 /////////////////////////////////////////////////
@@ -37,14 +37,14 @@ endinterface: BitCommon_IFC
 //                                             //
 /////////////////////////////////////////////////
 
-interface BitSingle_IFC #(type bit_t);
-  method    Action                 args_put (bit_t arg0);
-  interface BitCommon_IFC #(bit_t) common;
+interface BitSingle_IFC;
+  method    Action        args_put (BitXL arg0);
+  interface BitCommon_IFC common;
 endinterface: BitSingle_IFC
 
-interface BitDouble_IFC #(type bit_t);
-  method    Action                 args_put (bit_t arg0, bit_t arg1);
-  interface BitCommon_IFC #(bit_t) common;
+interface BitDouble_IFC;
+  method    Action        args_put (BitXL arg0, BitXL arg1);
+  interface BitCommon_IFC common;
 endinterface: BitDouble_IFC
 
-endpackage: BitManipCommon
+endpackage: BitManipMeta
