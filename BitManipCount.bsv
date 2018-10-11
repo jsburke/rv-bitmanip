@@ -6,7 +6,7 @@ package BitManipCount;
 //                                             //
 /////////////////////////////////////////////////
 
-import BitManip_IFC :: *;
+import BitManipCommon :: *;
 
 /////////////////////////////////////////////////
 //                                             //
