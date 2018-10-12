@@ -6,11 +6,11 @@ package BitManipMeta;
 //                                             //
 /////////////////////////////////////////////////
 
-`ifdef BIT32 
+`ifdef RV32 
 
 typedef 32 XLEN;
 
-`elsif BIT64
+`elsif RV64
 
 typedef 64 XLEN;
 
