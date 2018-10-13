@@ -2,6 +2,14 @@ package BitManipMeta;
 
 /////////////////////////////////////////////////
 //                                             //
+// BlueSpec Imports                            //
+//                                             //
+/////////////////////////////////////////////////
+
+import Vector :: *;
+
+/////////////////////////////////////////////////
+//                                             //
 // Types and Aliases                           //
 //                                             //
 /////////////////////////////////////////////////
@@ -23,32 +31,20 @@ Integer log_xlen = valueOf(LOG_XLEN);
 
 typedef Bit #(XLEN) BitXL;
 
+Integer int_single_port = 1;
+Integer int_double_port = 2;
+
 /////////////////////////////////////////////////
 //                                             //
-// Universal BitManip Interface                //
+//  BitManip Interface                         //
 //                                             //
 /////////////////////////////////////////////////
 
-interface BitCommon_IFC;
+interface BitManip_IFC #(numeric type no_args);
+  method Action args_put (Vector #(no_args, BitXL) arg);
   method Action kill;
   method Bool   valid_get;
   method BitXL  value_get;
-endinterface: BitCommon_IFC
-
-/////////////////////////////////////////////////
-//                                             //
-// Interfaces Extended For Argument Inputs     //
-//                                             //
-/////////////////////////////////////////////////
-
-interface BitSingle_IFC;
-  method    Action        args_put (BitXL arg0);
-  interface BitCommon_IFC common;
-endinterface: BitSingle_IFC
-
-interface BitDouble_IFC;
-  method    Action        args_put (BitXL arg0, BitXL arg1);
-  interface BitCommon_IFC common;
-endinterface: BitDouble_IFC
+endinterface: BitManip_IFC
 
 endpackage: BitManipMeta
