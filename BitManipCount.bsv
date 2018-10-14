@@ -18,7 +18,22 @@ import BitManipMeta :: *;
 
 typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
 
-module mkIterCLZ (BitManip_IFC #(int_single_port));
+  ///////////////////////////
+  //                       //
+  //  Zero Counts          //
+  //                       //
+  //  Covers Both Leading  //
+  //  and Trailing         //
+  //                       //
+  //  (clz and ctz)        //
+  //                       //
+  ///////////////////////////
+
+Bit #(1) opt_leading  = 1'b0;
+Bit #(1) opt_trailing = 1'b1;
+
+module mkZeroCountIter (BitManip_IFC #(int_single_port, one_option))
+  provisos (SizedLiteral #(Bit #(one_option), 1));
 
   Integer           int_msb     = xlen - 1;
 
@@ -26,25 +41,25 @@ module mkIterCLZ (BitManip_IFC #(int_single_port));
   Reg #(BitXL)      rg_count   <- mkRegU;
   Reg #(IterState)  rg_state   <- mkReg(Idle);
 
-  /////////////////////////
-  //                     //
-  //  Rules              //
-  //                     //
-  /////////////////////////
+  ///////////////////////////
+  //                       //
+  //  Rules                //
+  //                       //
+  ///////////////////////////
 
   rule rl_calc ((rg_state == Calc) && !unpack(rg_operand[int_msb]));
     rg_count   <= rg_count + 1;
     rg_operand <= rg_operand << 1;
   endrule: rl_calc
 
-  /////////////////////////
-  //                     //
-  //  Interface          //
-  //                     //
-  /////////////////////////  
+  ///////////////////////////
+  //                       //
+  //  Interface            //
+  //                       //
+  ///////////////////////////  
 
-  method Action args_put (Vector #(int_single_port, BitXL) arg) if (rg_state == Idle);
-    rg_operand <= arg[0];
+  method Action args_put (Vector #(int_single_port, BitXL) arg, Bit #(one_option) option) if (rg_state == Idle);
+    rg_operand <= (option == opt_leading) ? arg[0] : reverseBits(arg[0]);
     rg_count   <= 0;
     rg_state   <= Calc;
   endmethod: args_put
@@ -61,6 +76,6 @@ module mkIterCLZ (BitManip_IFC #(int_single_port));
     return rg_count;
   endmethod: value_get
 
-endmodule: mkIterCLZ
+endmodule: mkZeroCountIter
 
 endpackage: BitManipCount
