@@ -7,15 +7,35 @@ PROJ_NAME = RISC V X-Bitmanip
 #################################################
 
 XLEN ?= 32
+#XLEN ?= 64
 
 #################################################
 ##                                             ##
-##  Source Files                               ##
+##  Build Tools                                ##
 ##                                             ##
 #################################################
 
-BSV_ALL = $(wildcard *.bsv)
-BSV_TB  = $(wildcard *Tb.bsv)
+BSC ?= bsc
+
+VERI_LIB = $(BLUESPECDIR)/Verilog
+VERIMAIN = $(VERI_LIB)/main.v
+
+#################################################
+##                                             ##
+##  Project Management                         ##
+##                                             ##
+#################################################
+
+SRC_DIR  = bsv/src
+TEST_DIR = bsv/test
+
+TESTS    = $(wildcard $(TEST_DIR)/*.bsv)
+
+#################################################
+##                                             ##
+##  Project Targets                            ##
+##                                             ##
+#################################################
 
 .PHONY: default
 default: help
@@ -33,8 +53,7 @@ help:
 	@echo " "
 	@echo "  ******* Individual Targets *******"
 	@echo " "
-	@echo " $(BSV_ALL)"
-	@echo " $(BSV_TB)"
+	@echo " $(TESTS)"
 
 .PHONY: clean
 clean:
