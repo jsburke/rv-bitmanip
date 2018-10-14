@@ -32,8 +32,8 @@ Integer log_xlen = valueOf(LOG_XLEN);
 typedef Bit #(XLEN) BitXL;
 
 // solo or paired source inputs
-Integer int_single_port = 1;
-Integer int_double_port = 2;
+Integer single_port = 1;
+Integer double_port = 2;
 
 // width for option selection
 // in modules

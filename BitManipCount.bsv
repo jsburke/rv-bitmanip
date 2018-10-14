@@ -32,7 +32,7 @@ typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
 Bit #(1) opt_leading  = 1'b0;
 Bit #(1) opt_trailing = 1'b1;
 
-module mkZeroCountIter (BitManip_IFC #(int_single_port, one_option))
+module mkZeroCountIter (BitManip_IFC #(single_port, one_option))
   provisos (SizedLiteral #(Bit #(one_option), 1));
 
   Integer           int_msb     = xlen - 1;
@@ -58,7 +58,7 @@ module mkZeroCountIter (BitManip_IFC #(int_single_port, one_option))
   //                       //
   ///////////////////////////  
 
-  method Action args_put (Vector #(int_single_port, BitXL) arg, Bit #(one_option) option) if (rg_state == Idle);
+  method Action args_put (Vector #(single_port, BitXL) arg, Bit #(one_option) option) if (rg_state == Idle);
     rg_operand <= (option == opt_leading) ? arg[0] : reverseBits(arg[0]);
     rg_count   <= 0;
     rg_state   <= Calc;
@@ -84,7 +84,7 @@ endmodule: mkZeroCountIter
   //                       //
   ///////////////////////////
 
-module mkPopCountIter (BitManip_IFC #(int_single_port, no_options));
+module mkPopCountIter (BitManip_IFC #(single_port, no_options));
 
   Reg #(BitXL) rg_operand   <- mkRegU;
   Reg #(BitXL) rg_count     <- mkRegU;
@@ -107,7 +107,7 @@ module mkPopCountIter (BitManip_IFC #(int_single_port, no_options));
   //                       //
   ///////////////////////////  
 
-  method Action args_put (Vector #(int_single_port, BitXL) arg, Bit #(no_options) option) if (rg_state == Idle);
+  method Action args_put (Vector #(single_port, BitXL) arg, Bit #(no_options) option) if (rg_state == Idle);
     rg_operand <= arg[0];
     rg_count   <= 0;
     rg_state   <= Calc;
