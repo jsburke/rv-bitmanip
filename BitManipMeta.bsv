@@ -31,8 +31,15 @@ Integer log_xlen = valueOf(LOG_XLEN);
 
 typedef Bit #(XLEN) BitXL;
 
+// solo or paired source inputs
 Integer int_single_port = 1;
 Integer int_double_port = 2;
+
+// width for option selection
+// in modules
+Integer no_options  = 0;
+Integer one_option  = 1;
+Integer two_options = 2;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -40,10 +47,18 @@ Integer int_double_port = 2;
 //                                             //
 /////////////////////////////////////////////////
 
-interface BitManip_IFC #(numeric type no_args);
-  method Action args_put (Vector #(no_args, BitXL) arg);
+interface BitManip_IFC #(numeric type no_args, numeric type opt_sz);
+
+  (* always_ready *)
+  method Action args_put (Vector #(no_args, BitXL) arg, Bit #(opt_sz) option);
+
+  (* always_ready *)
   method Action kill;
+
+  (* always_ready *)
   method Bool   valid_get;
+
+  (* always_ready *)
   method BitXL  value_get;
 endinterface: BitManip_IFC
 
