@@ -56,8 +56,8 @@ def writeCornerCases(file_name, noDigits): # admittedly coded quite lazily
   file = open(file_name, "w")              
   file.write("0" * noDigits + "\n")               # all zeros
   file.write("0" * (noDigits - 1) + "1" + "\n")   # int of value 1
-  file.write("1" * noDigits + "\n")               # negative one
-  file.write("1" * (noDigits - 1) + "0" + "\n")   # all bits set except LSB
+  file.write("f" * noDigits + "\n")               # negative one
+  file.write("f" * (noDigits - 1) + "0" + "\n")   # all bits set except LSB
   file.write("7" + "f" * (noDigits - 1) + "\n")   # most positive 2's c
   file.write("8" + "0" * (noDigits - 1) + "\n")   # most negative 2's c
   file.write("5" * noDigits + "\n")               # alternating 0101...
@@ -80,9 +80,9 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
 
 def countLeadingZeroes(hex_str, noDigits):
   bin_str = hexToBinStr(hex_str)
-  bits    = len(bin_str) - 1
+  bits    = len(bin_str)
   count   = 0
-  while (bin_str[count] == "0") and (count < bits):
+  while (count < bits) and (bin_str[count] == "0"):
     count = count + 1
   return hexStrFormat(count, noDigits)
 
