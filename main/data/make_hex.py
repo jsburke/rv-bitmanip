@@ -30,7 +30,7 @@ import os, sys, argparse
 #############################
 
 def hexToBinStr(hex_str):
-  return bin(int('1' + hex_str, 16))[3:]
+  return bin(int("1" + hex_str, 16))[3:]
 
 def stringReverse(string):
   return string[::-1]
@@ -47,11 +47,11 @@ def writeBytes(file_name, entries, chars):
     file.write("\n")
   file.close()
 
-def writeBytesLambdaSingle(lam, sourceFile, destFile):
+def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
   dest = open(destFile, "w")
   with open(sourceFile, "r") as source:
     for line in source:
-      dest.write(lam(line))
+      dest.write(lam(line.rstrip("\n"), noDigits))
       dest.write("\n")
   source.close
   dest.close
@@ -62,16 +62,17 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile):
 ##                         ##
 #############################
 
-def countLeadingZeroes(hex_str):
+def countLeadingZeroes(hex_str, noDigits):
   bin_str = hexToBinStr(hex_str)
   bits    = len(bin_str)
   count   = 0
   while (bin_str[count] == "0") and (count < bits):
     count = count + 1
-  return str(count)
+  hexCount    = hex(count)[2::]
+  return "0" * (noDigits - len(hexCount)) + hexCount
 
-def countTrailingZeroes(hex_str):  # possible to collapse via lambdas or partial application??
-  return countLeadingZeroes(stringReverse(hex_str))
+def countTrailingZeroes(hex_str, noDigits):  # possible to collapse via lambdas or partial application
+  return countLeadingZeroes(stringReverse(hex_str), noDigits)
 
 #############################
 ##                         ##
@@ -140,8 +141,8 @@ def main():
   instructions = []
 
   instructions.append("clz")
-#  instructions.append("ctz")
-#  instructions.append("pcnt")
+  instructions.append("ctz")
+  instructions.append("pcnt")
 
   dest_files = [insn + suffix for insn in instructions]
 
@@ -149,6 +150,7 @@ def main():
   writeBytes(rs2_file, entries, entry_len)
 
   # can I do a map below via some dictionary for dest_file <--> lambda ??
-  writeBytesLambdaSingle(countLeadingZeroes, rs1_file, dest_files[0])
+  writeBytesLambdaSingle(countLeadingZeroes,  rs1_file, dest_files[0], entry_len)
+  writeBytesLambdaSingle(countTrailingZeroes, rs1_file, dest_files[1], entry_len)
 
 main()
