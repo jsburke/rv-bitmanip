@@ -57,7 +57,7 @@ def writeCornerCases(file_name, noDigits): # admittedly coded quite lazily
   file.write("0" * noDigits + "\n")               # all zeros
   file.write("0" * (noDigits - 1) + "1" + "\n")   # int of value 1
   file.write("f" * noDigits + "\n")               # negative one
-  file.write("f" * (noDigits - 1) + "0" + "\n")   # all bits set except LSB
+  file.write("f" * (noDigits - 1) + "e" + "\n")   # all bits set except LSB
   file.write("7" + "f" * (noDigits - 1) + "\n")   # most positive 2's c
   file.write("8" + "0" * (noDigits - 1) + "\n")   # most negative 2's c
   file.write("5" * noDigits + "\n")               # alternating 0101...
