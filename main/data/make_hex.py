@@ -32,6 +32,10 @@ import os, sys, argparse
 def hexToBinStr(hex_str):
   return bin(int("1" + hex_str, 16))[3:]
 
+def hexStrFormat(int_val, noDigits):
+  hexShort = hex(int_val)[2::]
+  return "0" * (noDigits - len(hexShort)) + hexShort
+
 def stringReverse(string):
   return string[::-1]
 
@@ -68,11 +72,18 @@ def countLeadingZeroes(hex_str, noDigits):
   count   = 0
   while (bin_str[count] == "0") and (count < bits):
     count = count + 1
-  hexCount    = hex(count)[2::]
-  return "0" * (noDigits - len(hexCount)) + hexCount
+  return hexStrFormat(count, noDigits)
 
 def countTrailingZeroes(hex_str, noDigits):  # possible to collapse via lambdas or partial application
   return countLeadingZeroes(stringReverse(hex_str), noDigits)
+
+def popCount(hex_str, noDigits):
+  bin_str = hexToBinStr(hex_str)
+  count   = 0
+  for bit in bin_str:
+    if(bit == "1"): count = count + 1
+  return hexStrFormat(count, noDigits)
+ 
 
 #############################
 ##                         ##
@@ -152,5 +163,6 @@ def main():
   # can I do a map below via some dictionary for dest_file <--> lambda ??
   writeBytesLambdaSingle(countLeadingZeroes,  rs1_file, dest_files[0], entry_len)
   writeBytesLambdaSingle(countTrailingZeroes, rs1_file, dest_files[1], entry_len)
+  writeBytesLambdaSingle(popCount,            rs1_file, dest_files[2], entry_len)
 
 main()
