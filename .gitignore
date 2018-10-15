@@ -3,6 +3,10 @@
 *.ba
 *.bi
 
+# generic hardware ignores
+*.hex
+*.bin
+
 # general ignore
 *.log
 ~*
