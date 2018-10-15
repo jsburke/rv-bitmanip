@@ -25,9 +25,12 @@ import os, sys, argparse
 
 #############################
 ##                         ##
-##  Utility Functions      ##
+##  Support Functions      ##
 ##                         ##
 #############################
+
+def hexToBinStr(hex_str):
+  return bin(int('1' + hex_str, 16))[3:]
 
 def randHexDigit():
   return hex(rd.randint(0,15))[2:]
@@ -40,6 +43,32 @@ def writeBytes(file_name, entries, chars):
       file.write(randHexDigit())
     file.write("\n")
   file.close()
+
+def writeBytesLambda1(lam, sourceFile, destFile):
+  dest = open(destFile, "w")
+
+  with open(sourceFile, "r") as source:
+    for line in source:
+      dest.write(lam(line))
+      dest.write("\n")
+
+  source.close
+  dest.close
+#############################
+##                         ##
+##  Lambda Functions       ##
+##                         ##
+#############################
+
+def clz(hex_str):
+  bin_str = hexToBinStr(hex_str)
+  bits    = len(bin_str)
+  count   = 0
+  
+  while (bin_str[count] == 0) and (count < bits):
+    count = count + 1
+
+  return count
 
 #############################
 ##                         ##
