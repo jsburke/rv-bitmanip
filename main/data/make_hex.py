@@ -60,7 +60,7 @@ def writeBytesLambda1(lam, sourceFile, destFile):
 ##                         ##
 #############################
 
-def clz(hex_str):
+def countLeadingZeroes(hex_str):
   bin_str = hexToBinStr(hex_str)
   bits    = len(bin_str)
   count   = 0
