@@ -32,6 +32,9 @@ import os, sys, argparse
 def hexToBinStr(hex_str):
   return bin(int('1' + hex_str, 16))[3:]
 
+def stringReverse(string):
+  return string[::-1]
+
 def randHexDigit():
   return hex(rd.randint(0,15))[2:]
 
@@ -44,16 +47,15 @@ def writeBytes(file_name, entries, chars):
     file.write("\n")
   file.close()
 
-def writeBytesLambda1(lam, sourceFile, destFile):
+def writeBytesLambdaSingle(lam, sourceFile, destFile):
   dest = open(destFile, "w")
-
   with open(sourceFile, "r") as source:
     for line in source:
       dest.write(lam(line))
       dest.write("\n")
-
   source.close
   dest.close
+
 #############################
 ##                         ##
 ##  Lambda Functions       ##
@@ -64,11 +66,12 @@ def countLeadingZeroes(hex_str):
   bin_str = hexToBinStr(hex_str)
   bits    = len(bin_str)
   count   = 0
-  
-  while (bin_str[count] == 0) and (count < bits):
+  while (bin_str[count] == "0") and (count < bits):
     count = count + 1
+  return str(count)
 
-  return count
+def countTrailingZeroes(hex_str):  # possible to collapse via lambdas or partial application??
+  return countLeadingZeroes(stringReverse(hex_str))
 
 #############################
 ##                         ##
@@ -134,13 +137,18 @@ def main():
   rs2_file = "rs2" + suffix
 
   # result files, may only need rs1
-  dst_files = []
+  instructions = []
 
-  dst_files.append("clz")
-  dst_files.append("ctz")
-  dst_files.append("pcnt")
+  instructions.append("clz")
+#  instructions.append("ctz")
+#  instructions.append("pcnt")
+
+  dest_files = [insn + suffix for insn in instructions]
 
   writeBytes(rs1_file, entries, entry_len)
   writeBytes(rs2_file, entries, entry_len)
+
+  # can I do a map below via some dictionary for dest_file <--> lambda ??
+  writeBytesLambdaSingle(countLeadingZeroes, rs1_file, dest_files[0])
 
 main()
