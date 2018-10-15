@@ -42,14 +42,26 @@ def stringReverse(string):
 def randHexDigit():
   return hex(rd.randint(0,15))[2:]
 
-def writeBytes(file_name, entries, chars):
-  file = open(file_name, "w")
+  # file writers
 
-  for i in range(entries):
-    for c in range(chars):
+def writeBytes(file_name, entries, noDigits):
+  file = open(file_name, "a") # open with append since writeCornerCases
+  for i in range(entries):    # will be first for source "register" data
+    for c in range(noDigits):
       file.write(randHexDigit())
     file.write("\n")
   file.close()
+
+def writeCornerCases(file_name, noDigits): # admittedly coded quite lazily
+  file = open(file_name, "w")              
+  file.write("0" * noDigits + "\n")               # all zeros
+  file.write("0" * (noDigits - 1) + "1" + "\n")   # int of value 1
+  file.write("1" * noDigits + "\n")               # negative one
+  file.write("1" * (noDigits - 1) + "0" + "\n")   # all bits set except LSB
+  file.write("7" + "f" * (noDigits - 1) + "\n")   # most positive 2's c
+  file.write("8" + "0" * (noDigits - 1) + "\n")   # most negative 2's c
+  file.write("5" * noDigits + "\n")               # alternating 0101...
+  file.write("c" * noDigits + "\n")               # alternating 1010...
 
 def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
   dest = open(destFile, "w")
@@ -68,7 +80,7 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
 
 def countLeadingZeroes(hex_str, noDigits):
   bin_str = hexToBinStr(hex_str)
-  bits    = len(bin_str)
+  bits    = len(bin_str) - 1
   count   = 0
   while (bin_str[count] == "0") and (count < bits):
     count = count + 1
@@ -156,6 +168,9 @@ def main():
   instructions.append("pcnt")
 
   dest_files = [insn + suffix for insn in instructions]
+
+  writeCornerCases(rs1_file, entry_len)
+  writeCornerCases(rs2_file, entry_len)
 
   writeBytes(rs1_file, entries, entry_len)
   writeBytes(rs2_file, entries, entry_len)
