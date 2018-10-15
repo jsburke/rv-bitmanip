@@ -32,6 +32,15 @@ import os, sys, argparse
 def randHexDigit():
   return hex(rd.randint(0,15))[2:]
 
+def writeBytes(file_name, entries, chars):
+  file = open(file_name, "w")
+
+  for i in range(entries):
+    for c in range(chars):
+      file.write(randHexDigit())
+    file.write("\n")
+  file.close()
+
 #############################
 ##                         ##
 ##  Command Line Controls  ##
@@ -82,7 +91,27 @@ def main():
 
   entries = options.entries
 
-  mode = "32"
-  if(options.rv64): mode = "64"
+  # use an int to make controlling digits to write easy
+  mode = 32
+  if(options.rv64): mode = 64
+
+  entry_len = mode // 4 
+
+  # write digits to files
+  suffix   = "_rv" + str(mode) + ".hex"
+
+  # sources
+  rs1_file = "rs1" + suffix
+  rs2_file = "rs2" + suffix
+
+  # result files, may only need rs1
+  dst_files = []
+
+  dst_files.append("clz")
+  dst_files.append("ctz")
+  dst_files.append("pcnt")
+
+  writeBytes(rs1_file, entries, entry_len)
+  writeBytes(rs2_file, entries, entry_len)
 
 main()
