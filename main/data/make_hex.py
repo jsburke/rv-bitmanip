@@ -67,7 +67,7 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
   dest = open(destFile, "w")
   with open(sourceFile, "r") as source:
     for line in source:
-      dest.write(lam(line.rstrip("\n"), noDigits))
+      dest.write(lam(hexToBinStr(line.rstrip("\n")), noDigits))
       dest.write("\n")
   source.close
   dest.close
@@ -78,19 +78,17 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
 ##                         ##
 #############################
 
-def countLeadingZeroes(hex_str, noDigits):
-  bin_str = hexToBinStr(hex_str)
+def countLeadingZeroes(bin_str, noDigits):
   bits    = len(bin_str)
   count   = 0
   while (count < bits) and (bin_str[count] == "0"):
     count = count + 1
   return hexStrFormat(count, noDigits)
 
-def countTrailingZeroes(hex_str, noDigits):  # possible to collapse via lambdas or partial application
-  return countLeadingZeroes(stringReverse(hex_str), noDigits)
+def countTrailingZeroes(bin_str, noDigits):  # possible to collapse via lambdas or partial application
+  return countLeadingZeroes(stringReverse(bin_str), noDigits)
 
-def popCount(hex_str, noDigits):
-  bin_str = hexToBinStr(hex_str)
+def popCount(bin_str, noDigits):
   count   = 0
   for bit in bin_str:
     if(bit == "1"): count = count + 1
