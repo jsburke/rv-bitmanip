@@ -37,6 +37,7 @@ def hexStrFormat(int_val, noDigits):
   hexShort = hex(int_val)[2::]
   return "0" * (noDigits - len(hexShort)) + hexShort
 
+
 def stringReverse(string):
   return string[::-1]
 
@@ -75,6 +76,17 @@ def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
   source.close
   dest.close
 
+# assume sourceFileOne maps to rs1 values, sourceFileTwo to rs2
+def writeBytesLambdaDouble(lam, sourceFileOne, sourceFileTwo, destFile, noDigits):
+  dest = open(destFile, "w")
+  with open(sourceFileOne) as src1, open(sourceFileTwo) as src2:
+    for (rs1, rs2) in zip(src1, src2):
+      dest.write(lam(hexToBinStr(rs1.rstrip("\n")), hexToBinStr(rs2.rstrip("\n")), noDigits))
+      dest.write("\n")
+  src1.close
+  src2.close
+  dest.close
+
 #############################
 ##                         ##
 ##  Lambda Functions       ##
@@ -97,6 +109,10 @@ def popCount(bin_str, noDigits):
     if(bit == "1"): count = count + 1
   return hexStrFormat(count, noDigits)
  
+def andWithComplement(bin_str1, bin_str2, noDigits):
+  bin_str2_inv = "".join(["1" if s == "0" else "0"  for s in bin_str2])
+  bin_result   = "".join(["1" if a == "1" and b == "1" else "0" for a, b in zip(bin_str1, bin_str2_inv)])
+  return hexStrFormat(int(bin_result, 2), noDigits)
 
 #############################
 ##                         ##
@@ -170,6 +186,7 @@ def main():
   instructions.append("clz")
   instructions.append("ctz")
   instructions.append("pcnt")
+  instructions.append("andc")
 
   dest_files = [insn + suffix for insn in instructions]
 
@@ -183,5 +200,7 @@ def main():
   writeBytesLambdaSingle(countLeadingZeroes,  rs1_file, dest_files[0], entry_len)
   writeBytesLambdaSingle(countTrailingZeroes, rs1_file, dest_files[1], entry_len)
   writeBytesLambdaSingle(popCount,            rs1_file, dest_files[2], entry_len)
+
+  writeBytesLambdaDouble(andWithComplement,   rs1_file, rs2_file, dest_files[3], entry_len)
 
 main()
