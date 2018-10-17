@@ -11,7 +11,8 @@
 #  -32, --rv32       generate hex files with 32 bit hex numbers [default]
 #  -64, --rv64       generate hex files with 64 bit hex numbers
 #
-#  -e,  --entries    defines number of integers in each hex file [default 16]
+#  -e,  --entries    defines number of integers in each hex file
+#                      must be at least 8 to cover defaulting corner cases 
 #
 
 #############################
@@ -62,6 +63,8 @@ def writeCornerCases(file_name, noDigits): # admittedly coded quite lazily
   file.write("8" + "0" * (noDigits - 1) + "\n")   # most negative 2's c
   file.write("5" * noDigits + "\n")               # alternating 0101...
   file.write("c" * noDigits + "\n")               # alternating 1010...
+
+noCornerCases = 8 # equal to number of writes invoked above
 
 def writeBytesLambdaSingle(lam, sourceFile, destFile, noDigits):
   dest = open(destFile, "w")
@@ -145,6 +148,9 @@ def main():
 
   entries = options.entries
 
+  if (entries <= noCornerCases): randEntries = 0
+  else                         : randEntries = entries - noCornerCases
+
   # use an int to make controlling digits to write easy
   mode = 32
   if(options.rv64): mode = 64
@@ -170,8 +176,8 @@ def main():
   writeCornerCases(rs1_file, entry_len)
   writeCornerCases(rs2_file, entry_len)
 
-  writeBytes(rs1_file, entries, entry_len)
-  writeBytes(rs2_file, entries, entry_len)
+  writeBytes(rs1_file, randEntries, entry_len)
+  writeBytes(rs2_file, randEntries, entry_len)
 
   # can I do a map below via some dictionary for dest_file <--> lambda ??
   writeBytesLambdaSingle(countLeadingZeroes,  rs1_file, dest_files[0], entry_len)
