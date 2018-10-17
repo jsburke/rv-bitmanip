@@ -174,11 +174,14 @@ def main():
   entry_len = mode // 4 
 
   # write digits to files
-  suffix   = "_rv" + str(mode) + ".hex"
+
+  path   = "./RV" + str(mode) + "/"
+  os.mkdir(path)
+  suffix = ".hex"
 
   # sources
-  rs1_file = "rs1" + suffix
-  rs2_file = "rs2" + suffix
+  rs1_file = path + "rs1" + suffix
+  rs2_file = path + "rs2" + suffix
 
   # result files, may only need rs1
   instructions = []
@@ -188,7 +191,7 @@ def main():
   instructions.append("pcnt")
   instructions.append("andc")
 
-  dest_files = [insn + suffix for insn in instructions]
+  dest_files = [path + insn + suffix for insn in instructions]
 
   writeCornerCases(rs1_file, entry_len)
   writeCornerCases(rs2_file, entry_len)
