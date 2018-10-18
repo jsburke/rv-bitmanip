@@ -26,8 +26,9 @@ VERIMAIN = $(VERI_LIB)/main.v
 ##                                             ##
 #################################################
 
-SRC_DIR  = bsv/src
-TEST_DIR = bsv/test
+SRC_DIR  = main/src
+TEST_DIR = main/test
+DATA_DIR = main/data/RV$(XLEN)
 
 TESTS    = $(wildcard $(TEST_DIR)/*.bsv)
 
