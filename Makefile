@@ -11,17 +11,6 @@ XLEN ?= 32
 
 #################################################
 ##                                             ##
-##  Build Tools                                ##
-##                                             ##
-#################################################
-
-BSC ?= bsc
-
-VERI_LIB = $(BLUESPECDIR)/Verilog
-VERIMAIN = $(VERI_LIB)/main.v
-
-#################################################
-##                                             ##
 ##  Test Options                               ##
 ##                                             ##
 #################################################
@@ -34,11 +23,28 @@ BRAM_ENTRIES ?= 32  # Number of tests to run
 ##                                             ##
 #################################################
 
-SRC_DIR  = main/src
-TEST_DIR = main/test
-DATA_DIR = main/data/RV$(XLEN)
+SRC_DIR   = main/src
+TEST_DIR  = main/test
+DATA_DIR  = main/data
 
-TESTS    = $(wildcard $(TEST_DIR)/*.bsv)
+TEST_BRAM = $(DATA_DIR)/RV$(XLEN)
+TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
+TESTS     = $(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW)))
+
+BRAM_SCRIPT = make_hex.py
+
+#################################################
+##                                             ##
+##  Build Tools                                ##
+##                                             ##
+#################################################
+
+BSC ?= bsc
+
+BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
+
+VERI_LIB = $(BLUESPECDIR)/Verilog
+VERIMAIN = $(VERI_LIB)/main.v
 
 #################################################
 ##                                             ##
@@ -48,6 +54,12 @@ TESTS    = $(wildcard $(TEST_DIR)/*.bsv)
 
 .PHONY: default
 default: help
+
+$(TEST_BRAM):
+	cd $(DATA_DIR) && ./$(BRAM_SCRIPT) -e $(BRAM_ENTRIES) --rv$(XLEN)
+
+mk%Tb_sim: $(TEST_BRAM)
+
 
 .PHONY: help
 help:
@@ -63,7 +75,9 @@ help:
 	@echo "  ******* Individual Targets *******"
 	@echo " "
 	@echo " $(TESTS)"
+	@echo " "
 
 .PHONY: clean
 clean:
 	rm -rf *.bo *.ba *.bi *.log
+	rm -rf $(DATA_DIR)/RV*
