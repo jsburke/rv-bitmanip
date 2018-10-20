@@ -21,7 +21,7 @@
 ##                         ##
 #############################
 
-import random 
+from random import randint as randomint
 import os, sys, argparse
 
 #############################
@@ -42,7 +42,7 @@ def stringReverse(string):
   return string[::-1]
 
 def randHexDigit():
-  return hex(random.randint(0,15))[2:]
+  return hex(randomint(0,15))[2:]
 
   # file writers
 
