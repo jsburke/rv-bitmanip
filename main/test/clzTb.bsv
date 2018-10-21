@@ -1,4 +1,4 @@
-package CLZ_Tb;
+package clzTb;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -31,7 +31,7 @@ typedef Bit #(valueOf(TLog #(`BRAM_ENTRIES))) bramEntry;
 typedef enum {Init, Calc, Return} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
-module mkCLZ_Tb (Empty);
+module mkclzTb (Empty);
 
   Reg #(bramEntry) rg_bram_offset <- mkReg(0);
   Reg #(TbState)   rg_state       <- mkReg(Init);
@@ -39,11 +39,8 @@ module mkCLZ_Tb (Empty);
   Reg #(BitXL)     rg_rs1         <- mkRegU;
   Reg #(BitXL)     rg_rd          <- mkRegU;
 
-//  BitManip_IFC #(single_port, one_option) clz <- mkZeroCounterIter;
-
-  //                                                         No. Tests      no reg  file     hex mode
-  BRAM_PORT #(bramEntry, BitXL) rs1       <- mkBRAMCore1Load(`BRAM_ENTRIES, False, `RS1_HEX, `HEX_FILE);
-  BRAM_PORT #(bramEntry, BitXL) rd_expect <- mkBRAMCore1Load(`BRAM_ENTRIES, False, `RS1_HEX, `HEX_FILE);
+  BRAM_PORT #(bramEntry, BitXL) rs1       <- mkBRAMCore1Load(`BRAM_ENTRIES, False, `RS1_HEX, False);
+  BRAM_PORT #(bramEntry, BitXL) rd_expect <- mkBRAMCore1Load(`BRAM_ENTRIES, False, `RS1_HEX, False);
 
   /////////////////////
   //                 //
@@ -82,6 +79,6 @@ module mkCLZ_Tb (Empty);
     $finish(0);
   endrule: tb_complete
 
-endmodule: mkCLZ_Tb
+endmodule: mkclzTb
 
-endpackage: CLZ_Tb
+endpackage: clzTb
