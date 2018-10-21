@@ -19,7 +19,7 @@ import BitManipCount :: *;
 
 `ifndef BRAM_ENTRIES
 `define BRAM_ENTRIES 0  // force bsc to get angry
-`endif // BRAM_ENTRIES
+`endif
 
 /////////////////////////////////////////////////
 //                                             //
