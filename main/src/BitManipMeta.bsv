@@ -14,14 +14,12 @@ import Vector :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-`ifdef RV32 
-
-typedef 32 XLEN;
-
+`ifdef RV32
+ typedef 32 XLEN;
 `elsif RV64
-
-typedef 64 XLEN;
-
+ typedef 64 XLEN;
+`else  // don't know why it was missed...
+ typedef 32 XLEN;
 `endif
 
 typedef TLog #(XLEN) LOG_XLEN;
