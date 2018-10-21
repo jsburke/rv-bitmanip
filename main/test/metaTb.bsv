@@ -21,15 +21,15 @@ import BitManipMeta :: *;
 /////////////////////////////////////////////////
 
 `ifdef RV32
-typedef "RV32" BRAM_DIR;
+String bram_dir = "RV32";
 `elsif RV64
-typedef "RV64" BRAM_DIR;
+String bram_dir = "RV64"
 `else
-typedef "RV32" BRAM_DIR;
+String bram_dir = "RV32";
 `endif
 
 //  Where the hex files are located
-String bram_path = PROJ_HOME + BRAM_DIR;
+String bram_path = "./" + bram_dir;
 
 //  should the below be put into a function??
 //  Source operand value vectors
