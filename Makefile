@@ -1,4 +1,4 @@
-PROJ_NAME = RISC V X-Bitmanip
+PROJ_NAME = BlueSpec RISC-V Bitmanip
 
 #################################################
 ##                                             ##
@@ -35,11 +35,13 @@ BRAM_SCRIPT = make_hex.py
 
 #################################################
 ##                                             ##
-##  Build Tools                                ##
+##  Bluespec Controls                          ##
 ##                                             ##
 #################################################
 
 BSC ?= bsc
+BSC_FLAGS   = -aggressive-conditions -no-warn-action-shadowing -show-range-conflict
+BSC_DEFINES = -D RV$(XLEN)
 
 BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
 
@@ -58,7 +60,8 @@ default: help
 $(TEST_BRAM):
 	cd $(DATA_DIR) && ./$(BRAM_SCRIPT) -e $(BRAM_ENTRIES) --rv$(XLEN)
 
-mk%Tb_sim: $(TEST_BRAM)
+%Tb_sim: $(TEST_BRAM)
+	$(BSC) 
 
 
 .PHONY: help
