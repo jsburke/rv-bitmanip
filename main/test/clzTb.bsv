@@ -26,7 +26,7 @@ String clz_file = bram_locate("clz.hex");
 //                                             //
 /////////////////////////////////////////////////
 
-typedef enum {Init, Calc, Return} TbState deriving (Eq, Bits, FShow);
+typedef enum {Init, Calc, Return, Complete} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
 module mkclzTb (Empty);
@@ -46,7 +46,7 @@ module mkclzTb (Empty);
   //                 //
   /////////////////////
 
-  rule tb_init ((rg_state == Init) && (rg_bram_offset < bram_entries));
+  rule tb_init (rg_state == Init);// && (rg_bram_offset < bram_entries));
 //    clz.args_put(/*do this after waking up...*/, 0);
     $display("Test Number : %d", rg_bram_offset);
 
@@ -58,7 +58,7 @@ module mkclzTb (Empty);
 
 
 
-  rule tb_calc ((rg_state == Calc) && (rg_bram_offset < bram_entries));
+  rule tb_calc (rg_state == Calc);// && (rg_bram_offset < bram_entries));
     rg_rs1 <= rs1.read;
     rg_rd  <= rd_expect.read;
 
@@ -67,12 +67,13 @@ module mkclzTb (Empty);
   endrule: tb_calc
 
 
-  rule tb_return ((rg_state == Return) && (rg_bram_offset < bram_entries));
+  rule tb_return (rg_state == Return);// && (rg_bram_offset < bram_entries));
+    if (rg_bram_offset >= fromInteger(bram_entries)) rg_state <= Complete;
+    else                                rg_state <= Init;
     rg_bram_offset <= rg_bram_offset + 1;
-    rg_state       <= Init;
   endrule: tb_return
 
-  rule tb_complete (rg_bram_offset >= bram_entries);
+  rule tb_complete (rg_state == Return);
     $display("Count Leading Zeroes Test Complete");
     $finish(0);
   endrule: tb_complete
