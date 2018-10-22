@@ -68,7 +68,7 @@ module mkclzTb (Empty);
 
 
   rule tb_return (rg_state == Return);// && (rg_bram_offset < bram_entries));
-    if (rg_bram_offset >= fromInteger(bram_entries)) rg_state <= Complete;
+    if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
     else                                rg_state <= Init;
     rg_bram_offset <= rg_bram_offset + 1;
   endrule: tb_return

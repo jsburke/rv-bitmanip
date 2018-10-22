@@ -44,6 +44,7 @@ typedef `TEST_COUNT BRAM_ENTRIES;
 typedef TLog #(BRAM_ENTRIES) LOG_BRAM_ENTRIES;
 
 Integer bram_entries     = valueOf(BRAM_ENTRIES);
+Integer bram_limit       = bram_entries - 1;
 Integer log_bram_entries = valueOf(LOG_BRAM_ENTRIES);
 
 typedef Bit #(LOG_BRAM_ENTRIES) BramEntry;
