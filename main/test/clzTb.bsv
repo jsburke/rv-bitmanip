@@ -48,7 +48,7 @@ module mkclzTb (Empty);
 
   rule tb_init (rg_state == Init);// && (rg_bram_offset < bram_entries));
 //    clz.args_put(/*do this after waking up...*/, 0);
-    $display("Test Number : %d", rg_bram_offset);
+    $display("Test %d of %d", rg_bram_offset, fromInteger(bram_limit));
 
     rs1.put(False, rg_bram_offset, 0);
     rd_expect.put(False, rg_bram_offset, 0);
