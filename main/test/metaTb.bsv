@@ -33,8 +33,8 @@ function String bram_locate (String test);
 endfunction
 
 //  Source operand value vectors
-String rs1_file  = bram_locate("rs1.hex");
-String rs2_file  = bram_locate("rs2.hex"); 
+String rs1_file  = bram_locate("rs1");
+String rs2_file  = bram_locate("rs2"); 
 
 `ifndef TEST_COUNT
   `define TEST_COUNT 0
