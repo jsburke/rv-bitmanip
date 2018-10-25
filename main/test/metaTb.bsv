@@ -23,7 +23,7 @@ import BitManipMeta :: *;
 `ifdef RV32
 String bram_dir = "RV32";
 `elsif RV64
-String bram_dir = "RV64"
+String bram_dir = "RV64";
 `else
 String bram_dir = "RV32";
 `endif
