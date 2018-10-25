@@ -74,7 +74,8 @@ module mkclzTb (Empty);
     rg_bram_offset <= rg_bram_offset + 1;
   endrule: tb_return
 
-  rule tb_complete (rg_state == Return);
+
+  rule tb_complete (rg_state == Complete);
     $display("Count Leading Zeroes Test Complete");
     $finish(0);
   endrule: tb_complete
