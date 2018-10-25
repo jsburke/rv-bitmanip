@@ -29,7 +29,7 @@ String bram_dir = "RV32";
 `endif
 
 function String bram_locate (String test);
-  return "./" + bram_dir + "/" + test;
+  return "./" + bram_dir + "/" + test + ".hex";
 endfunction
 
 //  Source operand value vectors

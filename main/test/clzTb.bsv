@@ -18,7 +18,7 @@ import BitManipMeta  :: *;
 import BitManipCount :: *;
 import metaTb        :: *;
 
-String clz_file = bram_locate("clz.hex");
+String res_file = bram_locate("clz");
 
 /////////////////////////////////////////////////
 //                                             //
@@ -38,7 +38,7 @@ module mkclzTb (Empty);
   Reg #(BitXL)     rg_rd          <- mkRegU;
 
   BRAM_PORT #(BramEntry, BitXL) rs1       <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
-  BRAM_PORT #(BramEntry, BitXL) rd_expect <- mkBRAMCore1Load(bram_entries, False, clz_file, False);
+  BRAM_PORT #(BramEntry, BitXL) rd_expect <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
   /////////////////////
   //                 //
