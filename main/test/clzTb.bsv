@@ -40,6 +40,8 @@ module `MK_TB (Empty);
   BRAM_PORT #(BramEntry, BitXL) rs1       <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
   BRAM_PORT #(BramEntry, BitXL) rd_expect <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
+  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
+
   /////////////////////
   //                 //
   //  Rules          //
