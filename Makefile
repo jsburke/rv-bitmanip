@@ -36,6 +36,7 @@ TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
 TESTS     = $(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW)))
 
 BRAM_SCRIPT = $(TEST_DIR)/make_hex.py
+TB_NAME    ?= mkclzTb
 
 #################################################
 ##                                             ##
@@ -44,7 +45,7 @@ BRAM_SCRIPT = $(TEST_DIR)/make_hex.py
 #################################################
 
 BSC ?= bsc
-BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
+BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT) -D MK_TB=$(TB_NAME)
 BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
 
 BSC_TEST_0 = -u -sim

@@ -29,7 +29,7 @@ String res_file = bram_locate("clz");
 typedef enum {Init, Calc, Return, Complete} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
-module mkclzTb (Empty);
+module `MK_TB (Empty);
 
   Reg #(BramEntry) rg_bram_offset <- mkReg(0);
   Reg #(TbState)   rg_state       <- mkReg(Init);
@@ -80,6 +80,6 @@ module mkclzTb (Empty);
     $finish(0);
   endrule: tb_complete
 
-endmodule: mkclzTb
+endmodule: `MK_TB
 
 endpackage: clzTb
