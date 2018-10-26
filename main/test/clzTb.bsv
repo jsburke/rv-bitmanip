@@ -82,7 +82,7 @@ module `MK_TB (Empty);
   endrule: tb_calc
 
   rule tb_return (rg_state == Return);
-    $display("  RS1 -- %h || RD -- %h", rg_rs1, rg_rd);
+    $display("  RS1 -- %h || DUT -- %h || EXPECTED -- %h", rg_rs1, rg_dut_res, rg_rd);
 
     if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
     else                                           rg_state <= MemInit;
