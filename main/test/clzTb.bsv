@@ -27,7 +27,7 @@ String res_file = bram_locate("clz");
 //                                             //
 /////////////////////////////////////////////////
 
-typedef enum {MemInit, DutInit, Calc, Return, Complete} TbState deriving (Eq, Bits, FShow);
+typedef enum {MemInit, DutInit, Calc, Return, Complete, Fail} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
 module `MK_TB (Empty);
@@ -82,18 +82,30 @@ module `MK_TB (Empty);
   endrule: tb_calc
 
   rule tb_return (rg_state == Return);
-    $display("  RS1 -- %h || DUT -- %h || EXPECTED -- %h", rg_rs1, rg_dut_res, rg_rd);
+    let fail = rg_dut_res != rg_rd;
 
-    if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
-    else                                           rg_state <= MemInit;
+    if (fail) rg_state <= Fail;
+    else begin
+      $display("  -- PASS: rs1 = %h", rg_rs1);
+      $display("           res = %h", rg_dut_res);
+
+      if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
+      else                                           rg_state <= MemInit;
+    end
 
     rg_bram_offset <= rg_bram_offset + 1;
   endrule: tb_return
 
   rule tb_complete (rg_state == Complete);
-    $display("Count Leading Zeroes Test Complete");
+    $display(" *** All Tests Completed Correctly ***");
     $finish(0);
   endrule: tb_complete
+
+  rule tb_fail (rg_state == Fail);
+    $display(" *** FAILURE *** ");
+    $display("    For input %h, result calculated was %h, but was expected as %h", rg_rs1, rg_dut_res, rg_rd);
+    $finish(1);
+  endrule: tb_fail
 
 endmodule: `MK_TB
 
