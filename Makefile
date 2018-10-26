@@ -101,7 +101,7 @@ help:
 	@echo "  launch-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>]"
 	@echo "    - generate testbench for instruction INSN"
 	@echo "    - default 32 bit, 16 test inputs"
-	@echo "    - launch the test from make"
+	@echo "    - launch the test automatically"
 	@echo " "
 	@echo "  clean"
 	@echo "    - deletes build directories"
