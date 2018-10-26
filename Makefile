@@ -68,7 +68,7 @@ $(TB_DIR):
 
 $(TEST_BRAM): $(TB_DIR)
 	$(BRAM_SCRIPT) --entries $(TEST_COUNT) --rv$(XLEN)
-	mv RV$(XLEN) $(TEST_BRAM) # mv feels hacky, should one line this recipe
+	mv RV$(XLEN) $(TEST_BRAM)
 
 test-%: $(TEST_BRAM)
 	$(BSC) $(BSC_DEFINES) $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/$*Tb.bsv
@@ -77,20 +77,50 @@ test-%: $(TEST_BRAM)
 	mv $(TEST_DIR)/*.bo $(TB_DIR)
 	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mk$*Tb -o $*Tb *.ba 
 
+launch-%: test-%
+	cd $(TB_DIR) && ./$*Tb
+
+retest-%:
+	make clean
+	make test-$*
+
+relaunch-%:
+	make clean
+	make launch-$*
+
 .PHONY: help
 help:
 	@echo "$(PROJ_NAME) Instructions"
 	@echo " "
-	@echo "  ********* Basic Targets **********"
+	@echo "************ Targets ************"
 	@echo " "
+	@echo "  test-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>]"
+	@echo "    - generate testbench for instruction INSN"
+	@echo "    - default 32 bit, 16 test inputs"
 	@echo " "
-	@echo "   help  -- show this message"
+	@echo "  launch-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>]"
+	@echo "    - generate testbench for instruction INSN"
+	@echo "    - default 32 bit, 16 test inputs"
+	@echo "    - launch the test from make"
 	@echo " "
-	@echo "   clean -- remove generated files"
+	@echo "  clean"
+	@echo "    - deletes build directories"
 	@echo " "
-	@echo "  ******* Individual Targets *******"
+	@echo "  help  (defualt option)"
+	@echo "    - print this message "
 	@echo " "
-	@echo " $(TESTS)"
+	@echo "************ Aliases ************"
+	@echo " "
+	@echo "  retest-<INSN> [...]"
+	@echo "    - make clean then make test-INSN ..."
+	@echo " "
+	@echo "  relaunch-<INSN> [...]"
+	@echo "     - make clean then make launch-INSN ..."
+	@echo " "
+	@echo "************ Testbenches **********"
+	@echo " "
+	@echo "  Instructions that can be tested"
+	@echo "   $(TESTS)"
 	@echo " "
 
 .PHONY: clean
