@@ -1,4 +1,4 @@
-package clzTb;
+package singlePortTb;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -19,7 +19,7 @@ import BitManipMeta  :: *;
 import BitManipCount :: *;
 import metaTb        :: *;
 
-String res_file = bram_locate("clz");
+String res_file = bram_locate(rd_str);
 
 /////////////////////////////////////////////////
 //                                             //
@@ -42,7 +42,8 @@ module `MK_TB (Empty);
   BRAM_PORT #(BramEntry, BitXL) rs1 <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
   BRAM_PORT #(BramEntry, BitXL) rd  <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
-  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
+//  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
+  `DUT_IFC dut <- `DUT_MODULE;
 
   /////////////////////
   //                 //
@@ -66,10 +67,11 @@ module `MK_TB (Empty);
     rg_rs1 <= op_0;
     rg_rd  <= res;
 
-    Vector #(1, BitXL) v_args        = newVector();
+    // can keep both if file remains single ported
+    Vector #(1, BitXL) v_args = newVector();
     v_args[0] = op_0;
 
-    dut.args_put(v_args, 0);
+    dut.args_put(v_args, `DUT_SELECT);
 
     rg_state <= Calc;
   endrule: tb_dut_init
@@ -109,4 +111,4 @@ module `MK_TB (Empty);
 
 endmodule: `MK_TB
 
-endpackage: clzTb
+endpackage: singlePortTb
