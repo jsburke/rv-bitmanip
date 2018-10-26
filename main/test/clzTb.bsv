@@ -7,6 +7,7 @@ package clzTb;
 /////////////////////////////////////////////////
 
 import BRAMCore :: *;
+import Vector   :: *;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -33,8 +34,6 @@ module `MK_TB (Empty);
 
   Reg #(BramEntry) rg_bram_offset <- mkReg(0);
   Reg #(TbState)   rg_state       <- mkReg(MemInit);
-
-  Vector #(1, BitXL) v_args;
 
   Reg #(BitXL)     rg_rs1         <- mkRegU;
   Reg #(BitXL)     rg_rd          <- mkRegU;
@@ -67,7 +66,8 @@ module `MK_TB (Empty);
     rg_rs1 <= op_0;
     rg_rd  <= res;
 
-    v_args[0] <= op_0;
+    Vector #(1, BitXL) v_args        = newVector();
+    v_args[0] = op_0;
 
     dut.args_put(v_args, 0);
 
@@ -85,7 +85,7 @@ module `MK_TB (Empty);
     $display("  RS1 -- %h || RD -- %h", rg_rs1, rg_rd);
 
     if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
-    else                                rg_state <= Init;
+    else                                           rg_state <= MemInit;
 
     rg_bram_offset <= rg_bram_offset + 1;
   endrule: tb_return
