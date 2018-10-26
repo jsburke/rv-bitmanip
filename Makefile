@@ -33,7 +33,7 @@ VERI_DIR  = ./verilog
 
 TEST_BRAM = $(TB_DIR)/RV$(XLEN)
 TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
-TESTS     = $(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW)))
+TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
 
 BRAM_SCRIPT = $(TEST_DIR)/make_hex.py
 TB_NAME    ?= mkclzTb
