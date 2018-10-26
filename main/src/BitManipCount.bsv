@@ -47,7 +47,7 @@ module mkZeroCountIter (BitManip_IFC #(single_port, one_option))
   //                       //
   ///////////////////////////
 
-  rule rl_calc ((rg_state == Calc) && !unpack(rg_operand[int_msb]));
+  rule rl_calc ((rg_state == Calc) && !unpack(rg_operand[int_msb]) && (rg_count <= fromInteger(xlen)));
     rg_count   <= rg_count + 1;
     rg_operand <= rg_operand << 1;
   endrule: rl_calc
@@ -69,7 +69,7 @@ module mkZeroCountIter (BitManip_IFC #(single_port, one_option))
   endmethod: kill
 
   method Bool valid_get;
-    return ((rg_state == Calc) && unpack(rg_operand[int_msb]));
+    return ((rg_state == Calc) && (unpack(rg_operand[int_msb]) || (rg_count == fromInteger(xlen))));
   endmethod: valid_get
 
   method BitXL value_get;
