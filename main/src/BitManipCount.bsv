@@ -47,9 +47,12 @@ module mkZeroCountIter (BitManip_IFC #(single_port, one_option))
   //                       //
   ///////////////////////////
 
-  rule rl_calc ((rg_state == Calc) && !unpack(rg_operand[int_msb]) && (rg_count <= fromInteger(xlen)));
+  rule rl_calc (rg_state == Calc);
+    if((unpack(rg_operand[int_msb])) || (rg_count == fromInteger(xlen))) rg_state <= Idle;
+    else begin
     rg_count   <= rg_count + 1;
     rg_operand <= rg_operand << 1;
+    end
   endrule: rl_calc
 
   ///////////////////////////
