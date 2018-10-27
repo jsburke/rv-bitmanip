@@ -36,10 +36,6 @@ endfunction
 String rs1_file  = bram_locate("rs1");
 String rs2_file  = bram_locate("rs2"); 
 
-`ifndef TEST_COUNT
-  `define TEST_COUNT 0
-`endif
-
 typedef `TEST_COUNT BRAM_ENTRIES;
 typedef TLog #(BRAM_ENTRIES) LOG_BRAM_ENTRIES;
 
@@ -57,6 +53,8 @@ typedef Bit #(LOG_BRAM_ENTRIES) BramEntry;
 
 `ifdef TEST_clz
   String res_file = bram_locate("clz");
+  `define DUT_IFC BitManip_IFC #(1,1)
+  `define DUT_MODULE mkZeroCountIter
 `endif
 
 /////////////////////////////////////////////////
