@@ -1,4 +1,4 @@
-package singlePortTb;
+package genericTb;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -19,8 +19,6 @@ import BitManipMeta  :: *;
 import BitManipCount :: *;
 import metaTb        :: *;
 
-String res_file = bram_locate(rd_str);
-
 /////////////////////////////////////////////////
 //                                             //
 // Test Bench                                  //
@@ -30,7 +28,7 @@ String res_file = bram_locate(rd_str);
 typedef enum {MemInit, DutInit, Calc, Return, Complete, Fail} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
-module `MK_TB (Empty);
+module mkGenericTb (Empty);
 
   Reg #(BramEntry) rg_bram_offset <- mkReg(0);
   Reg #(TbState)   rg_state       <- mkReg(MemInit);
@@ -42,8 +40,8 @@ module `MK_TB (Empty);
   BRAM_PORT #(BramEntry, BitXL) rs1 <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
   BRAM_PORT #(BramEntry, BitXL) rd  <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
-//  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
-  `DUT_IFC dut <- `DUT_MODULE;
+  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
+//  `DUT_IFC dut <- `DUT_MODULE;
 
   /////////////////////
   //                 //
@@ -71,7 +69,7 @@ module `MK_TB (Empty);
     Vector #(1, BitXL) v_args = newVector();
     v_args[0] = op_0;
 
-    dut.args_put(v_args, `DUT_SELECT);
+    dut.args_put(v_args, 0);
 
     rg_state <= Calc;
   endrule: tb_dut_init
@@ -109,6 +107,6 @@ module `MK_TB (Empty);
     $finish(1);
   endrule: tb_fail
 
-endmodule: `MK_TB
+endmodule: mkGenericTb
 
-endpackage: singlePortTb
+endpackage: genericTb

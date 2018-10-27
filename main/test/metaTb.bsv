@@ -48,5 +48,16 @@ Integer bram_limit       = bram_entries - 1;
 Integer log_bram_entries = valueOf(LOG_BRAM_ENTRIES);
 
 typedef Bit #(LOG_BRAM_ENTRIES) BramEntry;
+
+/////////////////////////////////////////////////
+//                                             //
+// Test Specification                          //
+//                                             //
+/////////////////////////////////////////////////
+
+`ifdef TEST_clz
+  String res_file = bram_locate("clz");
+`endif
+
 /////////////////////////////////////////////////
 endpackage: metaTb

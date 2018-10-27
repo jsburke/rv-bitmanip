@@ -35,7 +35,7 @@ TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
 TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
 
 BRAM_SCRIPT = $(TEST_DIR)/make_hex.py
-TB_NAME    ?= mkclzTb
+TEST_NAME   = genericTb
 
 #################################################
 ##                                             ##
@@ -44,7 +44,7 @@ TB_NAME    ?= mkclzTb
 #################################################
 
 BSC ?= bsc
-BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT) -D MK_TB=$(TB_NAME)
+BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
 BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
 
 BSC_TEST_0 = -u -sim
@@ -70,11 +70,12 @@ $(TEST_BRAM): $(TB_DIR)
 	mv RV$(XLEN) $(TEST_BRAM)
 
 test-%: $(TEST_BRAM)
-	$(BSC) $(BSC_DEFINES) $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/$*Tb.bsv
+	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/genericTb.bsv
 	mv $(SRC_DIR)/*.bo  $(TB_DIR)
 	mv $(TEST_DIR)/*.ba $(TB_DIR)
 	mv $(TEST_DIR)/*.bo $(TB_DIR)
-	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mk$*Tb -o $*Tb *.ba 
+	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mkGenericTb -o genericTb *.ba
+	cd $(TB_DIR) && mv genericTb $*Tb && mv genericTb.so $*Tb.so 
 
 launch-%: test-%
 	cd $(TB_DIR) && ./$*Tb
