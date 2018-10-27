@@ -21,6 +21,21 @@ import metaTb        :: *;
 
 /////////////////////////////////////////////////
 //                                             //
+// Preprocessor for Generalizing               //
+//                                             //
+/////////////////////////////////////////////////
+
+`ifdef TEST_clz
+  String res_file = bram_locate("clz");
+  `define DUT_IFC BitManip_IFC #(1,1)
+  `define DUT_MODULE mkZeroCountIter
+  `define DUT_PORT_COUNT 1
+  `define DUT_PORT_ASSIGN v_args[0] = op_0;
+  `define DUT_SELECT 0
+`endif
+
+/////////////////////////////////////////////////
+//                                             //
 // Test Bench                                  //
 //                                             //
 /////////////////////////////////////////////////
@@ -40,7 +55,6 @@ module mkGenericTb (Empty);
   BRAM_PORT #(BramEntry, BitXL) rs1 <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
   BRAM_PORT #(BramEntry, BitXL) rd  <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
-//  BitManip_IFC #(1,1) dut <- mkZeroCountIter;
   `DUT_IFC dut <- `DUT_MODULE;
 
   /////////////////////
@@ -65,11 +79,10 @@ module mkGenericTb (Empty);
     rg_rs1 <= op_0;
     rg_rd  <= res;
 
-    // can keep both if file remains single ported
-    Vector #(1, BitXL) v_args = newVector();
-    v_args[0] = op_0;
+    Vector #(`DUT_PORT_COUNT, BitXL) v_args = newVector();
+    `DUT_PORT_ASSIGN
 
-    dut.args_put(v_args, 0);
+    dut.args_put(v_args, `DUT_SELECT);
 
     rg_state <= Calc;
   endrule: tb_dut_init

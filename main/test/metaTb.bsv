@@ -46,16 +46,4 @@ Integer log_bram_entries = valueOf(LOG_BRAM_ENTRIES);
 typedef Bit #(LOG_BRAM_ENTRIES) BramEntry;
 
 /////////////////////////////////////////////////
-//                                             //
-// Test Specification                          //
-//                                             //
-/////////////////////////////////////////////////
-
-`ifdef TEST_clz
-  String res_file = bram_locate("clz");
-  `define DUT_IFC BitManip_IFC #(1,1)
-  `define DUT_MODULE mkZeroCountIter
-`endif
-
-/////////////////////////////////////////////////
 endpackage: metaTb
