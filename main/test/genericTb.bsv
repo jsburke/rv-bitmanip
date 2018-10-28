@@ -32,6 +32,13 @@ import metaTb        :: *;
   `define DUT_PORT_COUNT 1
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
   `define DUT_SELECT 0
+`elsif TEST_ctz
+  String res_file = bram_locate("ctz");
+  `define DUT_IFC BitManip_IFC #(1,1)
+  `define DUT_MODULE mkZeroCountIter
+  `define DUT_PORT_COUNT 1
+  `define DUT_PORT_ASSIGN v_args[0] = op_0;
+  `define DUT_SELECT 1
 `endif
 
 /////////////////////////////////////////////////
