@@ -16,8 +16,6 @@ import BitManipMeta :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
-
   ///////////////////////////
   //                       //
   //  Zero Counts          //

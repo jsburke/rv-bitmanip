@@ -45,6 +45,8 @@ Integer two_options = 2;
 //                                             //
 /////////////////////////////////////////////////
 
+typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
+
 interface BitManip_IFC #(numeric type no_args, numeric type opt_sz);
 
   (* always_ready *)
