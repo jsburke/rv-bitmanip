@@ -37,7 +37,6 @@ def hexStrFormat(int_val, noDigits):
   hexShort = hex(int_val)[2::]
   return "0" * (noDigits - len(hexShort)) + hexShort
 
-
 def stringReverse(string):
   return string[::-1]
 
