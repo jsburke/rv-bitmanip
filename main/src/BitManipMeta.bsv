@@ -27,7 +27,8 @@ typedef TLog #(XLEN) LOG_XLEN;
 Integer xlen     = valueOf(XLEN);
 Integer log_xlen = valueOf(LOG_XLEN);
 
-typedef Bit #(XLEN) BitXL;
+typedef Bit #(XLEN)     BitXL;
+typedef Bit #(LOG_XLEN) BitXLog;
 
 // solo or paired source inputs
 Integer single_port = 1;
