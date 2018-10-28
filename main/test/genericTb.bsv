@@ -16,7 +16,6 @@ import Vector   :: *;
 /////////////////////////////////////////////////
 
 import BitManipMeta  :: *;
-import BitManipCount :: *;
 import metaTb        :: *;
 
 /////////////////////////////////////////////////
@@ -26,6 +25,7 @@ import metaTb        :: *;
 /////////////////////////////////////////////////
 
 `ifdef TEST_clz
+  import BitManipCount :: *;
   String res_file = bram_locate("clz");
   `define DUT_IFC BitManip_IFC #(1,1)
   `define DUT_MODULE mkZeroCountIter
@@ -33,6 +33,7 @@ import metaTb        :: *;
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
   `define DUT_SELECT 0 
 `elsif TEST_ctz
+  import BitManipCount :: *;
   String res_file = bram_locate("ctz");
   `define DUT_IFC BitManip_IFC #(1,1)
   `define DUT_MODULE mkZeroCountIter
@@ -40,11 +41,21 @@ import metaTb        :: *;
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
   `define DUT_SELECT 1 
 `elsif TEST_pcnt
+  import BitManipCount :: *;
   String res_file = bram_locate("pcnt");
   `define DUT_IFC BitManip_IFC #(1,0)
   `define DUT_MODULE mkPopCountIter
   `define DUT_PORT_COUNT 1
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
+  `define DUT_SELECT 0 
+`elsif TEST_andc
+  import BitManipAndComp :: *;
+  String res_file = bram_locate("andc");
+  `define RS2_PRESENT
+  `define DUT_IFC BitManip_IFC #(2,0)
+  `define DUT_MODULE mkAndWithComplement
+  `define DUT_PORT_COUNT 2
+  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
   `define DUT_SELECT 0 
 `endif
 
@@ -67,6 +78,10 @@ module mkGenericTb (Empty);
   Reg #(BitXL)     rg_dut_res     <- mkRegU;
 
   BRAM_PORT #(BramEntry, BitXL) rs1 <- mkBRAMCore1Load(bram_entries, False, rs1_file, False);
+  `ifdef RS2_PRESENT
+  BRAM_PORT #(BramEntry, BitXL) rs2 <- mkBRAMCore1Load(bram_entries, False, rs2_file, False);
+  Reg #(BitXL)     rg_rs2           <- mkRegU;
+  `endif
   BRAM_PORT #(BramEntry, BitXL) rd  <- mkBRAMCore1Load(bram_entries, False, res_file, False);
 
   `DUT_IFC dut <- `DUT_MODULE;
@@ -81,6 +96,9 @@ module mkGenericTb (Empty);
     $display("Test %d of %d", rg_bram_offset, fromInteger(bram_limit));
 
     rs1.put(False, rg_bram_offset, 0);
+    `ifdef RS2_PRESENT
+    rs2.put(False, rg_bram_offset, 0);
+    `endif
     rd.put(False,  rg_bram_offset, 0);
 
     rg_state <= DutInit;
@@ -92,6 +110,11 @@ module mkGenericTb (Empty);
 
     rg_rs1 <= op_0;
     rg_rd  <= res;
+
+    `ifdef RS2_PRESENT
+    let op_1 = rs2.read;
+    rg_rs2  <= op_1;
+    `endif
 
     Vector #(`DUT_PORT_COUNT, BitXL) v_args = newVector();
     `DUT_PORT_ASSIGN
