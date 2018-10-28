@@ -89,6 +89,8 @@ endmodule: mkZeroCountIter
 
 module mkPopCountIter (BitManip_IFC #(single_port, no_options));
 
+  Integer      int_msb       = xlen - 1;
+
   Reg #(BitXL) rg_operand   <- mkRegU;
   Reg #(BitXL) rg_count     <- mkRegU;
   Reg #(IterState) rg_state <- mkReg(Idle);
@@ -99,9 +101,12 @@ module mkPopCountIter (BitManip_IFC #(single_port, no_options));
   //                       //
   ///////////////////////////
 
-  rule rl_calc ((rg_state == Calc) && (rg_operand != 0));
-    rg_count   <= rg_count + 1;
-    rg_operand <= rg_operand << 1;
+  rule rl_calc (rg_state == Calc);
+    if(rg_operand == 0) rg_state <= Idle;
+    else begin
+      if(unpack(rg_operand[int_msb])) rg_count <= rg_count + 1;
+      rg_operand <= rg_operand << 1;
+    end
   endrule: rl_calc
 
   ///////////////////////////
