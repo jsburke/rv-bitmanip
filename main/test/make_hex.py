@@ -37,6 +37,9 @@ def hexStrFormat(int_val, noDigits):
   hexShort = hex(int_val)[2::]
   return "0" * (noDigits - len(hexShort)) + hexShort
 
+def bin_inv(bin_str):
+  return "".join(["1" if s == "0" else "0" for s in bin_str])
+
 def stringReverse(string):
   return string[::-1]
 
@@ -109,9 +112,13 @@ def popCount(bin_str, noDigits):
   return hexStrFormat(count, noDigits)
  
 def andWithComplement(bin_str1, bin_str2, noDigits):
-  bin_str2_inv = "".join(["1" if s == "0" else "0"  for s in bin_str2])
+  bin_str2_inv = bin_inv(bin_str2)
   bin_result   = "".join(["1" if a == "1" and b == "1" else "0" for a, b in zip(bin_str1, bin_str2_inv)])
   return hexStrFormat(int(bin_result, 2), noDigits)
+
+def shiftOnesLeft(bin_str1, bin_str2, noDigits):
+  bin_str_res = bin_inv(bin(int(bin_inv(bin_str1), 2) << (int(bin_str2, 2)))[3::])
+  return hexStrFormat(int(bin_str_res, 2), noDigits)
 
 #############################
 ##                         ##
@@ -189,6 +196,7 @@ def main():
   instructions.append("ctz")
   instructions.append("pcnt")
   instructions.append("andc")
+  instructions.append("slo")
 
   dest_files = [path + insn + suffix for insn in instructions]
 
@@ -204,5 +212,6 @@ def main():
   writeBytesLambdaSingle(popCount,            rs1_file, dest_files[2], entry_len)
 
   writeBytesLambdaDouble(andWithComplement,   rs1_file, rs2_file, dest_files[3], entry_len)
-
+  writeBytesLambdaDouble(shiftOnesLeft,       rs1_file, rs2_file, dest_files[4], entry_len)
+  
 main()
