@@ -63,13 +63,16 @@ VERIMAIN = $(VERI_LIB)/main.v
 default: help
 
 $(TB_DIR):
+	@echo "***** Creating Test Bench Dir *****"
 	mkdir -p $(TB_DIR)
 
 $(TEST_BRAM): $(TB_DIR)
-	$(BRAM_SCRIPT) --entries $(TEST_COUNT) --rv$(XLEN)
-	mv RV$(XLEN) $(TEST_BRAM)
+	@echo "****** Creating Test Vectors ******"
+	rm -rf $(TEST_BRAM) # hack so I can launch multiple tests w/o cleans
+	cd $(TB_DIR) && ../$(BRAM_SCRIPT) --entries $(TEST_COUNT) --rv$(XLEN)
 
 test-%: $(TEST_BRAM)
+	@echo "******* Creating Test Bench *******"
 	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/genericTb.bsv
 	mv $(SRC_DIR)/*.bo  $(TB_DIR)
 	mv $(TEST_DIR)/*.ba $(TB_DIR)
@@ -77,7 +80,8 @@ test-%: $(TEST_BRAM)
 	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mkGenericTb -o genericTb *.ba
 	cd $(TB_DIR) && mv genericTb $*Tb && mv genericTb.so $*Tb.so 
 
-launch-%: test-%
+launch-%: $(TEST_BRAM) test-%
+	@echo "******* Launching Test Bench ******"
 	cd $(TB_DIR) && ./$*Tb
 
 retest-%:
