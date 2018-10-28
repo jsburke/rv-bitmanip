@@ -31,14 +31,21 @@ import metaTb        :: *;
   `define DUT_MODULE mkZeroCountIter
   `define DUT_PORT_COUNT 1
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
-  `define DUT_SELECT 0
+  `define DUT_SELECT 0 
 `elsif TEST_ctz
   String res_file = bram_locate("ctz");
   `define DUT_IFC BitManip_IFC #(1,1)
   `define DUT_MODULE mkZeroCountIter
   `define DUT_PORT_COUNT 1
   `define DUT_PORT_ASSIGN v_args[0] = op_0;
-  `define DUT_SELECT 1
+  `define DUT_SELECT 1 
+`elsif TEST_pcnt
+  String res_file = bram_locate("pcnt");
+  `define DUT_IFC BitManip_IFC #(1,0)
+  `define DUT_MODULE mkPopCountIter
+  `define DUT_PORT_COUNT 1
+  `define DUT_PORT_ASSIGN v_args[0] = op_0;
+  `define DUT_SELECT 0 
 `endif
 
 /////////////////////////////////////////////////
@@ -88,7 +95,6 @@ module mkGenericTb (Empty);
 
     Vector #(`DUT_PORT_COUNT, BitXL) v_args = newVector();
     `DUT_PORT_ASSIGN
-
     dut.args_put(v_args, `DUT_SELECT);
 
     rg_state <= Calc;
