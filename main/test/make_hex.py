@@ -22,6 +22,7 @@
 #############################
 
 from random import randint as randomint
+from math   import log2    as log2
 import os, sys, argparse, shutil
 
 #############################
@@ -117,8 +118,9 @@ def andWithComplement(bin_str1, bin_str2, noDigits):
   return hexStrFormat(int(bin_result, 2), noDigits)
 
 def shiftOnesLeft(bin_str1, bin_str2, noDigits):
-  bin_str_res = bin_inv(bin(int(bin_inv(bin_str1), 2) << (int(bin_str2, 2)))[3::])
-  return hexStrFormat(int(bin_str_res, 2), noDigits)
+  shamt_bits = int(log2(len(bin_str1)))
+  res_int    = ~(int(bin_inv(bin_str1), 2) << int(bin_str2[-shamt_bits::], 2))
+  return hexStrFormat(res_int, noDigits)
 
 #############################
 ##                         ##
