@@ -1,7 +1,6 @@
 #ifndef BITMANIP_H
 #define BITMANIP_H
 
-#include <stdio.h>
 #include <stdint.h>
 
 #ifdef RV32
