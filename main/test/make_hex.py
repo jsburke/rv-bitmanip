@@ -22,7 +22,7 @@
 #############################
 
 from random import randint as randomint
-import os, sys, argparse
+import os, sys, argparse, shutil
 
 #############################
 ##                         ##
@@ -182,7 +182,11 @@ def main():
   # write digits to files
 
   path   = "./RV" + str(mode) + "/"
+
+  if(os.path.exists(path)):
+    shutil.rmtree(path)
   os.mkdir(path)
+
   suffix = ".hex"
 
   # sources
