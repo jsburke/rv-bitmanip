@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "bitmanip.h"
 
 xlen_t clz(xlen_t rs1){
   for(int count = 0; count < XLEN; count++)
