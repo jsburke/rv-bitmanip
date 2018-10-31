@@ -66,7 +66,13 @@ $(TB_DIR):
 	@echo "***** Creating Test Bench Dir *****"
 	mkdir -p $(TB_DIR)
 
-$(TEST_BRAM): $(TB_DIR)
+bramGen%: $(TB_DIR)
+	cd $(TEST_DIR) && gcc -DRV$* -c bitmanip.c -o bitmanip$*.o
+	cd $(TEST_DIR) && gcc -DRV$* -o $@ bramGen.c bitmanip$*.o
+	mv $(TEST_DIR)/$@ .
+	rm $(TEST_DIR)/*.o
+
+$(TEST_BRAM): $(TB_DIR) bramGen$(XLEN)
 	@echo "****** Creating Test Vectors ******"
 	rm -rf $(TEST_BRAM) # hack so I can launch multiple tests w/o cleans
 	cd $(TB_DIR) && ../$(BRAM_SCRIPT) --entries $(TEST_COUNT) --rv$(XLEN)
@@ -131,3 +137,4 @@ help:
 clean:
 	rm -rf $(TB_DIR)
 	rm -rf $(VERI_DIR)
+	rm -rf bramGen*
