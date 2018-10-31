@@ -19,6 +19,9 @@ void rand_close(FILE *urand){
 }
 
 // array writers
+
+#define NO_CORNER_CASES 8
+
 void xlen_corner_cases(xlen_t *arr, int start){
   arr[start++] =                     0;  // zeros
   arr[start++] =                     1;  // LSB
@@ -60,15 +63,15 @@ int main(int argc, char *argv[]){
   long no_entries = strtol(argv[1], NULL, 10);
   no_entries = (no_entries > 8) ? no_entries : 8;  //cover corner cases at least
 
+  FILE *urand = rand_init();
+
   xlen_t rs1[no_entries];
-//  xlen_t rs2[no_entries];
+  xlen_t rs2[no_entries];
 
   xlen_corner_cases(rs1, 0);
 
-  printf("rs1 values:\n\n");
-  for(int i = 0; i < 8; i++) printf("    rs1[%d] : %" PR_HEX "\n", i, rs1[i]);
-
-//  FILE *urand = rand_init();
+  xlen_arr_fill(urand, rs1, NO_CORNER_CASES, no_entries);
+  xlen_arr_fill(urand, rs2, 0, no_entries);
 
   return 0;
 }
