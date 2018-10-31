@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <inttypes.h>
 #include "bitmanip.h"
 
 xlen_t clz(xlen_t rs1){
