@@ -44,6 +44,20 @@ void xlen_arr_fill(FILE *urand, xlen_t *arr, int start, int len){
     arr[i] = rand_val(urand);
 }
 
+// file writer
+void xlen_hex_write(const char *file, xlen_t *arr, int len){
+  FILE *fp = fopen(file, "w");
+  if(file == NULL){
+    printf("failed to open %s, exitting", file);
+    exit(EXIT_FAILURE);
+  }
+  
+  for(int i = 0; i < len; i++){
+    fprintf(fp, "%0*" PR_HEX "\n", XLEN/4, arr[i]);
+  }
+  fclose(fp);
+}
+
 ///////////////////////////////////////
 //                                   //
 //  Meat                             //
@@ -52,6 +66,7 @@ void xlen_arr_fill(FILE *urand, xlen_t *arr, int start, int len){
 
 int main(int argc, char *argv[]){
 
+  // basic program prep
   if(argc != 2){
     printf("*******  ERROR  *******\n");
     printf("  bramGen requires one \n");
@@ -65,6 +80,7 @@ int main(int argc, char *argv[]){
 
   FILE *urand = rand_init();
 
+  // declare source operand values
   xlen_t rs1[no_entries];
   xlen_t rs2[no_entries];
 
@@ -72,6 +88,82 @@ int main(int argc, char *argv[]){
 
   xlen_arr_fill(urand, rs1, NO_CORNER_CASES, no_entries);
   xlen_arr_fill(urand, rs2, 0, no_entries);
+
+  rand_close(urand);
+
+  // write sources to file
+  xlen_hex_write("./rs1.hex", rs1, no_entries);
+  xlen_hex_write("./rs2.hex", rs2, no_entries);
+
+  // generate interesting bit manip based results
+  xlen_t res[no_entries];
+
+  // single operand
+  for(int i = 0; i < no_entries; i++)
+    res[i] = clz(rs1[i]);
+  xlen_hex_write("./clz.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = ctz(rs1[i]);
+  xlen_hex_write("./ctz.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = pcnt(rs1[i]);
+  xlen_hex_write("./pcnt.hex", res, no_entries);
+
+  // dual operand
+  for(int i = 0; i < no_entries; i++)
+    res[i] = andc(rs1[i], rs2[i]);
+  xlen_hex_write("./andc.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = slo(rs1[i], rs2[i]);
+  xlen_hex_write("./slo.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = sro(rs1[i], rs2[i]);
+  xlen_hex_write("./sro.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = rol(rs1[i], rs2[i]);
+  xlen_hex_write("./rol.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = ror(rs1[i], rs2[i]);
+  xlen_hex_write("./ror.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = bext(rs1[i], rs2[i]);
+  xlen_hex_write("./bext.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = bdep(rs1[i], rs2[i]);
+  xlen_hex_write("./bdep.hex", res, no_entries);
+
+  // more bitness restricted
+  for(int i = 0; i < no_entries; i++)
+#ifdef RV32
+    res[i] = grev32(rs1[i], rs2[i]);
+#elif  RV64
+    res[i] = grev64(rs1[i], rs2[i]);
+#endif
+  xlen_hex_write("./grev/hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+#ifdef RV32
+    res[i] = shfl32(rs1[i], rs2[i]);
+#elif  RV64
+    res[i] = shfl64(rs1[i], rs2[i]);
+#endif
+  xlen_hex_write("./shfl.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+#ifdef RV32
+    res[i] = unshfl32(rs1[i], rs2[i]);
+#elif  RV64
+    res[i] = unshfl64(rs1[i], rs2[i]);
+#endif
+  xlen_hex_write("./unshfl.hex", res, no_entries);
 
   return 0;
 }
