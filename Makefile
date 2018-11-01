@@ -31,8 +31,8 @@ TB_DIR    = ./tb
 VERI_DIR  = ./verilog
 
 TEST_BRAM = $(TB_DIR)/RV$(XLEN)
-TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
-TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
+#TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
+#TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
 
 BRAM_SCRIPT = bramGen$(XLEN)
 TEST_NAME   = genericTb
@@ -105,7 +105,7 @@ help:
 	@echo " "
 	@echo "************ Targets ************"
 	@echo " "
-	@echo "  test-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>]"
+	@echo "  <INSN>Tb [XLEN={32|64}] [TEST_COUNT=<int>]"
 	@echo "    - generate testbench for instruction INSN"
 	@echo "    - default 32 bit, 16 test inputs"
 	@echo " "
@@ -123,16 +123,16 @@ help:
 	@echo "************ Aliases ************"
 	@echo " "
 	@echo "  retest-<INSN> [...]"
-	@echo "    - make clean then make test-INSN ..."
+	@echo "    - make clean then make <INSN>Tb ..."
 	@echo " "
 	@echo "  relaunch-<INSN> [...]"
 	@echo "     - make clean then make launch-INSN ..."
 	@echo " "
-	@echo "************ Testbenches **********"
-	@echo " "
-	@echo "  Instructions that can be tested"
-	@echo "   $(TESTS)"
-	@echo " "
+#	@echo "************ Testbenches **********"
+#	@echo " "
+#	@echo "  Instructions that can be tested"
+#	@echo "   $(TESTS)"
+#	@echo " "
 
 .PHONY: clean
 clean:
