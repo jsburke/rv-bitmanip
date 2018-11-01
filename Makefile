@@ -34,7 +34,7 @@ TEST_BRAM = $(TB_DIR)/RV$(XLEN)
 TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
 TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
 
-BRAM_SCRIPT = $(TEST_DIR)/make_hex.py
+BRAM_SCRIPT = bramGen$(XLEN)
 TEST_NAME   = genericTb
 
 #################################################
@@ -69,13 +69,13 @@ $(TB_DIR):
 bramGen%: $(TB_DIR)
 	cd $(TEST_DIR) && gcc -DRV$* -c bitmanip.c -o bitmanip$*.o
 	cd $(TEST_DIR) && gcc -DRV$* -o $@ bramGen.c bitmanip$*.o
-	mv $(TEST_DIR)/$@ .
+	mv $(TEST_DIR)/$@ $(TB_DIR)
 	rm $(TEST_DIR)/*.o
 
 $(TEST_BRAM): $(TB_DIR) bramGen$(XLEN)
 	@echo "****** Creating Test Vectors ******"
 	rm -rf $(TEST_BRAM) # hack so I can launch multiple tests w/o cleans
-	cd $(TB_DIR) && ../$(BRAM_SCRIPT) --entries $(TEST_COUNT) --rv$(XLEN)
+	cd $(TB_DIR) && ./$(BRAM_SCRIPT) $(TEST_COUNT) 
 
 test-%: $(TEST_BRAM)
 	@echo "******* Creating Test Bench *******"
@@ -137,4 +137,3 @@ help:
 clean:
 	rm -rf $(TB_DIR)
 	rm -rf $(VERI_DIR)
-	rm -rf bramGen*
