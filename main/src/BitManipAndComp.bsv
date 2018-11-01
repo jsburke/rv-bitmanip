@@ -13,32 +13,21 @@ import BitManipMeta :: *;
 /////////////////////////////////////////////////
 //                                             //
 //  The Only Module in Here                    //
+//    NB: really should just be a r1&~r2 deal  //
 //                                             //
 /////////////////////////////////////////////////
 
-module mkAndWithComplement (BitManip_IFC #(double_port, no_options));
+interface BitManipAndC_IFC;
+  (* always_ready *)
+  method ActionValue #(BitXL) eval (BitXL op0, BitXL op1);
+endinterface: BitManipAndC_IFC
 
-  Wire #(BitXL) result <- mkWire;
+module mkAndWithComplement (BitManipAndC_IFC);
 
-  method Action args_put (Vector #(double_port, BitXL) arg, Bit #(no_options) option);
-    let rs1 = arg[0];
-    let rs2 = arg[1];
+  method ActionValue #(BitXL) eval (BitXL op0, BitXL op1);
+    return op0 & ~op1;
+  endmethod: eval
 
-    result <= rs1 & ~rs2;
-  endmethod: args_put
-
-  method Action kill;
-    // what do?  maybe custom IFC??
-  endmethod: kill
-
-  method Bool valid_get;
-    return True;
-  endmethod: valid_get
-
-  method BitXL value_get;
-    return result;
-  endmethod: value_get
- 
 endmodule: mkAndWithComplement
 
 endpackage: BitManipAndComp

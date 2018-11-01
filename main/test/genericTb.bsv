@@ -52,11 +52,8 @@ import metaTb        :: *;
   import BitManipAndComp :: *;
   String res_file = bram_locate("andc");
   `define RS2_PRESENT
-  `define DUT_IFC BitManip_IFC #(2,0)
+  `define DUT_IFC BitManipAndC_IFC
   `define DUT_MODULE mkAndWithComplement
-  `define DUT_PORT_COUNT 2
-  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
-  `define DUT_SELECT 0 
 `elsif TEST_slo
   import BitManipShiftOnes :: *;
   String res_file = bram_locate("slo");
@@ -155,13 +152,19 @@ module mkGenericTb (Empty);
     rg_rs2  <= op_1;
     `endif
 
+`ifndef TEST_andc
     Vector #(`DUT_PORT_COUNT, BitXL) v_args = newVector();
     `DUT_PORT_ASSIGN
     dut.args_put(v_args, `DUT_SELECT);
-
     rg_state <= Calc;
+`else // AndC test
+    let dut_res = dut.eval(op_0,op_1);
+    rg_dut_res <= dut_res;
+    rg_state   <= Return;  // jump right to return because combinational
+`endif
   endrule: tb_dut_init
 
+`ifndef TEST_andc  // not used for andc
   rule tb_calc (rg_state == Calc);
 `ifdef HW_DBG
     $display("   -- dut processing --");
@@ -171,6 +174,7 @@ module mkGenericTb (Empty);
       rg_state   <= Return;
     end
   endrule: tb_calc
+`endif
 
   rule tb_return (rg_state == Return);
 `ifdef HW_DBG
