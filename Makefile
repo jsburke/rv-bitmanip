@@ -78,7 +78,7 @@ $(TEST_BRAM): $(TB_DIR) bramGen$(XLEN)
 	cd $(TB_DIR) && ./$(BRAM_SCRIPT) $(TEST_COUNT)
 	mv $(TB_DIR)/*.hex $(TEST_BRAM)
 
-test-%: $(TEST_BRAM)
+%Tb: $(TEST_BRAM)
 	@echo "******* Creating Test Bench *******"
 	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/genericTb.bsv
 	mv $(SRC_DIR)/*.bo  $(TB_DIR)
@@ -87,7 +87,7 @@ test-%: $(TEST_BRAM)
 	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mkGenericTb -o genericTb *.ba
 	cd $(TB_DIR) && mv genericTb $*Tb && mv genericTb.so $*Tb.so 
 
-launch-%: $(TEST_BRAM) test-%
+launch-%: $(TEST_BRAM) %Tb
 	@echo "******* Launching Test Bench ******"
 	cd $(TB_DIR) && ./$*Tb
 
