@@ -7,6 +7,7 @@ PROJ_NAME = BlueSpec RISC-V Bitmanip
 #################################################
 
 XLEN ?= 32  # set default to 32 or 64 bit
+#HW_DBG = on # enables nice debug prints in HW simulation
 
 #################################################
 ##                                             ##
@@ -45,6 +46,9 @@ TEST_NAME   = genericTb
 
 BSC ?= bsc
 BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
+ifdef HW_DBG
+  BSC_DEFINES += -D HW_DBG
+endif
 BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
 
 BSC_TEST_0 = -u -sim

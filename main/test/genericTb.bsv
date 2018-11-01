@@ -141,6 +141,9 @@ module mkGenericTb (Empty);
   endrule: tb_mem_init
 
   rule tb_dut_init (rg_state == DutInit);
+`ifdef HW_DBG
+    $display("   -- initialize DUT --");
+`endif
     let op_0 = rs1.read;
     let res  = rd.read;
 
@@ -160,6 +163,9 @@ module mkGenericTb (Empty);
   endrule: tb_dut_init
 
   rule tb_calc (rg_state == Calc);
+`ifdef HW_DBG
+    $display("   -- dut processing --");
+`endif
     if(dut.valid_get) begin
       rg_dut_res <= dut.value_get;
       rg_state   <= Return;
@@ -167,6 +173,9 @@ module mkGenericTb (Empty);
   endrule: tb_calc
 
   rule tb_return (rg_state == Return);
+`ifdef HW_DBG
+    $display("   -- dut resolution --");
+`endif
     let fail = rg_dut_res != rg_rd;
 
     if (fail) rg_state <= Fail;
