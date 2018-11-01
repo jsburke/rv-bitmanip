@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
 #elif  RV64
     res[i] = grev64(rs1[i], rs2[i]);
 #endif
-  xlen_hex_write("./grev/hex", res, no_entries);
+  xlen_hex_write("./grev.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
 #ifdef RV32
