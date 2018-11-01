@@ -35,16 +35,12 @@ module mkRotateIter (BitManip_IFC #(double_port, one_option))
   //                       //
   ///////////////////////////
 
-  BitXL minus_1  = '1;
-  BitXL high_bit = (1 << (xlen - 1));
-  BitXL low_bit  = 1;
-
   rule rl_calc (rg_state == Calc);
     if(rg_rs2 == 0) rg_state <= Idle;
     else begin
       rg_rs2 <= rg_rs2 - 1;
-      if(rg_dir) rg_rs1 <= {rg_rs1[0], (rg_rs1)[(xlen - 1) : 1]};           // right
-      else       rg_rs1 <= {(rg_rs1)[(xlen - 2) : 0], rg_rs1[(xlen - 1)]};  // left
+      if(rg_dir) rg_rs1 <= {rg_rs1[0], rg_rs1[(xlen - 1):1]};  // right
+      else       rg_rs1 <= {rg_rs1[(xlen - 2):0], rg_rs1[(xlen - 1)]};  // left
     end
   endrule: rl_calc
 
