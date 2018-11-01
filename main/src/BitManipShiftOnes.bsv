@@ -56,7 +56,7 @@ module mkShiftOnesIter (BitManip_IFC #(double_port, one_option))
 
   method Action args_put (Vector #(double_port, BitXL) arg, Bit #(one_option) option) if (rg_state == Idle);
     rg_rs1     <= arg[0];
-    rg_rs2     <= arg[1][log_xlen:0];
+    rg_rs2     <= arg[1][(log_xlen - 1):0];
     rg_dir     <= (unpack(option));
     rg_state   <= Calc;
   endmethod: args_put

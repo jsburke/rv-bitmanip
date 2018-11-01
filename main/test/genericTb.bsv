@@ -57,6 +57,24 @@ import metaTb        :: *;
   `define DUT_PORT_COUNT 2
   `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
   `define DUT_SELECT 0 
+`elsif TEST_slo
+  import BitManipShiftOnes :: *;
+  String res_file = bram_locate("slo");
+  `define RS2_PRESENT
+  `define DUT_IFC BitManip_IFC #(2,1)
+  `define DUT_MODULE mkShiftOnesIter
+  `define DUT_PORT_COUNT 2
+  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
+  `define DUT_SELECT 0 
+`elsif TEST_sro
+  import BitManipShiftOnes :: *;
+  String res_file = bram_locate("sro");
+  `define RS2_PRESENT
+  `define DUT_IFC BitManip_IFC #(2,1)
+  `define DUT_MODULE mkShiftOnesIter
+  `define DUT_PORT_COUNT 2
+  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
+  `define DUT_SELECT 1 
 `endif
 
 /////////////////////////////////////////////////
