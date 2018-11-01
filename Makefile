@@ -74,8 +74,9 @@ bramGen%: $(TB_DIR)
 
 $(TEST_BRAM): $(TB_DIR) bramGen$(XLEN)
 	@echo "****** Creating Test Vectors ******"
-	rm -rf $(TEST_BRAM) # hack so I can launch multiple tests w/o cleans
-	cd $(TB_DIR) && ./$(BRAM_SCRIPT) $(TEST_COUNT) 
+	rm -rf $(TEST_BRAM) && mkdir -p $(TEST_BRAM) 
+	cd $(TB_DIR) && ./$(BRAM_SCRIPT) $(TEST_COUNT)
+	mv $(TB_DIR)/*.hex $(TEST_BRAM)
 
 test-%: $(TEST_BRAM)
 	@echo "******* Creating Test Bench *******"
