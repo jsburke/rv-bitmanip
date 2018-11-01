@@ -185,6 +185,9 @@ module mkGenericTb (Empty);
     if (fail) rg_state <= Fail;
     else begin
       $display("  -- PASS: rs1 = %h", rg_rs1);
+`ifdef RS2_PRESENT
+      $display("           rs2 = %h", rg_rs2);
+`endif
       $display("           res = %h", rg_dut_res);
 
       if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
