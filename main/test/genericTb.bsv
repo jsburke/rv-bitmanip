@@ -126,7 +126,9 @@ module mkGenericTb (Empty);
   /////////////////////
 
   rule tb_mem_init (rg_state == MemInit);
+    `ifdef TEST_VERBOSE
     $display("Test %d of %d", rg_bram_offset, fromInteger(bram_limit));
+    `endif
 
     rs1.put(False, rg_bram_offset, 0);
     `ifdef RS2_PRESENT
@@ -138,9 +140,10 @@ module mkGenericTb (Empty);
   endrule: tb_mem_init
 
   rule tb_dut_init (rg_state == DutInit);
-`ifdef HW_DBG
+    `ifdef HW_DBG
     $display("   -- initialize DUT --");
-`endif
+    `endif
+
     let op_0 = rs1.read;
     let res  = rd.read;
 
@@ -152,43 +155,45 @@ module mkGenericTb (Empty);
     rg_rs2  <= op_1;
     `endif
 
-`ifndef TEST_andc
+    `ifndef TEST_andc
     Vector #(`DUT_PORT_COUNT, BitXL) v_args = newVector();
     `DUT_PORT_ASSIGN
     dut.args_put(v_args, `DUT_SELECT);
     rg_state <= Calc;
-`else // AndC test
+    `else // AndC test
     let dut_res = dut.eval(op_0,op_1);
     rg_dut_res <= dut_res;
     rg_state   <= Return;  // jump right to return because combinational
-`endif
+    `endif
   endrule: tb_dut_init
 
-`ifndef TEST_andc  // not used for andc
+  `ifndef TEST_andc  // not used for andc
   rule tb_calc (rg_state == Calc);
-`ifdef HW_DBG
+  `ifdef HW_DBG
     $display("   -- dut processing --");
-`endif
+  `endif
     if(dut.valid_get) begin
       rg_dut_res <= dut.value_get;
       rg_state   <= Return;
     end
   endrule: tb_calc
-`endif
+  `endif // TEST_andc
 
   rule tb_return (rg_state == Return);
-`ifdef HW_DBG
+    `ifdef HW_DBG
     $display("   -- dut resolution --");
-`endif
+    `endif
     let fail = rg_dut_res != rg_rd;
 
     if (fail) rg_state <= Fail;
     else begin
+      `ifdef TEST_VERBOSE
       $display("  -- PASS: rs1 = %h", rg_rs1);
-`ifdef RS2_PRESENT
+      `ifdef RS2_PRESENT
       $display("           rs2 = %h", rg_rs2);
-`endif
+      `endif
       $display("           res = %h", rg_dut_res);
+      `endif
 
       if (rg_bram_offset >= fromInteger(bram_limit)) rg_state <= Complete;
       else                                           rg_state <= MemInit;
@@ -198,13 +203,17 @@ module mkGenericTb (Empty);
   endrule: tb_return
 
   rule tb_complete (rg_state == Complete);
+    `ifdef TEST_VERBOSE
     $display(" *** All Tests Completed Correctly ***");
+    `endif
     $finish(0);
   endrule: tb_complete
 
   rule tb_fail (rg_state == Fail);
+    `ifdef TEST_VERBOSE
     $display(" *** FAILURE *** ");
     $display("    For input %h, result calculated was %h, but was expected as %h", rg_rs1, rg_dut_res, rg_rd);
+    `endif
     $finish(1);
   endrule: tb_fail
 

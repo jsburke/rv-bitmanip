@@ -8,6 +8,7 @@ PROJ_NAME = BlueSpec RISC-V Bitmanip
 
 XLEN ?= 32  # set default to 32 or 64 bit
 #HW_DBG = on # enables nice debug prints in HW simulation
+#TEST_VERBOSE = on # enables info to come out of tests
 
 #################################################
 ##                                             ##
@@ -46,8 +47,11 @@ TEST_NAME   = genericTb
 
 BSC ?= bsc
 BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
-ifdef HW_DBG
-  BSC_DEFINES += -D HW_DBG
+ifdef TEST_VERBOSE
+  BSC_DEFINES += -D TEST_VERBOSE
+  ifdef HW_DBG
+    BSC_DEFINES += -D HW_DBG
+  endif
 endif
 BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
 
@@ -102,6 +106,27 @@ retest-%:
 relaunch-%:
 	make clean
 	make launch-$*
+
+full-test:
+	@echo "*******  32 bit  *******"
+	make launch-clz
+	make launch-ctz
+	make launch-pcnt
+	make launch-andc
+	make launch-slo
+	make launch-sro
+	make launch-rol
+	make launch-ror
+	@echo "*******  64 bit  *******"
+	make launch-clz   XLEN=64
+	make launch-ctz   XLEN=64 
+	make launch-pcnt  XLEN=64 
+	make launch-andc  XLEN=64 
+	make launch-slo   XLEN=64 
+	make launch-sro   XLEN=64 
+	make launch-rol   XLEN=64 
+	make launch-ror   XLEN=64 
+	@echo "******* COMPLETE *******"
 
 .PHONY: help
 help:
