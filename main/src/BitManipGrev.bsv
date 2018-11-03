@@ -84,33 +84,33 @@ module mkGrevIter (BitManip_IFC #(double_port, no_options));
     end
 
     if ((rg_state == Calc_2) && (unpack(rg_rs2[0]))) begin
-      let left  = (rg_rs1 & mask_left_s2)   << 2;  // arithmetic to the left and right
-      let right = (rg_rs1 & mask_right_s2)  >> 2;  // of the OR in B spec's C impl
+      let left  = (rg_rs1 & mask_left_s2)   << 2;  
+      let right = (rg_rs1 & mask_right_s2)  >> 2;  
       rg_rs1   <= left | right;
     end
 
     if ((rg_state == Calc_4) && (unpack(rg_rs2[0]))) begin
-      let left  = (rg_rs1 & mask_left_s4)   << 4;  // arithmetic to the left and right
-      let right = (rg_rs1 & mask_right_s4)  >> 4;  // of the OR in B spec's C impl
+      let left  = (rg_rs1 & mask_left_s4)   << 4;  
+      let right = (rg_rs1 & mask_right_s4)  >> 4;  
       rg_rs1   <= left | right;
     end
 
     if ((rg_state == Calc_8) && (unpack(rg_rs2[0]))) begin
-      let left  = (rg_rs1 & mask_left_s8)   << 8;  // arithmetic to the left and right
-      let right = (rg_rs1 & mask_right_s8)  >> 8;  // of the OR in B spec's C impl
+      let left  = (rg_rs1 & mask_left_s8)   << 8;  
+      let right = (rg_rs1 & mask_right_s8)  >> 8;  
       rg_rs1   <= left | right;
     end
 
     if ((rg_state == Calc_16) && (unpack(rg_rs2[0]))) begin
-      let left  = (rg_rs1 & mask_left_s16)  << 16;  // arithmetic to the left and right
-      let right = (rg_rs1 & mask_right_s16) >> 16;  // of the OR in B spec's C impl
+      let left  = (rg_rs1 & mask_left_s16)  << 16;  
+      let right = (rg_rs1 & mask_right_s16) >> 16;  
       rg_rs1   <= left | right;
     end
 
     `ifdef RV64
     if ((rg_state == Calc_32) && (unpack(rg_rs2[0]))) begin
-      let left  = (rg_rs1 & mask_left_s32)  << 32;  // arithmetic to the left and right
-      let right = (rg_rs1 & mask_right_s32) >> 32;  // of the OR in B spec's C impl
+      let left  = (rg_rs1 & mask_left_s32)  << 32;  
+      let right = (rg_rs1 & mask_right_s32) >> 32;  
       rg_rs1   <= left | right;
     end
     `endif
