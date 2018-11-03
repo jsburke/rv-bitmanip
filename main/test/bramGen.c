@@ -28,7 +28,7 @@ void xlen_corner_cases(xlen_t *arr, int start){
   arr[start++] =                    -1;  // ones
   arr[start++] =               -1 & ~1;  // LSB zero
   arr[start++] =    1ULL << (XLEN - 1);  // MSB 
-  arr[start++] = ~(1ULL << (XLEN - 1));  // MSB unset
+  arr[start++] =       ~arr[start - 1];  // MSB unset
 
   int shifts = (XLEN == 32) ? 8 : 16;
   for(int i = 0; i < shifts; i++){ // alternating zeros and ones 
@@ -142,27 +142,15 @@ int main(int argc, char *argv[]){
 
   // more bitness restricted
   for(int i = 0; i < no_entries; i++)
-#ifdef RV32
-    res[i] = grev32(rs1[i], rs2[i]);
-#elif  RV64
-    res[i] = grev64(rs1[i], rs2[i]);
-#endif
+    res[i] = grev(rs1[i], rs2[i]);
   xlen_hex_write("./grev.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
-#ifdef RV32
-    res[i] = shfl32(rs1[i], rs2[i]);
-#elif  RV64
-    res[i] = shfl64(rs1[i], rs2[i]);
-#endif
+    res[i] = shfl(rs1[i], rs2[i]);
   xlen_hex_write("./shfl.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
-#ifdef RV32
-    res[i] = unshfl32(rs1[i], rs2[i]);
-#elif  RV64
-    res[i] = unshfl64(rs1[i], rs2[i]);
-#endif
+    res[i] = unshfl(rs1[i], rs2[i]);
   xlen_hex_write("./unshfl.hex", res, no_entries);
 
   return 0;

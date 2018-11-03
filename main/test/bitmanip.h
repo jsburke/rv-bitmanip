@@ -29,14 +29,11 @@ xlen_t ror (xlen_t rs1, xlen_t rs2);
 xlen_t bext(xlen_t rs1, xlen_t rs2);
 xlen_t bdep(xlen_t rs1, xlen_t rs2);
 
-// width strict
-uint64_t grev64(uint64_t rs1, uint64_t rs2);
-uint32_t grev32(uint32_t rs1, uint32_t rs2);
+// below insns are very bitwidth sensitive
+xlen_t grev  (xlen_t rs1, xlen_t rs2);
 
-uint64_t shfl64  (uint64_t rs1, uint64_t rs2);
-uint64_t unshfl64(uint64_t rs1, uint64_t rs2);
+xlen_t shfl  (xlen_t rs1, xlen_t rs2);
+xlen_t unshfl(xlen_t rs1, xlen_t rs2);
 
-uint32_t shfl32  (uint32_t rs1, uint32_t rs2);
-uint32_t unshfl32(uint32_t rs1, uint32_t rs2);
 
 #endif //BITMANIP_H
