@@ -33,8 +33,6 @@ TB_DIR    = ./tb
 VERI_DIR  = ./verilog
 
 TEST_BRAM = $(TB_DIR)/RV$(XLEN)
-#TESTS_RAW = $(wildcard $(TEST_DIR)/*.bsv)
-#TESTS     = $(filter-out meta,$(patsubst %Tb.bsv,%,$(notdir $(TESTS_RAW))))
 
 BRAM_SCRIPT = bramGen$(XLEN)
 TEST_NAME   = genericTb
