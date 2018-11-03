@@ -126,7 +126,7 @@ xlen_t bext(xlen_t rs1, xlen_t rs2){
   for(int i = 0, j = 0; i < XLEN; i++)
     if((rs2 >> i) & 1){
       if((rs1 >> i) & 1)
-        r |= one << j;  // xlen_t feels funky, cast??
+        r |= one << j;
       j++;
     }
   return r;
@@ -139,7 +139,7 @@ xlen_t bdep (xlen_t rs1, xlen_t rs2){
   for(int i = 0, j = 0; i < XLEN; i++)
     if((rs2 >> i) & 1){
       if((rs1 >> j) & 1)
-        r |= one << i;  // xlen_t feels funky, cast??
+        r |= one << i;
       j++;
     }
   return r;
