@@ -90,6 +90,15 @@ import metaTb        :: *;
   `define DUT_PORT_COUNT 2
   `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
   `define DUT_SELECT 1 
+`elsif TEST_grev
+  import BitManipGrev :: *;
+  String res_file = bram_locate("grev");
+  `define RS2_PRESENT
+  `define DUT_IFC BitManip_IFC #(2,0)
+  `define DUT_MODULE mkGrevIter
+  `define DUT_PORT_COUNT 2
+  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
+  `define DUT_SELECT 0
 `endif
 
 /////////////////////////////////////////////////
