@@ -70,23 +70,23 @@ module mkGrevIter (BitManip_IFC #(double_port, no_options));
     BitXL mask_left_s16  = 32'h0000_FFFF;
     BitXL mask_right_s16 = 32'hFFFF_0000;
   `elsif RV64
-    BitXL mask_left_s1   = 32'h55555555_55555555;
-    BitXL mask_right_s1  = 32'hAAAAAAAA_AAAAAAAA;
+    BitXL mask_left_s1   = 64'h55555555_55555555;
+    BitXL mask_right_s1  = 64'hAAAAAAAA_AAAAAAAA;
 
-    BitXL mask_left_s2   = 32'h33333333_33333333;
-    BitXL mask_right_s2  = 32'hCCCCCCCC_CCCCCCCC;
+    BitXL mask_left_s2   = 64'h33333333_33333333;
+    BitXL mask_right_s2  = 64'hCCCCCCCC_CCCCCCCC;
 
-    BitXL mask_left_s4   = 32'h0F0F0F0F_0F0F0F0F;
-    BitXL mask_right_s4  = 32'hF0F0F0F0_F0F0F0F0;
+    BitXL mask_left_s4   = 64'h0F0F0F0F_0F0F0F0F;
+    BitXL mask_right_s4  = 64'hF0F0F0F0_F0F0F0F0;
 
-    BitXL mask_left_s8   = 32'h00FF00FF_00FF00FF;
-    BitXL mask_right_s8  = 32'hFF00FF00_FF00FF00;
+    BitXL mask_left_s8   = 64'h00FF00FF_00FF00FF;
+    BitXL mask_right_s8  = 64'hFF00FF00_FF00FF00;
 
-    BitXL mask_left_s16  = 32'h0000FFFF_0000FFFF;
-    BitXL mask_right_s16 = 32'hFFFF0000_FFFF0000;
+    BitXL mask_left_s16  = 64'h0000FFFF_0000FFFF;
+    BitXL mask_right_s16 = 64'hFFFF0000_FFFF0000;
 
-    BitXL mask_left_s32  = 32'h00000000_FFFFFFFF;
-    BitXL mask_right_s32 = 32'hFFFFFFFF_00000000;
+    BitXL mask_left_s32  = 64'h00000000_FFFFFFFF;
+    BitXL mask_right_s32 = 64'hFFFFFFFF_00000000;
   `endif
 
   rule rl_calc (rg_state != Idle);
