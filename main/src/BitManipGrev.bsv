@@ -25,6 +25,20 @@ import BitManipMeta :: *;
   typedef enum {Idle, Calc_1, Calc_2, Calc_4, Calc_8, Calc_16, Calc_32} GrevState deriving (Eq, Bits);
 `endif
 
+function GrevState fv_stateInc(GrevState s);
+ 
+  case(s) matches
+    Calc_1  : return  Calc_2;
+    Calc_2  : return  Calc_4;
+    Calc_4  : return  Calc_8;
+    Calc_8  : return Calc_16;
+    `ifdef RV64
+    Calc_16 : return Calc_32;
+    `endif
+    default : return    Idle;
+  endcase
+endfunction: fv_stateInc
+
 module mkGrevIter (BitManip_IFC #(double_port, no_options));
 
   Reg #(BitXL)      rg_rs1     <- mkRegU;
@@ -77,6 +91,10 @@ module mkGrevIter (BitManip_IFC #(double_port, no_options));
 
   rule rl_calc (rg_state != Idle);
 
+    `ifdef HW_DBG
+    $display("  --  HW_DBG : grev rs1 == %h || rs2 == %b", rg_rs1, rg_rs2);
+    `endif
+
     if ((rg_state == Calc_1) && (unpack(rg_rs2[0]))) begin
       let left  = (rg_rs1 & mask_left_s1)   << 1;  // arithmetic to the left and right
       let right = (rg_rs1 & mask_right_s1)  >> 1;  // of the OR in B spec's C impl
@@ -116,6 +134,10 @@ module mkGrevIter (BitManip_IFC #(double_port, no_options));
     `endif
 
     rg_rs2 <= rg_rs2 >> 1;  // shift rs2 rather than some bit select logic, then look at LSB
+    if(rg_rs2 == 0) rg_state <= Idle;
+    else begin
+      rg_state <= fv_stateInc(rg_state);
+    end
   endrule: rl_calc
 
   ///////////////////////////
@@ -135,7 +157,7 @@ module mkGrevIter (BitManip_IFC #(double_port, no_options));
   endmethod: kill
 
   method Bool valid_get;
-    return ((rg_rs2 >> 1) == 0); 
+    return (rg_rs2 == 0); 
   endmethod: valid_get
 
   method BitXL value_get;
