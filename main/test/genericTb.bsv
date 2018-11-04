@@ -221,8 +221,12 @@ module mkGenericTb (Empty);
   rule tb_fail (rg_state == Fail);
     `ifdef TEST_VERBOSE
     $display(" *** FAILURE *** ");
+    `ifndef RS2_PRESENT
     $display("    For input %h, result calculated was %h, but was expected as %h", rg_rs1, rg_dut_res, rg_rd);
-    `endif
+    `else
+    $display("    For rs1 = %h and rs2 = %h, calculated %h but expected %h", rg_rs1, rg_rs2, rg_dut_res, rg_rd);
+    `endif // RS2_PRESENT
+    `endif // TEST_VERBOSE
     $finish(1);
   endrule: tb_fail
 
