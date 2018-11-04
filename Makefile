@@ -115,6 +115,7 @@ full-test:
 	make launch-sro
 	make launch-rol
 	make launch-ror
+	make launch-grev
 	@echo "*******  64 bit  *******"
 	make launch-clz   XLEN=64
 	make launch-ctz   XLEN=64 
@@ -124,6 +125,7 @@ full-test:
 	make launch-sro   XLEN=64 
 	make launch-rol   XLEN=64 
 	make launch-ror   XLEN=64 
+	make launch-grev  XLEN=64 
 	@echo "******* COMPLETE *******"
 
 .PHONY: help
