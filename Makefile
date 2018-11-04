@@ -8,7 +8,7 @@ PROJ_NAME = BlueSpec RISC-V Bitmanip
 
 XLEN ?= 32  # set default to 32 or 64 bit
 #HW_DBG = on # enables nice debug prints in HW simulation
-#TEST_VERBOSE = on # enables info to come out of tests
+TEST_VERBOSE = on # enables info to come out of tests
 
 #################################################
 ##                                             ##
