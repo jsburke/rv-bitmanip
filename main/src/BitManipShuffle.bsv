@@ -86,21 +86,21 @@ module mkShuffleIter (BitManip_IFC #(double_port, one_option))
 
     BitXL mask_left_s8   = 32'h00FF_0000;
     BitXL mask_right_s8  = 32'h0000_FF00;
-  `elsif RV64  // have not touched yet
-    BitXL mask_left_s1   = 64'h55555555_55555555;
-    BitXL mask_right_s1  = 64'hAAAAAAAA_AAAAAAAA;
+  `elsif RV64
+    BitXL mask_left_s1   = 64'h44444444_44444444;
+    BitXL mask_right_s1  = 64'h22222222_22222222;
 
-    BitXL mask_left_s2   = 64'h33333333_33333333;
-    BitXL mask_right_s2  = 64'hCCCCCCCC_CCCCCCCC;
+    BitXL mask_left_s2   = 64'h30303030_30303030;
+    BitXL mask_right_s2  = 64'h0C0C0C0C_0C0C0C0C;
 
-    BitXL mask_left_s4   = 64'h0F0F0F0F_0F0F0F0F;
-    BitXL mask_right_s4  = 64'hF0F0F0F0_F0F0F0F0;
+    BitXL mask_left_s4   = 64'h0F000F00_0F000F00;
+    BitXL mask_right_s4  = 64'h00F000F0_00F000F0;
 
-    BitXL mask_left_s8   = 64'h00FF00FF_00FF00FF;
-    BitXL mask_right_s8  = 64'hFF00FF00_FF00FF00;
+    BitXL mask_left_s8   = 64'h00FF0000_00FF0000;
+    BitXL mask_right_s8  = 64'h0000FF00_0000FF00;
 
-    BitXL mask_left_s16  = 64'h0000FFFF_0000FFFF;
-    BitXL mask_right_s16 = 64'hFFFF0000_FFFF0000;
+    BitXL mask_left_s16  = 64'h0000FFFF_00000000;
+    BitXL mask_right_s16 = 64'h00000000_FFFF0000;
   `endif
 
   function BitXL fv_shuffle_stage(BitXL src, BitXL mask_left, BitXL mask_right, BitXLog shamt);
