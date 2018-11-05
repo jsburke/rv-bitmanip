@@ -20,9 +20,9 @@ import BitManipMeta :: *;
 /////////////////////////////////////////////////
 
 `ifdef RV32
-  typedef enum {Idle, Calc_1, Calc_2, Calc_4, Calc_8}          ShuffleState deriving (Eq, Bits);
+  typedef enum {Idle, Calc_1, Calc_2, Calc_4, Calc_8}          ShuffleState deriving (Eq, Bits, FShow);
 `elsif RV64
-  typedef enum {Idle, Calc_1, Calc_2, Calc_4, Calc_8, Calc_16} ShuffleState deriving (Eq, Bits);
+  typedef enum {Idle, Calc_1, Calc_2, Calc_4, Calc_8, Calc_16} ShuffleState deriving (Eq, Bits, FShow);
 `endif
 
 typedef enum {Shuffle, Unshuffle} ShuffleMode deriving (Eq, Bits);
@@ -57,7 +57,11 @@ module mkShuffleIter (BitManip_IFC #(double_port, one_option))
   provisos (SizedLiteral #(Bit #(one_option), 1));
 
   Reg #(BitXL)      rg_rs1     <- mkRegU;
-  Reg #(BitXLog)    rg_rs2     <- mkRegU;
+  `ifdef RV32
+  Reg #(Bit #(4))   rg_rs2     <- mkRegU;
+  `elsif RV64
+  Reg #(Bit #(5))   rg_rs2     <- mkRegU;
+  `endif
   // rg_rs1 acts as result register as well
   // rg_rs2 effectively is our "shamt" or revving select  
 
@@ -108,6 +112,7 @@ module mkShuffleIter (BitManip_IFC #(double_port, one_option))
 
     `ifdef HW_DBG
     $display("  --  HW_DBG : (un)shuffle rs1 == %h || rs2 == %b", rg_rs1, rg_rs2);
+    $display("  --  Stage ", fshow(rg_state));
     `endif
 
     if ((rg_state == Calc_1) && (unpack(rg_rs2[0]))) begin
