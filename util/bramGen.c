@@ -10,7 +10,7 @@ FILE *rand_init(){
 
 xlen_t rand_val(FILE *urand){
   xlen_t val;
-  fread(&val, sizeof(xlen_t), 1, urand);
+  fread(&val, sizeof(xlen_t), 1, urand); // causes -Wunused-variable to yell, don't care
   return val;
 }
 
@@ -22,25 +22,31 @@ void rand_close(FILE *urand){
 
 #define NO_CORNER_CASES 8
 
-void xlen_corner_cases(xlen_t *arr, int start){
-  arr[start++] =                     0;  // zeros
-  arr[start++] =                     1;  // LSB
-  arr[start++] =                    -1;  // ones
-  arr[start++] =               -1 & ~1;  // LSB zero
-  arr[start++] =    1ULL << (XLEN - 1);  // MSB 
-  arr[start++] =       ~arr[start - 1];  // MSB unset
+void xlen_corner_cases(xlen_t *arr, int first){
+
+  int idx    = first;
+
+  arr[idx++] =                     0;  // zeros
+  arr[idx++] =                     1;  // LSB
+  arr[idx++] =                    -1;  // ones
+  arr[idx++] =               -1 & ~1;  // LSB zero
+  arr[idx++] =    1ULL << (XLEN - 1);  // MSB 
+
+  xlen_t msb = arr[idx - 1];
+
+  arr[idx++] =                  ~msb;  // MSB unset
 
   int shifts = (XLEN == 32) ? 8 : 16;
   for(int i = 0; i < shifts; i++){ // alternating zeros and ones 
-    arr[start]      <<=  4;    // shift up by nibble
-    arr[start + 1]  <<=  4;    // can be done faster but meh
-    arr[start]      +=   5;        
-    arr[start + 1]  += 0xA;
+    arr[idx]      <<=  4;    // shift up by nibble
+    arr[idx + 1]  <<=  4;    // can be done faster but meh
+    arr[idx]      +=   5;        
+    arr[idx + 1]  += 0xA;
   }
 }
 
-void xlen_arr_fill(FILE *urand, xlen_t *arr, int start, int len){
-  for(int i = start; i < len; i++)
+void xlen_arr_fill(FILE *urand, xlen_t *arr, int first, int len){
+  for(int i = first; i < len; i++)
     arr[i] = rand_val(urand);
 }
 
