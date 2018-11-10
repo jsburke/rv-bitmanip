@@ -3,6 +3,10 @@
 *.ba
 *.bi
 
+# C ignores
+*.o
+*.so
+
 # generic hardware ignores
 *.hex
 *.bin
