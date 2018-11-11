@@ -1,4 +1,5 @@
 PROJ_NAME = BlueSpec RISC-V Bitmanip
+PROJ_HOME = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 #################################################
 ##                                             ##
@@ -6,32 +7,27 @@ PROJ_NAME = BlueSpec RISC-V Bitmanip
 ##                                             ##
 #################################################
 
-XLEN ?= 32  # set default to 32 or 64 bit
+XLEN ?= 32# set default to 32 or 64 bit
 #HW_DBG = on # enables nice debug prints in HW simulation
 TEST_VERBOSE = on # enables info to come out of tests
 
 #################################################
 ##                                             ##
-##  Test Options                               ##
+##  Test Controls                              ##
 ##                                             ##
 #################################################
 
 TEST_COUNT ?= 16  # Number of tests to run
 
+TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
+
 #################################################
 ##                                             ##
-##  Project Management                         ##
+##  Verilog Generation Controls                ##
 ##                                             ##
 #################################################
 
-SRC_DIR   = main/src
-TEST_DIR  = main/test
-
-  # directories for local testbench and generated
-  # verilog
-UTIL      = ./util
-TB_DIR    = ./tb
-VERI_DIR  = ./verilog
+VERILOG = $(PROJ_HOME)/veri$(XLEN)
 
 #################################################
 ##                                             ##
@@ -61,7 +57,10 @@ VERIMAIN = $(VERI_LIB)/main.v
 ##                                             ##
 #################################################
 
+UTIL     = $(PROJ_HOME)/util
+BRAM_DIR = $(TB_DIR)/bram
 #UTIL_DBG = on # enable if we want gdb to debug bram C stuff
+BRAM_GEN = $(UTIL)/bramGen$(XLEN)
 
 #################################################
 ##                                             ##
@@ -82,47 +81,19 @@ utils-rebuild:
 	@echo "  ********* Rebuilding Utils *********"
 	$(MAKE) -C $(UTIL) rebuild UTIL_DBG=$(UTIL_DBG)
 
+$(TB_DIR):
+	@echo " *************** $(PROJ_NAME) $(XLEN)bit Testbench Dir **************"
+	mkdir -p $(TB_DIR)
 
-.PHONY: help
-help:
-	@echo "$(PROJ_NAME) Instructions"
-	@echo " "
-	@echo "************ Targets ************"
-	@echo " "
-	@echo "  <INSN>Tb [XLEN={32|64}] [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - generate testbench for instruction INSN"
-	@echo "    - default 32 bit, 16 test inputs"
-	@echo " "
-	@echo "  launch-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - generate testbench for instruction INSN"
-	@echo "    - default 32 bit, 16 test inputs"
-	@echo "    - launch the test automatically"
-	@echo " "
-	@echo "  full-test [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - launches all tests, 32 bit then 64 bit"
-	@echo "    - default 16 tests, non-verbose"
-	@echo " "
-	@echo "  clean"
-	@echo "    - deletes build directories"
-	@echo " "
-	@echo "  help  (defualt option)"
-	@echo "    - print this message "
-	@echo " "
-	@echo "************ Aliases ************"
-	@echo " "
-	@echo "  retest-<INSN> [...]"
-	@echo "    - make clean then make <INSN>Tb ..."
-	@echo " "
-	@echo "  relaunch-<INSN> [...]"
-	@echo "     - make clean then make launch-INSN ..."
-	@echo " "
+bram: utils $(TB_DIR)
+	@echo " *************** $(PROJ_NAME) $(XLEN)bit BRAM Generation ************"
+	mkdir -p $(BRAM_DIR)
+	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
 
 .PHONY: clean
 clean:
-	rm -rf $(TB_DIR)
-	rm -rf $(VERI_DIR)
+	rm -rf tb32 tb64 veri32 veri64
 
-# really borked something?  This should put you even with the home repo
-.PHONY: full-clean
-full-clean: clean
-	rm -rf $(UTIL_DIR)
+.PHONY: help
+help:
+	@echo "Make file path : $(PROJ_HOME)"
