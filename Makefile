@@ -88,7 +88,7 @@ bram: utils $(TB_DIR)
 	$(MAKE) -C $(BSV) $@ $(BSC_FLAGS)
 	mv $(BSV)/$** $(TB_DIR)
 
-PHONY: test-all
+.PHONY: test-all
 test-all: $(TB_DIR)
 	@echo " ********** $(PROJ_NAME): Building all $(XLEN) bit Testbenches *********"
 	$(MAKE) -C $(BSV) all $(BSC_FLAGS)
@@ -114,4 +114,26 @@ full-clean: clean
 
 .PHONY: help
 help:
-	@echo "Make file path : $(PROJ_HOME)"
+	@echo " ******* $(PROJ_NAME) ******* "
+	@echo " "
+	@echo "  Targets"
+	@echo " "
+	@echo "  utils ------------------------------------- Build the bramGen Programs"
+	@echo " "
+	@echo "  utils-rebuild ----------------------------- clean then" 
+	@echo "                            rebuild the bramGen Programs"
+	@echo " "
+	@echo "  bram [XLEN=[32,64]] [TEST_COUNT=int] ------ generate brams"
+	@echo " "
+	@echo "  [INSN]Tb [XLEN=[32,64]] [TEST_COUNT=int] -- make Test for INSN"
+	@echo " "
+	@echo "  test-all [XLEN=[32,64]] [TEST_COUNT=int] -- make all tests"
+	@echo " "
+	@echo "  all (default) ----------------------------- make everything"
+	@echo " "
+	@echo "  clean ------------------------------------- delete build dirs"
+	@echo " "
+	@echo "  full-clean -------------------------------- set repo back to clone state"
+	@echo " "
+	@echo "  help -------------------------------------- print this"
+	@echo " "
