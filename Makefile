@@ -107,6 +107,11 @@ all:
 clean:
 	rm -rf tb32 tb64 veri32 veri64
 
+.PHONY: full-clean
+full-clean: clean
+	$(MAKE) -C $(UTIL) clean
+	$(MAKE) -C $(BSV)  full-clean
+
 .PHONY: help
 help:
 	@echo "Make file path : $(PROJ_HOME)"
