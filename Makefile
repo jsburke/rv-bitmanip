@@ -35,6 +35,8 @@ VERILOG = $(PROJ_HOME)/veri$(XLEN)
 ##                                             ##
 #################################################
 
+BSV_SRC = $(PROJ_HOME)/bsv
+
 BSC ?= bsc
 BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
 ifdef TEST_VERBOSE
@@ -43,10 +45,13 @@ ifdef TEST_VERBOSE
     BSC_DEFINES += -D HW_DBG
   endif
 endif
-BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
+BSV_INC = -p $(BSV_SRC):+
 
 BSC_TEST_0 = -u -sim
 BSC_TEST_1 = -sim -e
+
+TB         = genericTb
+BSV_TB     = $(BSV_SRC)/$(TB).bsv
 
 VERI_LIB = $(BLUESPECDIR)/Verilog
 VERIMAIN = $(VERI_LIB)/main.v
@@ -89,6 +94,14 @@ bram: utils $(TB_DIR)
 	@echo " *************** $(PROJ_NAME) $(XLEN)bit BRAM Generation ************"
 	mkdir -p $(BRAM_DIR)
 	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
+
+%Tb: $(TB_DIR)
+	@echo " ********* $(PROJ_NAME): Building $(XLEN) bit $* Testbench **********"
+	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BSC_TEST_0) $(BSV_INC) $(BSV_TB)
+	mv $(BSV_SRC)/*.bo $(TB_DIR)
+	mv $(BSV_SRC)/*.ba $(TB_DIR)
+	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mkGenericTb -o $(TB) *.ba
+	cd $(TB_DIR) && find . -name "$(TB)*" -exec rename 's/$(TB)/$*Tb/' {} \;
 
 .PHONY: clean
 clean:
