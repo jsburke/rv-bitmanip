@@ -66,31 +66,29 @@ default: all
 
 .PHONY: utils
 utils:
-	@echo "  ********* Building Utils *********"
 	$(MAKE) -C $(UTIL) all UTIL_DBG=$(UTIL_DBG)
 
 .PHONY: utils-rebuild
 utils-rebuild:
-	@echo "  ********* Rebuilding Utils *********"
 	$(MAKE) -C $(UTIL) rebuild UTIL_DBG=$(UTIL_DBG)
 
 $(TB_DIR):
-	@echo " *************** $(PROJ_NAME) $(XLEN)bit Testbench Dir **************"
 	mkdir -p $(TB_DIR)
 
 bram: utils $(TB_DIR)
-	@echo " *************** $(PROJ_NAME) $(XLEN)bit BRAM Generation ************"
 	mkdir -p $(BRAM_DIR)
 	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
 
 %Tb: $(TB_DIR)
-	@echo " ********* $(PROJ_NAME): Building $(XLEN) bit $* Testbench **********"
 	$(MAKE) -C $(BSV) $@ $(BSC_FLAGS)
 	mv $(BSV)/$** $(TB_DIR)
 
+.PHONY: launch-%
+launch-%: %Tb bram
+	cd $(TB_DIR) && ./$*Tb
+
 .PHONY: test-all
 test-all: $(TB_DIR)
-	@echo " ********** $(PROJ_NAME): Building all $(XLEN) bit Testbenches *********"
 	$(MAKE) -C $(BSV) all $(BSC_FLAGS)
 	mv $(BSV)/*Tb  $(TB_DIR)
 	mv $(BSV)/*.so $(TB_DIR)

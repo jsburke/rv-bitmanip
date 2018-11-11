@@ -56,7 +56,6 @@ default: all
 .PRECIOUS: $(TB_BINARIES) $(TB_SHARED)
 
 %Tb:
-	@echo "   ******* BSV : Building $@ *******"
 	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
 	$(BSC) $(BLUESIM_S2) mkGenericTb -o $(TB) *.ba
 	mv $(TB) $@
@@ -64,24 +63,20 @@ default: all
 
 .PHONY: all
 all: 
-	@echo "   ******* BSV : Building all $(XLEN) bit Testbenches *******"
 	make $(TB_BINARIES)
 	make clean
 
 .PHONY: rebuild
 rebuild:
-	@echo "   ******* BSV : Fresh Build ******* "
 	make full-clean
 	make all
 	
 .PHONY: clean
 clean:
-	@echo "   ******* BSV : cleaning dir ******* "
 	rm -rf $(TB_RESIDUES)
 
 .PHONY: full-clean
 full-clean: clean
-	@echo "   ******* BSV : complete cleanup ******* "
 	rm -rf $(TB_BINARIES) $(TB_SHARED) *.so
 
 .PHONY: help

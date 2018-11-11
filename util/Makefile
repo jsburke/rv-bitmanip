@@ -46,11 +46,9 @@ default: all
 .PRECIOUS: $(OBJS)
 
 bitmanip%.o: $(OBJ_DEP)
-	@echo "   ******* UTIL : building $@ ******* "
 	$(CC_FULL) -DRV$* $(SOBJ) -c -o $@
 
 bramGen%: bitmanip%.o
-	@echo "   ******* UTIL : building $@ ******* "
 	$(CC_FULL) -DRV$* -o $@ $^ bramGen.c  
 
 .PHONY: all
@@ -58,13 +56,11 @@ all: bramGen32 bramGen64
 
 .PHONY: rebuild
 rebuild:
-	@echo "   ******* UTIL : Fresh Build ******* "
 	make clean
 	make all
 	
 .PHONY: clean
 clean:
-	@echo "   ******* UTIL : cleaning dir ******* "
 	rm -rf $(OBJS)
 
 .PHONY: help
