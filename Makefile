@@ -1,4 +1,5 @@
 PROJ_NAME = BlueSpec RISC-V Bitmanip
+PROJ_HOME = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 #################################################
 ##                                             ##
@@ -6,58 +7,56 @@ PROJ_NAME = BlueSpec RISC-V Bitmanip
 ##                                             ##
 #################################################
 
-XLEN ?= 32  # set default to 32 or 64 bit
+XLEN ?= 32# set default to 32 or 64 bit
 #HW_DBG = on # enables nice debug prints in HW simulation
 TEST_VERBOSE = on # enables info to come out of tests
 
 #################################################
 ##                                             ##
-##  Test Options                               ##
+##  Test Controls                              ##
 ##                                             ##
 #################################################
 
 TEST_COUNT ?= 16  # Number of tests to run
 
-#################################################
-##                                             ##
-##  Project Management                         ##
-##                                             ##
-#################################################
+TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 
-SRC_DIR   = main/src
-TEST_DIR  = main/test
-
-  # directories for local testbench and generated
-  # verilog
-TB_DIR    = ./tb
-VERI_DIR  = ./verilog
-
-TEST_BRAM = $(TB_DIR)/RV$(XLEN)
-
-BRAM_SCRIPT = bramGen$(XLEN)
-TEST_NAME   = genericTb
+INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+LAUNCHERS = $(addprefix launch-, $(INSNS))
 
 #################################################
 ##                                             ##
-##  Bluespec Controls                          ##
+##  Verilog Generation Controls                ##
 ##                                             ##
 #################################################
 
-BSC ?= bsc
-BSC_DEFINES = -D RV$(XLEN) -D TEST_COUNT=$(TEST_COUNT)
+VERILOG = $(PROJ_HOME)/veri$(XLEN)
+
+#################################################
+##                                             ##
+##  Utility Build                              ##
+##                                             ##
+#################################################
+
+UTIL     = $(PROJ_HOME)/util
+BRAM_DIR = $(TB_DIR)/bram
+#UTIL_DBG = on # enable if we want gdb to debug bram C stuff
+BRAM_GEN = $(UTIL)/bramGen$(XLEN)
+
+#################################################
+##                                             ##
+##  Bluespec Build                             ##
+##                                             ##
+#################################################
+
+BSV = $(PROJ_HOME)/bsv
+BSC_FLAGS = XLEN=$(XLEN) TEST_COUNT=$(TEST_COUNT)
 ifdef TEST_VERBOSE
-  BSC_DEFINES += -D TEST_VERBOSE
-  ifdef HW_DBG
-    BSC_DEFINES += -D HW_DBG
-  endif
+BSC_FLAGS += TEST_VERBOSE=on
+ifdef HW_DBG
+BSC_FLAGS += HW_DBG=on
 endif
-BSV_INC = -p $(SRC_DIR):$(TEST_DIR):+
-
-BSC_TEST_0 = -u -sim
-BSC_TEST_1 = -sim -e
-
-VERI_LIB = $(BLUESPECDIR)/Verilog
-VERIMAIN = $(VERI_LIB)/main.v
+endif
 
 #################################################
 ##                                             ##
@@ -66,103 +65,78 @@ VERIMAIN = $(VERI_LIB)/main.v
 #################################################
 
 .PHONY: default
-default: help
+default: all
+
+.PHONY: utils
+utils:
+	$(MAKE) -C $(UTIL) all UTIL_DBG=$(UTIL_DBG)
+
+.PHONY: utils-rebuild
+utils-rebuild:
+	$(MAKE) -C $(UTIL) rebuild UTIL_DBG=$(UTIL_DBG)
 
 $(TB_DIR):
-	@echo "***** Creating Test Bench Dir *****"
 	mkdir -p $(TB_DIR)
 
-bramGen%: $(TB_DIR)
-	cd $(TEST_DIR) && gcc -DRV$* -c bitmanip.c -o bitmanip$*.o
-	cd $(TEST_DIR) && gcc -DRV$* -o $@ bramGen.c bitmanip$*.o
-	mv $(TEST_DIR)/$@ $(TB_DIR)
-	rm $(TEST_DIR)/*.o
+bram: utils $(TB_DIR)
+	mkdir -p $(BRAM_DIR)
+	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
 
-$(TEST_BRAM): $(TB_DIR) bramGen$(XLEN)
-	@echo "****** Creating Test Vectors ******"
-	rm -rf $(TEST_BRAM) && mkdir -p $(TEST_BRAM) 
-	cd $(TB_DIR) && ./$(BRAM_SCRIPT) $(TEST_COUNT)
-	mv $(TB_DIR)/*.hex $(TEST_BRAM)
+%Tb: $(TB_DIR)
+	$(MAKE) -C $(BSV) full-clean
+	$(MAKE) -C $(BSV) $@ $(BSC_FLAGS)
+	mv $(BSV)/$** $(TB_DIR)
 
-%Tb: $(TEST_BRAM)
-	@echo "******* Creating Test Bench *******"
-	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BSC_TEST_0) $(BSV_INC) $(TEST_DIR)/genericTb.bsv
-	mv $(SRC_DIR)/*.bo  $(TB_DIR)
-	mv $(TEST_DIR)/*.ba $(TB_DIR)
-	mv $(TEST_DIR)/*.bo $(TB_DIR)
-	cd $(TB_DIR) && $(BSC) $(BSC_TEST_1) mkGenericTb -o genericTb *.ba
-	cd $(TB_DIR) && mv genericTb $*Tb && mv genericTb.so $*Tb.so 
-
-launch-%: $(TEST_BRAM) %Tb
-	@echo "******* Launching Test Bench ******"
+.PHONY: launch-%
+launch-%: %Tb bram
 	cd $(TB_DIR) && ./$*Tb
 
-retest-%:
-	make clean
-	make test-$*
+.PHONY: test-all
+test-all: $(TB_DIR)
+	$(MAKE) -C $(BSV) all $(BSC_FLAGS)
+	mv $(BSV)/*Tb  $(TB_DIR)
+	mv $(BSV)/*.so $(TB_DIR)
 
-relaunch-%:
-	make clean
-	make launch-$*
-
-full-test:
-	@echo "*******  32 bit  *******"
-	make launch-clz
-	make launch-ctz
-	make launch-pcnt
-	make launch-andc
-	make launch-slo
-	make launch-sro
-	make launch-rol
-	make launch-ror
-	make launch-grev
-	@echo "*******  64 bit  *******"
-	make launch-clz   XLEN=64
-	make launch-ctz   XLEN=64 
-	make launch-pcnt  XLEN=64 
-	make launch-andc  XLEN=64 
-	make launch-slo   XLEN=64 
-	make launch-sro   XLEN=64 
-	make launch-rol   XLEN=64 
-	make launch-ror   XLEN=64 
-	make launch-grev  XLEN=64 
-	@echo "******* COMPLETE *******"
-
-.PHONY: help
-help:
-	@echo "$(PROJ_NAME) Instructions"
-	@echo " "
-	@echo "************ Targets ************"
-	@echo " "
-	@echo "  <INSN>Tb [XLEN={32|64}] [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - generate testbench for instruction INSN"
-	@echo "    - default 32 bit, 16 test inputs"
-	@echo " "
-	@echo "  launch-<INSN> [XLEN={32|64}] [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - generate testbench for instruction INSN"
-	@echo "    - default 32 bit, 16 test inputs"
-	@echo "    - launch the test automatically"
-	@echo " "
-	@echo "  full-test [TEST_COUNT=<int>] [TEST_VERBOSITY=on] [HW_DBG=on]"
-	@echo "    - launches all tests, 32 bit then 64 bit"
-	@echo "    - default 16 tests, non-verbose"
-	@echo " "
-	@echo "  clean"
-	@echo "    - deletes build directories"
-	@echo " "
-	@echo "  help  (defualt option)"
-	@echo "    - print this message "
-	@echo " "
-	@echo "************ Aliases ************"
-	@echo " "
-	@echo "  retest-<INSN> [...]"
-	@echo "    - make clean then make <INSN>Tb ..."
-	@echo " "
-	@echo "  relaunch-<INSN> [...]"
-	@echo "     - make clean then make launch-INSN ..."
-	@echo " "
+.PHONY: all
+all:
+	make utils
+	make bram
+	make bram XLEN=64
+	make test-all
+	$(MAKE) -C $(BSV) clean
+	make test-all XLEN=64
 
 .PHONY: clean
 clean:
-	rm -rf $(TB_DIR)
-	rm -rf $(VERI_DIR)
+	rm -rf tb32 tb64 veri32 veri64
+
+.PHONY: full-clean
+full-clean: clean
+	$(MAKE) -C $(UTIL) clean
+	$(MAKE) -C $(BSV)  full-clean
+
+.PHONY: help
+help:
+	@echo " ******* $(PROJ_NAME) ******* "
+	@echo " "
+	@echo "  Targets"
+	@echo " "
+	@echo "  utils ------------------------------------- Build the bramGen Programs"
+	@echo " "
+	@echo "  utils-rebuild ----------------------------- clean then" 
+	@echo "                            rebuild the bramGen Programs"
+	@echo " "
+	@echo "  bram [XLEN=[32,64]] [TEST_COUNT=int] ------ generate brams"
+	@echo " "
+	@echo "  [INSN]Tb [XLEN=[32,64]] [TEST_COUNT=int] -- make Test for INSN"
+	@echo " "
+	@echo "  test-all [XLEN=[32,64]] [TEST_COUNT=int] -- make all tests"
+	@echo " "
+	@echo "  all (default) ----------------------------- make everything"
+	@echo " "
+	@echo "  clean ------------------------------------- delete build dirs"
+	@echo " "
+	@echo "  full-clean -------------------------------- set repo back to clone state"
+	@echo " "
+	@echo "  help -------------------------------------- print this"
+	@echo " "

@@ -20,16 +20,8 @@ import BitManipMeta :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-`ifdef RV32
-String bram_dir = "RV32";
-`elsif RV64
-String bram_dir = "RV64";
-`else
-String bram_dir = "RV32";
-`endif
-
 function String bram_locate (String test);
-  return "./" + bram_dir + "/" + test + ".hex";
+  return "./bram/" + test + ".hex";
 endfunction
 
 //  Source operand value vectors
