@@ -21,6 +21,9 @@ TEST_COUNT ?= 16  # Number of tests to run
 
 TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 
+INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+LAUNCHERS = $(addprefix launch-, $(INSNS))
+
 #################################################
 ##                                             ##
 ##  Verilog Generation Controls                ##
@@ -80,6 +83,7 @@ bram: utils $(TB_DIR)
 	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
 
 %Tb: $(TB_DIR)
+	$(MAKE) -C $(BSV) full-clean
 	$(MAKE) -C $(BSV) $@ $(BSC_FLAGS)
 	mv $(BSV)/$** $(TB_DIR)
 
@@ -99,6 +103,7 @@ all:
 	make bram
 	make bram XLEN=64
 	make test-all
+	$(MAKE) -C $(BSV) clean
 	make test-all XLEN=64
 
 .PHONY: clean
