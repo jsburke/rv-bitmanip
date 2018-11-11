@@ -62,7 +62,7 @@ endif
 #################################################
 
 .PHONY: default
-default: help
+default: all
 
 .PHONY: utils
 utils:
@@ -94,6 +94,14 @@ test-all: $(TB_DIR)
 	$(MAKE) -C $(BSV) all $(BSC_FLAGS)
 	mv $(BSV)/*Tb  $(TB_DIR)
 	mv $(BSV)/*.so $(TB_DIR)
+
+.PHONY: all
+all:
+	make utils
+	make bram
+	make bram XLEN=64
+	make test-all
+	make test-all XLEN=64
 
 .PHONY: clean
 clean:
