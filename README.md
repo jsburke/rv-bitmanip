@@ -23,7 +23,8 @@ If you want to make tests, the first thing you'll likely need to do is `make uti
 ## Checklist
 
 1. Build the RISCV_BBox
-2. Consider Compressing Current modules into single module
+2. Incorporate into Piccolo or Flute
+3. Consider Compressing Current modules into single module
   - Can probably get most to use two common shifters for gate constrained designs
-3. Tabular test results (Issue exists)
-4. Fixed Latency Modules
+4. Tabular test results (Issue exists)
+5. Fixed Latency Modules
