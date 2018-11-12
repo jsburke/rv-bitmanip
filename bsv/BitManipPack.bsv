@@ -86,7 +86,7 @@ module mkPackIter (BitManip_IFC #(double_port, one_option))
    rg_seed   <= 1;
 
    rg_state   <= Calc;
-   rg_mode    <= unpack(option);
+   rg_mode    <= unpack(option); // set -- extract, unset -- deposit
   endmethod: args_put
 
   method Action kill;
