@@ -2,6 +2,7 @@
 *.bo
 *.ba
 *.bi
+*.cxx
 
 # C ignores
 *.o
