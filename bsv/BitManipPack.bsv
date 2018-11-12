@@ -61,7 +61,7 @@ module mkPackIter (BitManip_IFC #(double_port, one_option))
 
         rg_seed <= rg_seed << 1;
         if(unpack(rg_rs2[0])) begin
-          rg_rs1 <= rg_rs1 << 1;
+          rg_rs1 <= rg_rs1 >> 1;
           if(unpack(rg_rs1[0])) begin
             rg_res <= rg_res | rg_seed;
           end
@@ -83,7 +83,7 @@ module mkPackIter (BitManip_IFC #(double_port, one_option))
    rg_rs2     <= arg[1];
 
    rg_res     <= 0;
-   rg_seed   <= 1;
+   rg_seed    <= 1;
 
    rg_state   <= Calc;
    rg_mode    <= unpack(option); // set -- extract, unset -- deposit
