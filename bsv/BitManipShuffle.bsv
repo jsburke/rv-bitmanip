@@ -153,8 +153,8 @@ module mkShuffleIter (BitManip_IFC #(double_port, no_options));
 
     rg_rs1     <= arg[0];
 
-    let is_unshfl = arg[0][0];
-    let op_1      = arg[1][(log_xlen - 2):1];
+    let is_unshfl = arg[1][0];
+    let op_1      = arg[1][(log_xlen - 1):1];
 
     rg_rs2     <= (unpack(is_unshfl)) ? op_1 : reverseBits(op_1);
     rg_mode    <= (unpack(is_unshfl)) ? Unshuffle : Shuffle;
