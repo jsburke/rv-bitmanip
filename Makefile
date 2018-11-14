@@ -21,7 +21,7 @@ TEST_COUNT ?= 16  # Number of tests to run
 
 TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 
-INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl bext bdep
 LAUNCHERS = $(addprefix launch-, $(INSNS))
 
 #################################################
