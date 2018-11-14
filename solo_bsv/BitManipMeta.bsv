@@ -46,57 +46,6 @@ Integer two_options = 2;
 //                                             //
 /////////////////////////////////////////////////
 
-// below enum describes state for the unfixed latency iterative design
-typedef enum {S_Idle,      // awaiting args
-              S_Calc,      // indeterminate state for counts, shifts, etc
-              S_Stage_1,   // preset stages for grev and shfl
-              S_Stage_2,
-              S_Stage_4,
-              S_Stage_8,
-              S_Stage_16   // only grev will use final stage
-`ifdef RV64                // shfl needs one less
-             ,S_Stage_32
-`endif
-                        }  VarState deriving (Eq, Bits, FShow);
-
-function VarState fv_grevNextState(VarState s);
-  case(s) matches
-    S_Stage_1  : return  S_Stage_2;
-    S_Stage_2  : return  S_Stage_4;
-    S_Stage_4  : return  S_Stage_8;
-    S_Stage_8  : return S_Stage_16;
-    `ifdef RV64
-    S_Stage_16 : return S_Stage_32;
-    `endif
-    default    : return S_Idle;
-  endcase
-endfunction: fv_grevNextState
-
-function VarState fv_shflNextState(VarState s, Bool is_shfl);
-  if(is_shfl) begin // shuffle state progression
-    case(s) matches
-      `ifdef RV64
-      S_Stage_16 : return  S_Stage_8;
-      `endif
-      S_Stage_8  : return  S_Stage_4;
-      S_Stage_4  : return  S_Stage_2;
-      S_Stage_2  : return  S_Stage_1;
-      default    : return     S_Idle;
-    endcase
-  end else begin // Unshuffle state progression 
-    case(s) matches
-      S_Stage_1  : return  S_Stage_2;
-      S_Stage_2  : return  S_Stage_4;
-      S_Stage_4  : return  S_Stage_8;
-      `ifdef RV64
-      S_Stage_8  : return S_Stage_16;
-      `endif
-      default    : return     S_Idle;
-    endcase
-  end
-endfunction: fv_shflNextState
-
-
 typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
 
 interface BitManip_IFC #(numeric type no_args, numeric type opt_sz);
