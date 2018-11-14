@@ -38,7 +38,7 @@ VERIMAN     = $(VERILOG_LIB)/main.v
 TB     = genericTb
 BSV_TB = $(TB).bsv
 
-INSNS  = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+INSNS  = clz ctz pcnt andc slo sro rol ror grev shfl bext bdep
 
 TB_BINARIES = $(addsuffix Tb, $(INSNS))
 TB_SHARED   = $(addsuffix .so, $(TB_BINARIES))

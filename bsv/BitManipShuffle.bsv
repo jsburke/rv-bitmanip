@@ -53,8 +53,7 @@ function ShuffleState fv_state_inc(ShuffleState s, ShuffleMode m);
 
 endfunction: fv_state_inc
 
-module mkShuffleIter (BitManip_IFC #(double_port, one_option))
-  provisos (SizedLiteral #(Bit #(one_option), 1));
+module mkShuffleIter (BitManip_IFC #(double_port, no_options));
 
   Reg #(BitXL)      rg_rs1     <- mkRegU;
   `ifdef RV32
@@ -150,17 +149,20 @@ module mkShuffleIter (BitManip_IFC #(double_port, one_option))
   //                       //
   ///////////////////////////  
 
-  method Action args_put (Vector #(double_port, BitXL) arg, Bit #(one_option) option) if (rg_state == Idle);
-    rg_mode    <= (unpack(option)) ? Unshuffle : Shuffle;
+  method Action args_put (Vector #(double_port, BitXL) arg, Bit #(no_options) option) if (rg_state == Idle);
 
     rg_rs1     <= arg[0];
-    let op_1    = arg[1][(log_xlen - 2):0];
-    rg_rs2     <= (unpack(option)) ? op_1 : reverseBits(op_1);
+
+    let is_unshfl = arg[1][0];
+    let op_1      = arg[1][(log_xlen - 1):1];
+
+    rg_rs2     <= (unpack(is_unshfl)) ? op_1 : reverseBits(op_1);
+    rg_mode    <= (unpack(is_unshfl)) ? Unshuffle : Shuffle;
 
     `ifdef RV32
-    rg_state   <= (unpack(option)) ? Calc_1 : Calc_8;
+    rg_state   <= (unpack(is_unshfl)) ? Calc_1 : Calc_8;
     `elsif RV64
-    rg_state   <= (unpack(option)) ? Calc_1 : Calc_16;
+    rg_state   <= (unpack(is_unshfl)) ? Calc_1 : Calc_16;
     `endif
   endmethod: args_put
 

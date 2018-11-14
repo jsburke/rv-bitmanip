@@ -17,11 +17,11 @@ TEST_VERBOSE = on # enables info to come out of tests
 ##                                             ##
 #################################################
 
-TEST_COUNT ?= 16  # Number of tests to run
+TEST_COUNT ?= 16    # Number of tests to run
 
 TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 
-INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+INSNS     = clz ctz pcnt andc slo sro rol ror grev shfl bext bdep
 LAUNCHERS = $(addprefix launch-, $(INSNS))
 
 #################################################
@@ -90,6 +90,11 @@ bram: utils $(TB_DIR)
 .PHONY: launch-%
 launch-%: %Tb bram
 	cd $(TB_DIR) && ./$*Tb
+
+.PHONY: launch-all
+launch-all: all
+	make $(LAUNCHERS)
+	make $(LAUNCHERS) XLEN=64
 
 .PHONY: test-all
 test-all: $(TB_DIR)
