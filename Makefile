@@ -91,6 +91,11 @@ bram: utils $(TB_DIR)
 launch-%: %Tb bram
 	cd $(TB_DIR) && ./$*Tb
 
+.PHONY: launch-all
+launch-all: all
+	make $(LAUNCHERS)
+	make $(LAUNCHERS) XLEN=64
+
 .PHONY: test-all
 test-all: $(TB_DIR)
 	$(MAKE) -C $(BSV) all $(BSC_FLAGS)
