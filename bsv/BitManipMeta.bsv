@@ -28,16 +28,6 @@ Integer log_xlen = valueOf(LOG_XLEN);
 typedef Bit #(XLEN)     BitXL;
 typedef Bit #(LOG_XLEN) BitXLog;
 
-// solo or paired source inputs
-Integer single_port = 1;
-Integer double_port = 2;
-
-// width for option selection
-// in modules
-Integer no_options  = 0;
-Integer one_option  = 1;
-Integer two_options = 2;
-
 /////////////////////////////////////////////////
 //                                             //
 //  BitManip Interface                         //
