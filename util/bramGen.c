@@ -152,12 +152,8 @@ int main(int argc, char *argv[]){
   xlen_hex_write("./grev.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
-    res[i] = shfl(rs1[i], rs2[i]);
+    res[i] = shuffle(rs1[i], rs2[i]);
   xlen_hex_write("./shfl.hex", res, no_entries);
-
-  for(int i = 0; i < no_entries; i++)
-    res[i] = unshfl(rs1[i], rs2[i]);
-  xlen_hex_write("./unshfl.hex", res, no_entries);
 
   return 0;
 }

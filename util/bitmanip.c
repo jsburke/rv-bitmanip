@@ -121,8 +121,8 @@ static xlen_t unshfl(xlen_t rs1, xlen_t rs2){
 #endif
 
 xlen_t shuffle(xlen_t rs1, xlen_t rs2){
-  // rs2 lsb for mode sel
-  // return shfl/unshfl(rs1, rs2 >> 1);
+  if(rs2 & 1) return unshfl(rs1, (rs2 >> 1));
+  else        return shfl  (rs1, (rs2 >> 1));
 }
 
 xlen_t bext(xlen_t rs1, xlen_t rs2){

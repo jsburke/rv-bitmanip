@@ -30,10 +30,7 @@ xlen_t bext(xlen_t rs1, xlen_t rs2);
 xlen_t bdep(xlen_t rs1, xlen_t rs2);
 
 // below insns are very bitwidth sensitive
-xlen_t grev  (xlen_t rs1, xlen_t rs2);
-
-xlen_t shfl  (xlen_t rs1, xlen_t rs2);
-xlen_t unshfl(xlen_t rs1, xlen_t rs2);
-
+xlen_t grev   (xlen_t rs1, xlen_t rs2);
+xlen_t shuffle(xlen_t rs1, xlen_t rs2);
 
 #endif //BITMANIP_H
