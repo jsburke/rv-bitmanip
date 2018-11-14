@@ -17,7 +17,7 @@ TEST_VERBOSE = on # enables info to come out of tests
 ##                                             ##
 #################################################
 
-TEST_COUNT ?= 16  # Number of tests to run
+TEST_COUNT ?= 16    # Number of tests to run
 
 TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 
