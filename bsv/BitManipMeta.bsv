@@ -6,8 +6,6 @@ package BitManipMeta;
 //                                             //
 /////////////////////////////////////////////////
 
-import Vector :: *;
-
 /////////////////////////////////////////////////
 //                                             //
 // Types and Aliases                           //
@@ -57,9 +55,9 @@ typedef enum {S_Idle,      // awaiting args
 `ifdef RV64                // shfl needs one less
              ,S_Stage_32
 `endif
-                        }  VarState deriving (Eq, Bits, FShow);
+                        }  IterState deriving (Eq, Bits, FShow);
 
-function VarState fv_grevNextState(VarState s);
+function IterState fv_grevNextState(IterState s);
   case(s) matches
     S_Stage_1  : return  S_Stage_2;
     S_Stage_2  : return  S_Stage_4;
@@ -72,7 +70,7 @@ function VarState fv_grevNextState(VarState s);
   endcase
 endfunction: fv_grevNextState
 
-function VarState fv_shflNextState(VarState s, Bool is_shfl);
+function IterState fv_shflNextState(IterState s, Bool is_shfl);
   if(is_shfl) begin // shuffle state progression
     case(s) matches
       `ifdef RV64
@@ -97,21 +95,21 @@ function VarState fv_shflNextState(VarState s, Bool is_shfl);
 endfunction: fv_shflNextState
 
 
-typedef enum {Idle, Calc} IterState deriving (Eq, Bits, FShow);
-
-interface BitManip_IFC #(numeric type no_args, numeric type opt_sz);
+interface BitManip_IFC; 
 
   (* always_ready *)
-  method Action args_put (Vector #(no_args, BitXL) arg, Bit #(opt_sz) option);
+  method Action args_put (BitXL arg0, 
+                          BitXL arg1
+                          `ifdef RV64
+                          ,Bool  is_OP32 //64 bit have the W instructions
+                          `endif
+                          );
 
   (* always_ready *)
   method Action kill;
 
-  (* always_ready *)
-  method Bool   valid_get;
-
-  (* always_ready *)
-  method BitXL  value_get;
+  (* always_ready *) method Bool   valid_get;
+  (* always_ready *) method BitXL  value_get;
 endinterface: BitManip_IFC
 
 endpackage: BitManipMeta
