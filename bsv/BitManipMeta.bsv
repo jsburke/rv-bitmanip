@@ -97,6 +97,13 @@ typedef enum {CLZ,
               BDEP,
               ANDC} BitManipOp deriving (Eq, Bits, FShow);
 
+// below function eases reading when we want to hook arg0 and arg1
+// unintuitively because collecting the result of clz, ctz, and pcnt
+// int rs1's reg is a little wonky
+function Bool fv_swap_args(BitManipOp op);
+  return ((op == CLZ) || (op == CTZ) || (op == PCNT));
+endfunction: fv_swap_args
+
 interface BitManip_IFC; 
   (* always_ready *)
   method Action args_put (BitXL      arg0, 
