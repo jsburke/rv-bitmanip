@@ -95,15 +95,15 @@ typedef enum {CLZ,
               SHFL,
               BEXT,
               BDEP,
-              ANDC} BitManipOperation deriving (Eq, Bits, FShow);
+              ANDC} BitManipOp deriving (Eq, Bits, FShow);
 
 interface BitManip_IFC; 
   (* always_ready *)
-  method Action args_put (BitXL    arg0, 
-                          BitXL    arg1,
-                          Bit #(4) op_sel // 11 possible ops, so 4 bits for coverage
+  method Action args_put (BitXL      arg0, 
+                          BitXL      arg1,
+                          BitManipOp op_sel // 11 possible ops, so 4 bits for coverage
                           `ifdef RV64
-                          ,Bool  is_OP32  //64 bit have the W instructions
+                          ,Bool  is_32bit //64 bit have the W instructions
                           `endif
                           );
 
