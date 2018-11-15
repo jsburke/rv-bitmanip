@@ -84,9 +84,9 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
-  BitXL   minus_1  = '1;
-  BitXL   high_set = (1 << (xlen - 1));
-  BitXL   low_set  = 1;
+  BitXL   minus_1 = '1;
+  BitXL   msb_set = (1 << (xlen - 1));
+  BitXL   lsb_set = 1;
 
   Bool is_right_shift_op = (rg_operation == CLZ)  ||
                            (rg_operation == CTZ)  ||
@@ -132,7 +132,7 @@ module mkBitManipIter (BitManip_IFC);
   // andc not handled here
 
   Bool terminate_right_shift = is_right_shift_op  && (exit_zero_count || exit_ones_count ||
-                                                     exit_shift_ones || exit_rot_shfl_grev);
+                                                      exit_shift_ones || exit_rot_shfl_grev);
   Bool terminate_left_shift  = is_left_shift_op   && (exit_shift_ones || exit_rot_shfl_grev);
 
   Bool terminate_grev        = exit_rot_shfl_grev && (rg_operation == GREV);
@@ -148,6 +148,12 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages CLZ, CTZ, PCNT, SRO, ROR
   rule rl_right_shifts (is_rule_right_shift);
+    if (terminate_right_shift) rg_state <= S_Idle;
+
+    // for ROR, we steal the lsb, otherwise we only care for SRO
+    let new_msb = (rg_operation == ROR) ? reverseBits(rg_res & lsb_set) : msb_set;
+
+    rg_res <= 
   endrule: rl_right_shifts
 
   // rule manages SLO and ROL
