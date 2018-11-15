@@ -59,15 +59,28 @@ endfunction: fv_state_init
 
 module mkBitManipIter (BitManip_IFC);
 
-  Reg #(BitXL)      rg_val1       <- mkRegU;
-  Reg #(BitXL)      rg_val2       <- mkRegU;
+  Reg #(BitXL)      rg_res         <- mkRegU;  // we'll accumulate a result here
+  Reg #(BitXL)      rg_control     <- mkRegU;  // determines modifications to rg_res, when to terminate 
 
-  Reg #(IterState)  rg_state     <- mkReg(Idle);
-  Reg #(BitManipOp) rg_operation <- mkRegU;
+  // Below registers are only used for bext and bdep
+  //
+  // rough correspondence with C impl in util
+  //
+  // rg_res         -- xlen_t r
+  // rg_control     -- rs2 (causes things controlled by C Impl's j to left shift)
+  // rg_pack_seed   -- one << [i,j]  // remembers shifts rather than applying as needed like C
+  // rg_pack_setter -- rs1
+
+  Reg #(BitXL)      rg_pack_seed   <- mkRegU;
+  Reg #(BitXL)      rg_pack_setter <- mkRegU;
+
+  // module operative control registers
+  Reg #(IterState)  rg_state       <- mkReg(S_Idle);
+  Reg #(BitManipOp) rg_operation   <- mkRegU;
 
   /////////////////////////
   //                     //
-  // Rules               //
+  // Rule Controls       //
   //                     //
   /////////////////////////
 
@@ -77,59 +90,65 @@ module mkBitManipIter (BitManip_IFC);
   BitXL   high_set = (1 << (xlen - 1));
   BitXL   low_set  = 1;
 
-  Bool is_right_shift_op = (rg_state == S_Calc) && ((rg_operation == SRO)  || 
-                                                    (rg_operation == ROR)); 
+  Bool is_right_shift_op = (rg_operation == CLZ)  ||
+                           (rg_operation == CTZ)  ||
+                           (rg_operation == PCNT) ||
+                           (rg_operation == SRO)  ||
+                           (rg_operation == ROR);
 
-  Bool right_shift_exit  = (rg_state == S_Calc) && ((rg_val2 == 0)         ||
-                                                    ((rg_val1 == minus_1) && (rg_operation == ROR)));
- 
-  Bool is_left_shift_op  = (rg_state == S_Calc) && ((rg_operation == SLO)  || 
-                                                    (rg_operation == ROL)); 
-
-  Bool left_shift_exit   = (rg_state == S_Calc) && ((rg_val2 == 0)         ||
-                                                    ((rg_val1 == minus_1) && (rg_operation == ROL)));
+  Bool is_left_shift_op  = (rg_operation == SLO)  ||
+                           (rg_operation == ROL);
   
-  Bool is_count_op       = (rg_state == S_Calc) && ((rg_operation == CLZ)   ||
-                                                    (rg_operation == CTZ)   ||
-                                                    (rg_operation == PCNT));
 
-  // below needs fixing...
-  Bool count_exit        = (rg_state == S_Calc) && ((unpack(rg_val2[0]))    || 
-                                                    (rg_val1 == fromInteger(xlen)));
+  Bool is_rule_right_shift = (rg_state != S_IDLE) && is_right_shift_op;
+  Bool is_rule_left_shift  = (rg_state != S_IDLE) && is_left_shift_op;
 
-  rule rl_count (is_count_op);
-    if(count_exit) rg_state <= S_Idle;
-    rg_val2 <= rg_val2 >> 1;
-    rg_val1 <= // find a clever way when not tired
-  endrule: rl_count
+  // NB: some exit conditions are honestly early exit (ie: grev, shuffles)
+  //             exit          if bit we see is 1    OR  result saturates at XLEN
+  Bool exit_zero_count     = ((unpack(rg_control[0])) || (rg_res == fromInteger(xlen))) && 
+                             ((rg_operation == CLZ) || (rg_operation == CTZ));
+
+  //             exit         if rs1 becomes 0 OR  result saturates
+  Bool exit_ones_count     = (rg_control == 0) || (rg_res == fromInteger(xlen)) &&
+                             (rg_operation == PCNT);
+
+  //             exit         if res saturates   OR  control is depleted
+  Bool exit_shift_ones     = (rg_res == minus_1) || (rg_control == 0) &&
+                             ((rg_operation == SRO) || (rg_operation == SLO));
+
+  //             exit         when control depletes
+  Bool exit_rot_shfl_grev  = (rg_control == 0) &&
+                             ((rg_operation == SHFL) || (rg_operation == UNSHFL) || 
+                              (rg_operation == ROR)  || (rg_operation == ROL)    ||
+                              (rg_operation == GREV));  
+
+  //             exit         when either reg assoc with rs1 or rs2 depletes
+  Bool exit_bext_bdep      = (r_control == 0) || (rg_pack_setter == 0) &&
+                             ((rg_operation == BEXT) || (rg_operation == BDEP)); 
+
+  // andc not handled here
+
+  Bool terminate_right_shift = is_right_shift_op  && (exit_zero_count || exit_ones_count ||
+                                                     exit_shift_ones || exit_rot_shfl_grev);
+  Bool terminate_left_shift  = is_left_shift_op   && (exit_shift_ones || exit_rot_shfl_grev);
+
+  Bool terminate_grev        = exit_rot_shfl_grev && (rg_operation == GREV);
+  Bool terminate_shfl        = exit_rot_shfl_grev && ((rg_operation == SHFL) || 
+                                                      (rg_operation == UNSHFL));
+  Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
+                                                      (rg_operation == BDEP));
+  /////////////////////////
+  //                     //
+  // Rules               //
+  //                     //
+  /////////////////////////
 
   rule rl_right_shifts (is_right_shift_op);
-    if(right_shift_exit) rg_state <= S_Idle;
-    else begin
-      rg_val2 <= rg_val2 - 1;
-
-      let val1_shift = rg_val1 >> 1;
-
-      //                                    SRO        ROR 
-      let new_msb    = (rg_operation == SRO) high_set : (rg_val1[0] << (xlen - 1));
-
-      rg_val1 <= val1_shift | new_msb
-    end    
   endrule: rl_right_shifts
 
 
 
   rule rl_left_shifts (is_left_shift_op);
-    if(left_shift_exit) rg_state <= S_Idle;
-    else begin
-      rg_val2 <= rg_val2 - 1;
-
-      let val1_shift = rg_val1 << 1;
-      //
-      let new_lsb    = (rg_operation == SLO) low_set : (rg_val1 >> (xlen - 1));
-
-      rg_val1 <= val1_shift | new_lsb;
-    end
   endrule: rl_left_shifts
 
   /////////////////////////
@@ -143,10 +162,6 @@ module mkBitManipIter (BitManip_IFC);
                           ,Bool is_32bit
                          `endif
                           );
-
-    // swap the args from expected on clz, ctz, and pcnt for output ease
-    rg_val1      <= (fv_swap_args(op_sel)) ? arg1 : arg0;
-    rg_val2      <= (fv_swap_args(op_sel)) ? arg0 : arg1;
 
     rg_operation <= op_sel;
     rg_state     <= fv_state_init(op_sel, unpack(arg1[0])); 
