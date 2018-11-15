@@ -52,7 +52,7 @@ function IterState fv_state_init(BitManipOp op, Bool arg1_lsb);
     `endif
     BEXT     : return S_Calc;
     BDEP     : return S_Calc;
-    ANDC     : return S_Idle;
+    ANDC     : return S_Idle; // andc not managed here
     default  : return S_Idle;
   endcase
 endfunction: fv_state_init
@@ -84,8 +84,6 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
-  Integer int_msb  = xlen - 1; // probably gets messy witgh RV64 coming in
-
   BitXL   minus_1  = '1;
   BitXL   high_set = (1 << (xlen - 1));
   BitXL   low_set  = 1;
@@ -100,8 +98,13 @@ module mkBitManipIter (BitManip_IFC);
                            (rg_operation == ROL);
   
 
-  Bool is_rule_right_shift = (rg_state != S_IDLE) && is_right_shift_op;
-  Bool is_rule_left_shift  = (rg_state != S_IDLE) && is_left_shift_op;
+  Bool is_rule_right_shift = (rg_state != S_IDLE) &&  is_right_shift_op;
+  Bool is_rule_left_shift  = (rg_state != S_IDLE) &&  is_left_shift_op;
+  Bool is_rule_grev        = (rg_state != S_IDLE) &&  (rg_operation == GREV);
+  Bool is_rule_shfl        = (rg_state != S_IDLE) && ((rg_operation == SHFL) || 
+                                                      (rg_operation == UNSHFL));
+  Bool is_rule_bext_bdep   = (rg_state != S_IDLE) && ((rg_operation == BEXT) || 
+                                                      (rg_operation == BDEP));
 
   // NB: some exit conditions are honestly early exit (ie: grev, shuffles)
   //             exit          if bit we see is 1    OR  result saturates at XLEN
@@ -143,13 +146,26 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
-  rule rl_right_shifts (is_right_shift_op);
+  // rule manages CLZ, CTZ, PCNT, SRO, ROR
+  rule rl_right_shifts (is_rule_right_shift);
   endrule: rl_right_shifts
 
-
-
-  rule rl_left_shifts (is_left_shift_op);
+  // rule manages SLO and ROL
+  rule rl_left_shifts (is_rule_left_shift);
   endrule: rl_left_shifts
+
+  // rule manages GREV
+  rule rl_grev (is_rule_grev);
+  endrule: rl_grev
+
+  // rule manages SHFL and UNSHFL
+  rule rl_shfl (is_rule_shfl);
+  endrule: rl_shfl
+
+  // rule manages BEXT and BDEP
+  rule rl_bext_bdep (is_rule_bext_bdep);
+  endrule: rl_bext_bdep
+
 
   /////////////////////////
   //                     //
@@ -162,6 +178,14 @@ module mkBitManipIter (BitManip_IFC);
                           ,Bool is_32bit
                          `endif
                           );
+
+    rg_res     <= fv_result_init  (op_sel, arg0);
+    rg_control <= fv_control_init (op_sel, arg0, arg1);
+
+    // assigning the below in a slightly sloppy fashion since
+    // only the packe operations utilize them
+    rg_pack_seed   <= 1;
+    rg_pack_setter <= arg0;
 
     rg_operation <= op_sel;
     rg_state     <= fv_state_init(op_sel, unpack(arg1[0])); 
