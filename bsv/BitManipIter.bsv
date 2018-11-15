@@ -71,17 +71,66 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
-  Bool is_right_shift_op = (rg_state == S_Calc) && ((rg_operation == CTZ)  || 
-                                                    (rg_operation == PCNT) || 
-                                                    (rg_operation == SRO)  || 
+  Integer int_msb  = xlen - 1; // probably gets messy witgh RV64 coming in
+
+  BitXL   minus_1  = '1;
+  BitXL   high_set = (1 << (xlen - 1));
+  BitXL   low_set  = 1;
+
+  Bool is_right_shift_op = (rg_state == S_Calc) && ((rg_operation == SRO)  || 
                                                     (rg_operation == ROR)); 
+
+  Bool right_shift_exit  = (rg_state == S_Calc) && ((rg_val2 == 0)         ||
+                                                    ((rg_val1 == minus_1) && (rg_operation == ROR)));
  
-  Bool is_left_shift_op  = (rg_state == S_Calc) && ((rg_operation == CLZ)  || 
-                                                    (rg_operation == SLO)  || 
+  Bool is_left_shift_op  = (rg_state == S_Calc) && ((rg_operation == SLO)  || 
                                                     (rg_operation == ROL)); 
- 
-  rule rl_calc_right_shifts (is_right_shift_op);
-  endrule: rl_calc_right_shifts
+
+  Bool left_shift_exit   = (rg_state == S_Calc) && ((rg_val2 == 0)         ||
+                                                    ((rg_val1 == minus_1) && (rg_operation == ROL)));
+  
+  Bool is_count_op       = (rg_state == S_Calc) && ((rg_operation == CLZ)   ||
+                                                    (rg_operation == CTZ)   ||
+                                                    (rg_operation == PCNT));
+
+  // below needs fixing...
+  Bool count_exit        = (rg_state == S_Calc) && ((unpack(rg_val2[0]))    || 
+                                                    (rg_val1 == fromInteger(xlen)));
+
+  rule rl_count (is_count_op);
+    if(count_exit) rg_state <= S_Idle;
+    rg_val2 <= rg_val2 >> 1;
+    rg_val1 <= // find a clever way when not tired
+  endrule: rl_count
+
+  rule rl_right_shifts (is_right_shift_op);
+    if(right_shift_exit) rg_state <= S_Idle;
+    else begin
+      rg_val2 <= rg_val2 - 1;
+
+      let val1_shift = rg_val1 >> 1;
+
+      //                                    SRO        ROR 
+      let new_msb    = (rg_operation == SRO) high_set : (rg_val1[0] << (xlen - 1));
+
+      rg_val1 <= val1_shift | new_msb
+    end    
+  endrule: rl_right_shifts
+
+
+
+  rule rl_left_shifts (is_left_shift_op);
+    if(left_shift_exit) rg_state <= S_Idle;
+    else begin
+      rg_val2 <= rg_val2 - 1;
+
+      let val1_shift = rg_val1 << 1;
+      //
+      let new_lsb    = (rg_operation == SLO) low_set : (rg_val1 >> (xlen - 1));
+
+      rg_val1 <= val1_shift | new_lsb;
+    end
+  endrule: rl_left_shifts
 
   /////////////////////////
   //                     //
@@ -95,8 +144,10 @@ module mkBitManipIter (BitManip_IFC);
                          `endif
                           );
 
-    rg_val1      <= arg0;
-    rg_val2      <= arg1;
+    // swap the args from expected on clz, ctz, and pcnt for output ease
+    rg_val1      <= (fv_swap_args(op_sel)) ? arg1 : arg0;
+    rg_val2      <= (fv_swap_args(op_sel)) ? arg0 : arg1;
+
     rg_operation <= op_sel;
     rg_state     <= fv_state_init(op_sel, unpack(arg1[0])); 
 
