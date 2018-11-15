@@ -30,7 +30,7 @@ typedef Bit #(LOG_XLEN) BitXLog;
 
 /////////////////////////////////////////////////
 //                                             //
-//  BitManip Interface                         //
+//  BitManip Enums and Aux Functions           //
 //                                             //
 /////////////////////////////////////////////////
 
@@ -47,8 +47,8 @@ typedef enum {S_Idle,      // awaiting args
 `endif
                         }  IterState deriving (Eq, Bits, FShow);
 
-function IterState fv_grevNextState(IterState s);
-  case(s) matches
+function IterState fv_grevNextState (IterState s);
+  case (s) matches
     S_Stage_1  : return  S_Stage_2;
     S_Stage_2  : return  S_Stage_4;
     S_Stage_4  : return  S_Stage_8;
@@ -60,9 +60,9 @@ function IterState fv_grevNextState(IterState s);
   endcase
 endfunction: fv_grevNextState
 
-function IterState fv_shflNextState(IterState s, Bool is_shfl);
+function IterState fv_shflNextState (IterState s, Bool is_shfl);
   if(is_shfl) begin // shuffle state progression
-    case(s) matches
+    case (s) matches
       `ifdef RV64
       S_Stage_16 : return  S_Stage_8;
       `endif
@@ -72,7 +72,7 @@ function IterState fv_shflNextState(IterState s, Bool is_shfl);
       default    : return     S_Idle;
     endcase
   end else begin // Unshuffle state progression 
-    case(s) matches
+    case (s) matches
       S_Stage_1  : return  S_Stage_2;
       S_Stage_2  : return  S_Stage_4;
       S_Stage_4  : return  S_Stage_8;
@@ -98,12 +98,11 @@ typedef enum {CLZ,
               BDEP,
               ANDC} BitManipOp deriving (Eq, Bits, FShow);
 
-// below function eases reading when we want to hook arg0 and arg1
-// unintuitively because collecting the result of clz, ctz, and pcnt
-// int rs1's reg is a little wonky
-function Bool fv_swap_args(BitManipOp op);
-  return ((op == CLZ) || (op == CTZ) || (op == PCNT));
-endfunction: fv_swap_args
+/////////////////////////////////////////////////
+//                                             //
+//  BitManip Interfaces and Funcitons          //
+//                                             //
+/////////////////////////////////////////////////
 
 interface BitManip_IFC; 
   (* always_ready *)
@@ -121,5 +120,30 @@ interface BitManip_IFC;
   (* always_ready *) method Bool   valid_get;
   (* always_ready *) method BitXL  value_get;
 endinterface: BitManip_IFC
+
+// functions to set registers in the modules on args_put
+// question: put these in BitManipIter.bsv???
+function BitXL fv_result_init (BitManipOp op, BitXL arg0);
+  let is_zero_init = (op == CLZ) || (op == CTZ) || (op == PCNT) || (op == BEXT) || (op == BDEP);
+  return (is_zero_init) ? 0 : arg0; // not super worried about how andc behaves here...
+endfunction: fv_result_init
+
+function BitXL fv_control_init (BitManipOp op, BitXL arg0, BitXL arg1);
+  case (op) matches
+    CLZ     : return reverseBits(arg0);
+    CTZ     : return arg0;
+    PCNT    : return arg0;
+    SRO     : return arg1[(log_xlen - 1) : 0];
+    SLO     : return arg1[(log_xlen - 1) : 0];
+    ROR     : return arg1[(log_xlen - 1) : 0];
+    ROL     : return arg1[(log_xlen - 1) : 0];
+    GREV    : return arg1[(log_xlen - 1) : 0];
+    SHFL    : return arg1[(log_xlen - 2) : 0];
+    UNSHFL  : return arg1[(log_xlen - 2) : 0];
+    BEXT    : return arg1;
+    BDEP    : return arg1;
+    default : return 0; // expecting andc, want this to be poor behaving
+  endcase
+endfunction
 
 endpackage: BitManipMeta
