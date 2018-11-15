@@ -93,6 +93,7 @@ typedef enum {CLZ,
               ROL,
               GREV,
               SHFL,
+              UNSHFL,
               BEXT,
               BDEP,
               ANDC} BitManipOp deriving (Eq, Bits, FShow);
