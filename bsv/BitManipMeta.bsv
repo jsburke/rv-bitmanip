@@ -30,7 +30,7 @@ typedef Bit #(LOG_XLEN) BitXLog;
 
 /////////////////////////////////////////////////
 //                                             //
-//  Grev and Shuffle and Masks                 //
+//  Grev and Shuffle Masks and Functions       //
 //                                             //
 /////////////////////////////////////////////////
 
@@ -98,6 +98,12 @@ BitXL shfl_right_s8  = 64'h0000FF00_0000FF00;
 BitXL shfl_left_s16  = 64'h0000FFFF_00000000;
 BitXL shfl_right_s16 = 64'h00000000_FFFF0000;
 `endif
+
+// pretty much calque the C code in spec
+function BitXL fv_shuffleStage(BitXL src, BitXL mask_left, BitXL mask_right, BitXLog shamt);
+  let x = src & ~(mask_left | mask_right);
+  return x | (((src << shamt) & mask_left) | ((src >> shamt) & mask_right));
+endfunction: fv_shuffle_stage
 
 /////////////////////////////////////////////////
 //                                             //
