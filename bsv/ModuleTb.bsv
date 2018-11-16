@@ -16,6 +16,7 @@ import Vector       :: *;
 /////////////////////////////////////////////////
 
 import TbMeta       :: *;
+import BitManipMeta :: *;
 import BitManipIter :: *;  // likely to be ifdeffed as other modules are made
 
 /////////////////////////////////////////////////
@@ -64,21 +65,21 @@ module mkModuleTb (Empty);
   Reg #(BitXL)      rg_rd          <- mkRegU;
   Reg #(BitXL)      rg_dut_res     <- mkRegU;
 
-  BRAM_PORT #(Bramentry, BitXL) rs1    <- mkBRAMCore1Load(bram_entries, False, rs1_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) rs2    <- mkBRAMCore1Load(bram_entries, False, rs2_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) rs1    <- mkBRAMCore1Load(bram_entries, False, rs1_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) rs2    <- mkBRAMCore1Load(bram_entries, False, rs2_file   , False);
 
-  BRAM_PORT #(Bramentry, BitXL) clz    <- mkBRAMCore1Load(bram_entries, False, clz_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) ctz    <- mkBRAMCore1Load(bram_entries, False, ctz_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) pcnt   <- mkBRAMCore1Load(bram_entries, False, pcnt_file  , False);
-  BRAM_PORT #(Bramentry, BitXL) sro    <- mkBRAMCore1Load(bram_entries, False, sro_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) slo    <- mkBRAMCore1Load(bram_entries, False, slo_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) ror    <- mkBRAMCore1Load(bram_entries, False, ror_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) rol    <- mkBRAMCore1Load(bram_entries, False, rol_file   , False);
-  BRAM_PORT #(Bramentry, BitXL) grev   <- mkBRAMCore1Load(bram_entries, False, grev_file  , False);
-  BRAM_PORT #(Bramentry, BitXL) shfl   <- mkBRAMCore1Load(bram_entries, False, shfl_file  , False);
-  BRAM_PORT #(Bramentry, BitXL) unshfl <- mkBRAMCore1Load(bram_entries, False, unshfl_file, False);
-  BRAM_PORT #(Bramentry, BitXL) bext   <- mkBRAMCore1Load(bram_entries, False, bext_file  , False);
-  BRAM_PORT #(Bramentry, BitXL) bdep   <- mkBRAMCore1Load(bram_entries, False, bdep_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) clz    <- mkBRAMCore1Load(bram_entries, False, clz_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) ctz    <- mkBRAMCore1Load(bram_entries, False, ctz_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) pcnt   <- mkBRAMCore1Load(bram_entries, False, pcnt_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) sro    <- mkBRAMCore1Load(bram_entries, False, sro_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) slo    <- mkBRAMCore1Load(bram_entries, False, slo_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) ror    <- mkBRAMCore1Load(bram_entries, False, ror_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) rol    <- mkBRAMCore1Load(bram_entries, False, rol_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) grev   <- mkBRAMCore1Load(bram_entries, False, grev_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) shfl   <- mkBRAMCore1Load(bram_entries, False, shfl_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) unshfl <- mkBRAMCore1Load(bram_entries, False, unshfl_file, False);
+  BRAM_PORT #(BramEntry, BitXL) bext   <- mkBRAMCore1Load(bram_entries, False, bext_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) bdep   <- mkBRAMCore1Load(bram_entries, False, bdep_file  , False);
 
   BitManip_IFC dut <- mkBitManipIter;
 
@@ -135,20 +136,19 @@ module mkModuleTb (Empty);
     rg_rs1 <= arg0;
     rg_rs2 <= arg1;
 
-    case (rg_operation) matches
-      CLZ    : let res = clz.read;
-      CTZ    : let res = ctz.read;
-      PCNT   : let res = pcnt.read;
-      SRO    : let res = sro.read;
-      SLO    : let res = slo.read;
-      ROR    : let res = ror.read;
-      ROL    : let res = rol.read;
-      GREV   : let res = grev.read;
-      SHFL   : let res = shfl.read;
-      UNSHFL : let res = unshfl.read;
-      BEXT   : let res = bext.read;
-      BDEP   : let res = bdep.read;
-    endcase
+    let res = (rg_operation == CLZ)    ? clz.read    :
+              (rg_operation == CTZ)    ? ctz.read    :
+              (rg_operation == PCNT)   ? pcnt.read   :
+              (rg_operation == SRO)    ? sro.read    :
+              (rg_operation == SLO)    ? slo.read    :
+              (rg_operation == ROR)    ? ror.read    :
+              (rg_operation == ROL)    ? rol.read    :
+              (rg_operation == GREV)   ? grev.read   :
+              (rg_operation == SHFL)   ? shfl.read   :
+              (rg_operation == UNSHFL) ? unshfl.read :
+              (rg_operation == BEXT)   ? bext.read   :
+              (rg_operation == BDEP)   ? bdep.read   :
+              0; 
 
     rg_rd <= res;
 
