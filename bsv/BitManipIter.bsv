@@ -240,6 +240,24 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages SHFL and UNSHFL
   rule rl_shfl (is_rule_shfl);
+    if (terminate_shfl) rg_state <= S_Idle;
+    else begin
+      rg_control <= rg_control >> 1;
+      rg_state   <= fv_shflNextState(rg_state, (rg_operation == SHFL));
+
+      case (rg_state) matches
+        S_Stage_1  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s1, shfl_right_s1, 1);
+        S_Stage_2  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s2, shfl_right_s2, 2);
+        S_Stage_4  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s4, shfl_right_s4, 4);
+        S_Stage_8  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s8, shfl_right_s8, 8);
+        `ifdef RV64
+        S_Stage_16 : let shuffle = fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16);
+        `endif
+        default    : let shuffle = rg_res; // feels like a safe cop out
+      endcase
+
+      rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
+    end
   endrule: rl_shfl
 
 
