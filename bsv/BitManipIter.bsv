@@ -60,7 +60,7 @@ endfunction: fv_state_init
 module mkBitManipIter (BitManip_IFC);
 
   Reg #(BitXL)      rg_res         <- mkRegU;  // we'll accumulate a result here
-  Reg #(BitXL)      rg_control     <- mkRegU;  // determines modifications to rg_res, when to terminate 
+  Reg #(BitXL)      rg_control     <- mkRegU;  // normly lsb says rg_res changes,  when to terminate 
 
   // Below registers are only used for bext and bdep
   //
@@ -98,12 +98,13 @@ module mkBitManipIter (BitManip_IFC);
                            (rg_operation == ROL);
   
 
-  Bool is_rule_right_shift = (rg_state != S_IDLE) &&  is_right_shift_op;
-  Bool is_rule_left_shift  = (rg_state != S_IDLE) &&  is_left_shift_op;
-  Bool is_rule_grev        = (rg_state != S_IDLE) &&  (rg_operation == GREV);
-  Bool is_rule_shfl        = (rg_state != S_IDLE) && ((rg_operation == SHFL) || 
-                                                      (rg_operation == UNSHFL));
-  Bool is_rule_bext_bdep   = (rg_state != S_IDLE) && ((rg_operation == BEXT) || 
+  Bool is_rule_right_shift =  (rg_state == S_Calc) &&  is_right_shift_op;
+  Bool is_rule_left_shift  =  (rg_state == S_Calc) &&  is_left_shift_op;
+  Bool is_rule_grev        = ((rg_state != S_Idle) && (rg_state != S_Calc)) &&
+                              (rg_operation == GREV);
+  Bool is_rule_shfl        = ((rg_state != S_Idle) && (rg_state != S_Calc)) && 
+                             ((rg_operation == SHFL) || (rg_operation == UNSHFL));
+  Bool is_rule_bext_bdep   =  (rg_state == S_Calc) && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
 
   // NB: some exit conditions are honestly early exit (ie: grev, shuffles)
@@ -195,10 +196,36 @@ module mkBitManipIter (BitManip_IFC);
 
       // next we apply shifts and masks per state we're in and if the lsb is set
       case (rg_state) matches
-        S_Stage_1 : begin
-                      let left_mask  = grev_left_s1;
-                      let right_mask = grev_right_s1;
-                    end
+        S_Stage_1  : begin
+                       let left_mask  = grev_left_s1;
+                       let right_mask = grev_right_s1;
+                     end
+        S_Stage_2  : begin
+                       let left_mask  = grev_left_s2;
+                       let right_mask = grev_right_s2;
+                     end
+        S_Stage_4  : begin
+                       let left_mask  = grev_left_s4;
+                       let right_mask = grev_right_s4;
+                     end
+        S_Stage_8  : begin
+                       let left_mask  = grev_left_s8;
+                       let right_mask = grev_right_s8;
+                     end
+        S_Stage_16 : begin
+                       let left_mask  = grev_left_s1;
+                       let right_mask = grev_right_s1;
+                     end
+        `ifdef RV64
+        S_Stage_32 : begin
+                       let left_mask  = grev_left_s32;
+                       let right_mask = grev_right_s32;
+                     end
+        `endif
+        default    : begin // should be impossible
+                       let left_mask  = '0;
+                       let right_mask = '0;
+                     end
       endcase
 
       let left  = (rg_res & left_mask)  << rg_seed;
