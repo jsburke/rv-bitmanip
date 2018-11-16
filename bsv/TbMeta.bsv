@@ -1,4 +1,4 @@
-package metaTb;
+package TbMeta;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -38,4 +38,4 @@ Integer log_bram_entries = valueOf(LOG_BRAM_ENTRIES);
 typedef Bit #(LOG_BRAM_ENTRIES) BramEntry;
 
 /////////////////////////////////////////////////
-endpackage: metaTb
+endpackage: TbMeta
