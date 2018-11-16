@@ -91,7 +91,7 @@ module mkModuleTb (Empty);
 
   rule tb_op_init (rg_state == Op_Init);
     `ifdef TEST_VERBOSE
-    $display("----- Begin Tests for ", fshow(rg_operation));
+    $display("----- Begin Tests for ", fshow(fv_nextOp(rg_operation)));
     `endif 
 
     rg_operation <= fv_nextOp(rg_operation);
