@@ -146,14 +146,27 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
+  // contol sigs for rl_right_shifts
+  Bool is_zero_count = (rg_operation == CLZ)  || (rg_operation == CTZ);
+  Bool is_pcnt_inc   = (rg_operation == PCNT) && (unpack(rg_control[0]));
+  Bool is_ror_sro    = (rg_operation == ROR)  || (rg_operation == SRO);
+
   // rule manages CLZ, CTZ, PCNT, SRO, ROR
   rule rl_right_shifts (is_rule_right_shift);
     if (terminate_right_shift) rg_state <= S_Idle;
+    else begin
+      // for ROR, we steal the lsb, otherwise we only care for SRO
+      let new_msb = (rg_operation == ROR) ? reverseBits(rg_res & lsb_set) : msb_set;
 
-    // for ROR, we steal the lsb, otherwise we only care for SRO
-    let new_msb = (rg_operation == ROR) ? reverseBits(rg_res & lsb_set) : msb_set;
+      // increment rg_res if zero counts are going or pcnt has a set bit
+      // use earlier new_mb for sro and ror
+      // leave it be if pcnt does not have a set bit
+      rg_res <= (is_zero_count || is_pcnt_inc) ? rg_res + 1 :
+                (is_ror_sro)                   ? ((rg_res >> 1) | new_msb) : 
+                                                 rg_res;
 
-    rg_res <= 
+      rg_control <= (is_ror_sro) ? (rg_control - 1) : (rg_control >> 1);
+    end
   endrule: rl_right_shifts
 
   // rule manages SLO and ROL
