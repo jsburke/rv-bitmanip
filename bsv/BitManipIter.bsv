@@ -141,6 +141,9 @@ module mkBitManipIter (BitManip_IFC);
                                                       (rg_operation == UNSHFL));
   Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
+
+  Bool result_valid          = terminate_right_shift || terminate_left_shift || terminate_grev ||
+                               terminate_shfl        || terminate_bext_bdep;
   /////////////////////////
   //                     //
   // Rules               //
@@ -289,7 +292,7 @@ module mkBitManipIter (BitManip_IFC);
                          `ifdef RV64
                           ,Bool is_32bit
                          `endif
-                          );
+                          ) if (rg_state == S_Idle);
 
     rg_res     <= fv_result_init  (op_sel, arg0);
     rg_control <= fv_control_init (op_sel, arg0, arg1);
@@ -309,11 +312,11 @@ module mkBitManipIter (BitManip_IFC);
   endmethod: kill
 
   method Bool valid_get;
-    return False;
+    return result_valid;
   endmethod: valid_get
 
   method BitXL value_get;
-    return rg_val1;
+    return rg_res;
   endmethod: value_get
 
 endmodule: mkBitManipIter
