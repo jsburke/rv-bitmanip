@@ -103,7 +103,7 @@ BitXL shfl_right_s16 = 64'h00000000_FFFF0000;
 function BitXL fv_shuffleStage(BitXL src, BitXL mask_left, BitXL mask_right, BitXLog shamt);
   let x = src & ~(mask_left | mask_right);
   return x | (((src << shamt) & mask_left) | ((src >> shamt) & mask_right));
-endfunction: fv_shuffle_stage
+endfunction: fv_shuffleStage
 
 /////////////////////////////////////////////////
 //                                             //

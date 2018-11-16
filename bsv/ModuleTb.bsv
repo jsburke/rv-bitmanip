@@ -205,4 +205,4 @@ module mkModuleTb (Empty);
 
 endmodule: mkModuleTb
 
-endpackage: ModuleTb;
+endpackage: ModuleTb
