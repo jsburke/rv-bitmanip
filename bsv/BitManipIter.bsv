@@ -44,7 +44,7 @@ function IterState fv_state_init(BitManipOp op, Bool arg1_lsb);
     SLO      : return S_Calc;
     ROR      : return S_Calc;
     ROL      : return S_Calc;
-    GREV     : return S_State_1;
+    GREV     : return S_Stage_1;
     `ifdef RV32  // this shuffle portion will likely get messy...
     SHFL     : return (arg1_lsb) ? S_Stage_1 : S_Stage_8;
     `elsif RV64
