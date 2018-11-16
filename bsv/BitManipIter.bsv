@@ -198,38 +198,25 @@ module mkBitManipIter (BitManip_IFC);
       rg_seed    <= rg_seed << 1;
 
       // next we apply shifts and masks per state we're in and if the lsb is set
-      case (rg_state) matches
-        S_Stage_1  : begin
-                       let left_mask  = grev_left_s1;
-                       let right_mask = grev_right_s1;
-                     end
-        S_Stage_2  : begin
-                       let left_mask  = grev_left_s2;
-                       let right_mask = grev_right_s2;
-                     end
-        S_Stage_4  : begin
-                       let left_mask  = grev_left_s4;
-                       let right_mask = grev_right_s4;
-                     end
-        S_Stage_8  : begin
-                       let left_mask  = grev_left_s8;
-                       let right_mask = grev_right_s8;
-                     end
-        S_Stage_16 : begin
-                       let left_mask  = grev_left_s1;
-                       let right_mask = grev_right_s1;
-                     end
-        `ifdef RV64
-        S_Stage_32 : begin
-                       let left_mask  = grev_left_s32;
-                       let right_mask = grev_right_s32;
-                     end
-        `endif
-        default    : begin // should be impossible
-                       let left_mask  = '0;
-                       let right_mask = '0;
-                     end
-      endcase
+      let left_mask  = (rg_state == S_Stage_1)  ? grev_left_s1 :
+                       (rg_state == S_Stage_2)  ? grev_left_s2 :
+                       (rg_state == S_Stage_4)  ? grev_left_s4 :
+                       (rg_state == S_Stage_8)  ? grev_left_s8 :
+                       (rg_state == S_Stage_16) ? grev_left_s16:
+                       `ifdef RV64
+                       (rg_state == S_Stage_32) ? grev_left_s32 :
+                       `endif
+                       0;
+
+      let right_mask = (rg_state == S_Stage_1)  ? grev_right_s1 :
+                       (rg_state == S_Stage_2)  ? grev_right_s2 :
+                       (rg_state == S_Stage_4)  ? grev_right_s4 :
+                       (rg_state == S_Stage_8)  ? grev_right_s8 :
+                       (rg_state == S_Stage_16) ? grev_right_s16:
+                       `ifdef RV64
+                       (rg_state == S_Stage_32) ? grev_right_s32 :
+                       `endif
+                       0;
 
       let left  = (rg_res & left_mask)  << rg_seed;
       let right = (rg_res & right_mask) >> rg_seed;
@@ -248,16 +235,14 @@ module mkBitManipIter (BitManip_IFC);
       rg_control <= rg_control >> 1;
       rg_state   <= fv_shflNextState(rg_state, (rg_operation == SHFL));
 
-      case (rg_state) matches
-        S_Stage_1  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s1, shfl_right_s1, 1);
-        S_Stage_2  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s2, shfl_right_s2, 2);
-        S_Stage_4  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s4, shfl_right_s4, 4);
-        S_Stage_8  : let shuffle = fv_shuffleStage(rg_res, shfl_left_s8, shfl_right_s8, 8);
-        `ifdef RV64
-        S_Stage_16 : let shuffle = fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16);
-        `endif
-        default    : let shuffle = rg_res; // feels like a safe cop out
-      endcase
+     let shuffle = (rg_state == S_Stage_1)  ? fv_shuffleStage(rg_res, shfl_left_s1,  shfl_right_s1,  1) :
+                   (rg_state == S_Stage_2)  ? fv_shuffleStage(rg_res, shfl_left_s2,  shfl_right_s2,  2) :
+                   (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
+                   (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
+                   `ifdef RV64
+                   (S_Stage_16) ? fv_ShuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
+                   `endif
+                   rg_res;  // safe defalut??
 
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
     end
