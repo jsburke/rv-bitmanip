@@ -59,8 +59,8 @@ endfunction: fv_state_init
 
 module mkBitManipIter (BitManip_IFC);
 
-  Reg #(BitXL)      rg_res         <- mkRegU;  // we'll accumulate a result here
-  Reg #(BitXL)      rg_control     <- mkRegU;  // normly lsb says rg_res changes,  when to terminate 
+  Reg #(BitXL)      rg_res       <- mkRegU;  // we'll accumulate a result here
+  Reg #(BitXL)      rg_control   <- mkRegU;  // normly lsb says rg_res changes,  when to terminate 
 
   // Below registers are only used for bext and bdep
   //
@@ -69,14 +69,14 @@ module mkBitManipIter (BitManip_IFC);
   // rg_res         -- xlen_t r
   // rg_control     -- rs2 (causes things controlled by C Impl's j to left shift)
   // rg_seed        -- one << [i,j]  // remembers shifts rather than applying as needed like C
-  // rg_pack_setter -- rs1
+  // rg_setter      -- rs1
 
-  Reg #(BitXL)      rg_seed        <- mkRegU;  // also manages shifts in grev
-  Reg #(BitXL)      rg_pack_setter <- mkRegU;
+  Reg #(BitXL)      rg_seed      <- mkRegU;  // also manages shifts in grev
+  Reg #(BitXL)      rg_setter    <- mkRegU;
 
   // module operative control registers
-  Reg #(IterState)  rg_state       <- mkReg(S_Idle);
-  Reg #(BitManipOp) rg_operation   <- mkRegU;
+  Reg #(IterState)  rg_state     <- mkReg(S_Idle);
+  Reg #(BitManipOp) rg_operation <- mkRegU;
 
   /////////////////////////
   //                     //
@@ -127,7 +127,7 @@ module mkBitManipIter (BitManip_IFC);
                               (rg_operation == GREV));  
 
   //             exit         when either reg assoc with rs1 or rs2 depletes
-  Bool exit_bext_bdep      = (r_control == 0) || (rg_pack_setter == 0) &&
+  Bool exit_bext_bdep      = (rg_control == 0) || (rg_setter == 0) &&
                              ((rg_operation == BEXT) || (rg_operation == BDEP)); 
 
   // andc not handled here
@@ -260,10 +260,22 @@ module mkBitManipIter (BitManip_IFC);
     end
   endrule: rl_shfl
 
-
+  // control sigs to determine shifts in bext and bdep
+  Bool seed_shift_bext_bdep   =  (rg_operation == BDEP) || 
+                                ((rg_operation == BEXT) && (unpack(rg_control[0])));
+  Bool setter_shift_bext_bdep =  (rg_operation == BEXT) || 
+                                ((rg_operation == BDEP) && (unpack(rg_control[0])));
+  Bool alter_res_bext_bdep    = unpack((rg_setter & rg_control)[0]);
 
   // rule manages BEXT and BDEP
   rule rl_bext_bdep (is_rule_bext_bdep);
+    if (terminate_bext_bdep) rg_state <= S_Idle;
+    else begin
+      rg_control <= rg_control >> 1;
+      if (seed_shift_bext_bdep)   rg_seed   <= rg_seed << 1;
+      if (setter_shift_bext_bdep) rg_setter <= rg_setter >> 1;
+      if (alter_res_bext_bdep)    rg_res    <= rg_res | rg_seed;
+    end
   endrule: rl_bext_bdep
 
 
@@ -283,9 +295,9 @@ module mkBitManipIter (BitManip_IFC);
     rg_control <= fv_control_init (op_sel, arg0, arg1);
 
     // assigning the below in a slightly sloppy fashion since
-    // only the packe operations utilize them
-    rg_seed        <= 1;
-    rg_pack_setter <= arg0;
+    // only the pack operations utilize them (grev uses seed)
+    rg_seed     <= 1;
+    rg_setter   <= arg0;
 
     rg_operation <= op_sel;
     rg_state     <= fv_state_init (op_sel, unpack(arg1[0])); 
