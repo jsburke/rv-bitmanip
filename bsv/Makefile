@@ -35,13 +35,9 @@ VERIMAN     = $(VERILOG_LIB)/main.v
 ##                                             ##
 #################################################
 
-TB     = genericTb
+TB     = ModuleTb
 BSV_TB = $(TB).bsv
 
-INSNS  = clz ctz pcnt andc slo sro rol ror grev shfl bext bdep
-
-TB_BINARIES = $(addsuffix Tb, $(INSNS))
-TB_SHARED   = $(addsuffix .so, $(TB_BINARIES))
 TB_RESIDUES = *.bo *.ba *.cxx *.h *.o
 
 #################################################
@@ -51,25 +47,16 @@ TB_RESIDUES = *.bo *.ba *.cxx *.h *.o
 #################################################
 
 .PHONY: default
-default: all
+default: ModuleTb
 
-.PRECIOUS: $(TB_BINARIES) $(TB_SHARED)
-
-%Tb:
+ModuleTb:
 	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
-	$(BSC) $(BLUESIM_S2) mkGenericTb -o $(TB) *.ba
-	mv $(TB) $@
-	mv $(TB).so $@.so
-
-.PHONY: all
-all: 
-	make $(TB_BINARIES)
-	make clean
+	$(BSC) $(BLUESIM_S2) mk$(TB) -o $(TB) *.ba
 
 .PHONY: rebuild
 rebuild:
 	make full-clean
-	make all
+	make ModuleTb 
 	
 .PHONY: clean
 clean:
@@ -77,7 +64,7 @@ clean:
 
 .PHONY: full-clean
 full-clean: clean
-	rm -rf $(TB_BINARIES) $(TB_SHARED) *.so
+	rm -rf $(TB) $(TB).so
 
 .PHONY: help
 help:
@@ -86,18 +73,14 @@ help:
 	@echo " "
 	@echo "     Targets"
 	@echo " "
-	@echo "     [INSN]Tb {XLEN=[32,64]} {TEST_COUNT=int}"
+	@echo "     ModuleTb {XLEN=[32,64]} {TEST_COUNT=int}"
 	@echo "              {TEST_VERBOSE=on} {HW_DBG=on}"
 	@echo " "
-	@echo "       Builds bluesim test bench and .so for INSN"
+	@echo "       Builds bluesim test bench and .so for a given Module
 	@echo " "
 	@echo "   ************ ALIASES ************* "
 	@echo " "
-	@echo "     all (default) --- build bluesim Tb for all insns"
-	@echo " "
 	@echo "     clean ----------- delete bsc generated files"
-	@echo " "
-	@echo "     full-clean ------ clean and delete binaries and .so"
 	@echo " "
 	@echo "     rebuild --------- full-clean then all"
 	@echo " "
