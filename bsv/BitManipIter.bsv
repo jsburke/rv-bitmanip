@@ -187,6 +187,50 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages GREV
   rule rl_grev (is_rule_grev);
+    if (terminate_grev) rg_state <= S_Idle;
+    else begin
+      rg_control <= rg_control >> 1;  // this way we can get the next lsb of rs2
+      rg_state   <= fv_grevNextState (rg_state);
+
+      // next we apply shifts and masks per state we're in and if the lsb is set
+      if ((rg_state = S_Stage_1) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s1)  << 1; // arithmetic to the left and right
+        let right = (rg_res & grev_right_s1) >> 1; // of the OR in the C impl
+        rg_res   <=  left | right;
+      end
+
+      if ((rg_state = S_Stage_2) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s2)  << 2; 
+        let right = (rg_res & grev_right_s2) >> 2; 
+        rg_res   <=  left | right;
+      end
+
+      if ((rg_state = S_Stage_4) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s4)  << 4; 
+        let right = (rg_res & grev_right_s4) >> 4; 
+        rg_res   <=  left | right;
+      end
+
+      if ((rg_state = S_Stage_8) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s8)  << 8; 
+        let right = (rg_res & grev_right_s8) >> 8; 
+        rg_res   <=  left | right;
+      end
+
+      if ((rg_state = S_Stage_16) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s16)  << 16; 
+        let right = (rg_res & grev_right_s16) >> 16; 
+        rg_res   <=  left | right;
+      end
+
+      `ifdef RV64
+      if ((rg_state = S_Stage_32) && (unpack(rg_control[0]))) begin
+        let left  = (rg_res & grev_left_s32)  << 32; 
+        let right = (rg_res & grev_right_s32) >> 32; 
+        rg_res   <=  left | right;
+      end
+      `endif
+    end
   endrule: rl_grev
 
 
