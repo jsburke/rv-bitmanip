@@ -50,7 +50,7 @@ TB_RESIDUES = *.bo *.ba *.cxx *.h *.o
 default: ModuleTb
 
 ModuleTb:
-	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
+	$(BSC) $(BSC_DEFINES) $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
 	$(BSC) $(BLUESIM_S2) mk$(TB) -o $(TB) *.ba
 
 .PHONY: rebuild
