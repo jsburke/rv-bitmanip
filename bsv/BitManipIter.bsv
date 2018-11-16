@@ -169,17 +169,33 @@ module mkBitManipIter (BitManip_IFC);
     end
   endrule: rl_right_shifts
 
+
+
   // rule manages SLO and ROL
   rule rl_left_shifts (is_rule_left_shift);
+    if (terminate_left_shift) rg_state <= S_Idle;
+    else begin
+      // see note above for new_msb, and think backwards for new_lsb
+      let new_lsb = (rg_operation == ROL) ? reverseBits(rg_res & msb_set) : lsb_set;
+
+      rg_res     <= ((rg_res << 1) | new_lsb);
+      rg_control <= rg_control - 1;
+    end
   endrule: rl_left_shifts
+
+
 
   // rule manages GREV
   rule rl_grev (is_rule_grev);
   endrule: rl_grev
 
+
+
   // rule manages SHFL and UNSHFL
   rule rl_shfl (is_rule_shfl);
   endrule: rl_shfl
+
+
 
   // rule manages BEXT and BDEP
   rule rl_bext_bdep (is_rule_bext_bdep);
@@ -207,7 +223,7 @@ module mkBitManipIter (BitManip_IFC);
     rg_pack_setter <= arg0;
 
     rg_operation <= op_sel;
-    rg_state     <= fv_state_init(op_sel, unpack(arg1[0])); 
+    rg_state     <= fv_state_init (op_sel, unpack(arg1[0])); 
 
   endmethod: args_put
 
