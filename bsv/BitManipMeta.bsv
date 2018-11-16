@@ -30,6 +30,77 @@ typedef Bit #(LOG_XLEN) BitXLog;
 
 /////////////////////////////////////////////////
 //                                             //
+//  Grev and Shuffle and Masks                 //
+//                                             //
+/////////////////////////////////////////////////
+
+`ifdef RV32
+BitXL grev_left_s1   = 32'h5555_5555;
+BitXL grev_right_s1  = 32'hAAAA_AAAA;
+
+BitXL grev_left_s2   = 32'h3333_3333;
+BitXL grev_right_s2  = 32'hCCCC_CCCC;
+
+BitXL grev_left_s4   = 32'h0F0F_0F0F;
+BitXL grev_right_s4  = 32'hF0F0_F0F0;
+
+BitXL grev_left_s8   = 32'h00FF_00FF;
+BitXL grev_right_s8  = 32'hFF00_FF00;
+
+BitXL grev_left_s16  = 32'h0000_FFFF;
+BitXL grev_right_s16 = 32'hFFFF_0000;
+`elsif RV64
+BitXL grev_left_s1   = 64'h55555555_55555555;
+BitXL grev_right_s1  = 64'hAAAAAAAA_AAAAAAAA;
+
+BitXL grev_left_s2   = 64'h33333333_33333333;
+BitXL grev_right_s2  = 64'hCCCCCCCC_CCCCCCCC;
+
+BitXL grev_left_s4   = 64'h0F0F0F0F_0F0F0F0F;
+BitXL grev_right_s4  = 64'hF0F0F0F0_F0F0F0F0;
+
+BitXL grev_left_s8   = 64'h00FF00FF_00FF00FF;
+BitXL grev_right_s8  = 64'hFF00FF00_FF00FF00;
+
+BitXL grev_left_s16  = 64'h0000FFFF_0000FFFF;
+BitXL grev_right_s16 = 64'hFFFF0000_FFFF0000;
+
+BitXL grev_left_s32  = 64'h00000000_FFFFFFFF;
+BitXL grev_right_s32 = 64'hFFFFFFFF_00000000;
+`endif
+
+
+`ifdef RV32
+BitXL shfl_left_s1   = 32'h4444_4444;
+BitXL shfl_right_s1  = 32'h2222_2222;
+
+BitXL shfl_left_s2   = 32'h3030_3030;
+BitXL shfl_right_s2  = 32'h0C0C_0C0C;
+
+BitXL shfl_left_s4   = 32'h0F00_0F00;
+BitXL shfl_right_s4  = 32'h00F0_00F0;
+
+BitXL shfl_left_s8   = 32'h00FF_0000;
+BitXL shfl_right_s8  = 32'h0000_FF00;
+`elsif RV64
+BitXL shfl_left_s1   = 64'h44444444_44444444;
+BitXL shfl_right_s1  = 64'h22222222_22222222;
+
+BitXL shfl_left_s2   = 64'h30303030_30303030;
+BitXL shfl_right_s2  = 64'h0C0C0C0C_0C0C0C0C;
+
+BitXL shfl_left_s4   = 64'h0F000F00_0F000F00;
+BitXL shfl_right_s4  = 64'h00F000F0_00F000F0;
+
+BitXL shfl_left_s8   = 64'h00FF0000_00FF0000;
+BitXL shfl_right_s8  = 64'h0000FF00_0000FF00;
+
+BitXL shfl_left_s16  = 64'h0000FFFF_00000000;
+BitXL shfl_right_s16 = 64'h00000000_FFFF0000;
+`endif
+
+/////////////////////////////////////////////////
+//                                             //
 //  BitManip Enums and Aux Functions           //
 //                                             //
 /////////////////////////////////////////////////
