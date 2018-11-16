@@ -46,10 +46,11 @@ function IterState fv_state_init(BitManipOp op, Bool arg1_lsb);
     ROL      : return S_Calc;
     GREV     : return S_Stage_1;
     `ifdef RV32  // this shuffle portion will likely get messy...
-    SHFL     : return (arg1_lsb) ? S_Stage_1 : S_Stage_8;
+    SHFL     : return S_Stage_8;
     `elsif RV64
-    SHFL     : return (arg1_lsb) ? S_Stage_1 : S_Stage_16;
+    SHFL     : return S_Stage_16;
     `endif
+    UNSHFL   : return S_Stage_1;
     BEXT     : return S_Calc;
     BDEP     : return S_Calc;
     ANDC     : return S_Idle; // andc not managed here
@@ -77,6 +78,10 @@ module mkBitManipIter (BitManip_IFC);
   // module operative control registers
   Reg #(IterState)  rg_state     <- mkReg(S_Idle);
   Reg #(BitManipOp) rg_operation <- mkRegU;
+
+  `ifdef HW_DIAG
+  Reg #(int)        rg_cycle     <- mkReg(0);
+  `endif
 
   /////////////////////////
   //                     //
@@ -113,8 +118,8 @@ module mkBitManipIter (BitManip_IFC);
                              ((rg_operation == CLZ) || (rg_operation == CTZ));
 
   //             exit         if rs1 becomes 0 OR  result saturates
-  Bool exit_ones_count     = (rg_control == 0) || (rg_res == fromInteger(xlen)) &&
-                             (rg_operation == PCNT);
+  Bool exit_ones_count     = ((rg_control == 0) || (rg_res == fromInteger(xlen))) &&
+                              (rg_operation == PCNT);
 
   //             exit         if res saturates   OR  control is depleted
   Bool exit_shift_ones     = (rg_res == minus_1) || (rg_control == 0) &&
@@ -157,6 +162,19 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages CLZ, CTZ, PCNT, SRO, ROR
   rule rl_right_shifts (is_rule_right_shift);
+    `ifdef HW_DIAG
+      $display("-------  RIGHT SHIFT RULE -------");
+      $display("   Operation  -- ", fshow(rg_operation));
+      $display("   State      -- ", fshow(rg_state));
+      $display("   Cycles     -- %d", rg_cycle);
+      $display(" ");
+      $display("   res        -- %h", rg_res);
+      $display("   control    -- %h", rg_control);
+      $display("   seed       -- %h", rg_seed);
+      $display("   setter     -- %h", rg_setter);
+      $display("   terminating - %b", terminate_right_shift);
+      rg_cycle <= rg_cycle + 1;
+    `endif
     if (terminate_right_shift) rg_state <= S_Idle;
     else begin
       // for ROR, we steal the lsb, otherwise we only care for SRO
@@ -177,6 +195,19 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages SLO and ROL
   rule rl_left_shifts (is_rule_left_shift);
+    `ifdef HW_DIAG
+      $display("-------  LEFT SHIFT RULE -------");
+      $display("   Operation  -- ", fshow(rg_operation));
+      $display("   State      -- ", fshow(rg_state));
+      $display("   Cycles     -- %d", rg_cycle);
+      $display(" ");
+      $display("   res        -- %h", rg_res);
+      $display("   control    -- %h", rg_control);
+      $display("   seed       -- %h", rg_seed);
+      $display("   setter     -- %h", rg_setter);
+      $display("   terminating - %b", terminate_right_shift);
+      rg_cycle <= rg_cycle + 1;
+    `endif
     if (terminate_left_shift) rg_state <= S_Idle;
     else begin
       // see note above for new_msb, and think backwards for new_lsb
@@ -191,6 +222,19 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages GREV
   rule rl_grev (is_rule_grev);
+    `ifdef HW_DIAG
+      $display("-------  GREV RULE -------");
+      $display("   Operation  -- ", fshow(rg_operation));
+      $display("   State      -- ", fshow(rg_state));
+      $display("   Cycles     -- %d", rg_cycle);
+      $display(" ");
+      $display("   res        -- %h", rg_res);
+      $display("   control    -- %h", rg_control);
+      $display("   seed       -- %h", rg_seed);
+      $display("   setter     -- %h", rg_setter);
+      $display("   terminating - %b", terminate_right_shift);
+      rg_cycle <= rg_cycle + 1;
+    `endif
     if (terminate_grev) rg_state <= S_Idle;
     else begin
       rg_control <= rg_control >> 1;  // this way we can get the next lsb of rs2
@@ -230,6 +274,19 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages SHFL and UNSHFL
   rule rl_shfl (is_rule_shfl);
+    `ifdef HW_DIAG
+      $display("-------  SHUFFLE RULE -------");
+      $display("   Operation  -- ", fshow(rg_operation));
+      $display("   State      -- ", fshow(rg_state));
+      $display("   Cycles     -- %d", rg_cycle);
+      $display(" ");
+      $display("   res        -- %h", rg_res);
+      $display("   control    -- %h", rg_control);
+      $display("   seed       -- %h", rg_seed);
+      $display("   setter     -- %h", rg_setter);
+      $display("   terminating - %b", terminate_right_shift);
+      rg_cycle <= rg_cycle + 1;
+    `endif
     if (terminate_shfl) rg_state <= S_Idle;
     else begin
       rg_control <= rg_control >> 1;
@@ -257,6 +314,19 @@ module mkBitManipIter (BitManip_IFC);
 
   // rule manages BEXT and BDEP
   rule rl_bext_bdep (is_rule_bext_bdep);
+    `ifdef HW_DIAG
+      $display("-------  BEXT BDEP RULE -------");
+      $display("   Operation  -- ", fshow(rg_operation));
+      $display("   State      -- ", fshow(rg_state));
+      $display("   Cycles     -- %d", rg_cycle);
+      $display(" ");
+      $display("   res        -- %h", rg_res);
+      $display("   control    -- %h", rg_control);
+      $display("   seed       -- %h", rg_seed);
+      $display("   setter     -- %h", rg_setter);
+      $display("   terminating - %b", terminate_right_shift);
+      rg_cycle <= rg_cycle + 1;
+    `endif
     if (terminate_bext_bdep) rg_state <= S_Idle;
     else begin
       rg_control <= rg_control >> 1;
@@ -265,7 +335,6 @@ module mkBitManipIter (BitManip_IFC);
       if (alter_res_bext_bdep)    rg_res    <= rg_res | rg_seed;
     end
   endrule: rl_bext_bdep
-
 
   /////////////////////////
   //                     //
@@ -289,6 +358,10 @@ module mkBitManipIter (BitManip_IFC);
 
     rg_operation <= op_sel;
     rg_state     <= fv_state_init (op_sel, unpack(arg1[0])); 
+
+    `ifdef HW_DIAG
+    rg_cycle     <= 0;  // init for diagnostic build
+    `endif
 
   endmethod: args_put
 
