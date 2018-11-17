@@ -28,7 +28,6 @@ import BitManipMeta :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-// should I move to meta per chance??
 function IterState fv_state_init(BitManipOp op, Bool arg1_lsb);
   case(op) matches
     CLZ      : return S_Calc;
@@ -297,10 +296,10 @@ module mkBitManipIter (BitManip_IFC);
                     (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
                     (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
                     `ifdef RV64
-                    (rg_state == S_Stage_16) ? fv_ShuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
+                    (rg_state == S_Stage_16) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
                     `endif
                     rg_res;  // safe defalut??
-
+      $display("   shuffle   -- %h", shuffle);
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
     end
   endrule: rl_shfl
