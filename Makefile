@@ -99,6 +99,12 @@ bram: utils $(TB_DIR)
 	mkdir -p $(BRAM_DIR)
 	cd $(BRAM_DIR) && $(BRAM_GEN) $(TEST_COUNT) 
 
+ModuleTb: $(TB_DIR)
+	$(MAKE) -C $(BSV) $@ $(BSC_FLAGS)
+	mv $(BSV)/$@ $(TB_DIR)
+	mv $(BSV)/$@.so $(TB_DIR)
+
+# archival targets
 %Tb: $(TB_DIR)
 	@echo "********* ARCHIVED CODE USAGE **********"
 	$(MAKE) -C $(ARCH_DIR) full-clean
@@ -122,15 +128,16 @@ test-all: $(TB_DIR)
 	$(MAKE) -C $(ARCH_DIR) all $(BSC_FLAGS)
 	mv $(ARCH_DIR)/*Tb  $(TB_DIR)
 	mv $(ARCH_DIR)/*.so $(TB_DIR)
+# end archival targets
 
 .PHONY: all
 all:
 	make utils
 	make bram
 	make bram XLEN=64
-	make test-all
+	make ModuleTb
 	$(MAKE) -C $(BSV) clean
-	make test-all XLEN=64
+	make ModuleTb XLEN=64
 
 .PHONY: clean
 clean:
@@ -139,7 +146,8 @@ clean:
 .PHONY: full-clean
 full-clean: clean
 	$(MAKE) -C $(UTIL) clean
-	$(MAKE) -C $(BSV)  full-clean
+	$(MAKE) -C $(BSV)  clean
+	$(MAKE) -C $(ARCH_DIR) full-clean
 
 .PHONY: help
 help:
