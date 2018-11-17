@@ -217,8 +217,8 @@ function BitXL fv_control_init (BitManipOp op, BitXL arg0, BitXL arg1);
     ROR     : return arg1[(log_xlen - 1) : 0];
     ROL     : return arg1[(log_xlen - 1) : 0];
     GREV    : return arg1[(log_xlen - 1) : 0];
-    SHFL    : return arg1[(log_xlen - 2) : 0];
-    UNSHFL  : return reverseBits(arg1) >> (xlen - 4);  
+    SHFL    : return reverseBits(arg1) >> (xlen - 4);   
+    UNSHFL  : return arg1[(log_xlen - 2) : 0];
     BEXT    : return arg1;
     BDEP    : return arg1;
     default : return 0; // expecting andc, want this to be poor behaving

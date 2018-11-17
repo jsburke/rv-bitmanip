@@ -300,7 +300,6 @@ module mkBitManipIter (BitManip_IFC);
                     (rg_state == S_Stage_16) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
                     `endif
                     rg_res;  // safe defalut??
-      $display("   shuffle   -- %h", shuffle);
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
     end
   endrule: rl_shfl
