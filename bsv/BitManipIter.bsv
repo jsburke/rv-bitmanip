@@ -16,12 +16,6 @@ package BitManipIter;
 
 /////////////////////////////////////////////////
 //                                             //
-// BlueSpec Imports                            //
-//                                             //
-/////////////////////////////////////////////////
-
-/////////////////////////////////////////////////
-//                                             //
 // Project Imports                             //
 //                                             //
 /////////////////////////////////////////////////
@@ -126,24 +120,30 @@ module mkBitManipIter (BitManip_IFC);
                              ((rg_operation == SRO) || (rg_operation == SLO));
 
   //             exit         when control depletes
-  Bool exit_rot_shfl_grev  = (rg_control == 0) &&
-                             ((rg_operation == SHFL) || (rg_operation == UNSHFL) || 
-                              (rg_operation == ROR)  || (rg_operation == ROL)    ||
+  Bool exit_rot_grev       = (rg_control == 0) &&
+                             ((rg_operation == ROR)  || (rg_operation == ROL)    ||
                               (rg_operation == GREV));  
 
   //             exit         when either reg assoc with rs1 or rs2 depletes
   Bool exit_bext_bdep      = (rg_control == 0) || (rg_setter == 0) &&
                              ((rg_operation == BEXT) || (rg_operation == BDEP)); 
 
+  Bool exit_shfl           = (rg_operation == SHFL)   && ((rg_state == S_Stage_1) || (rg_control == 0));
+  Bool exit_unshfl         = (rg_operation == UNSHFL) && ((rg_control == 0) ||
+                             `ifdef RV64
+                             (rg_state     == S_Stage_16));
+                             `else
+                             (rg_state     == S_Stage_8));
+                             `endif 
+
   // andc not handled here
 
   Bool terminate_right_shift = is_right_shift_op  && (exit_zero_count || exit_ones_count ||
-                                                      exit_shift_ones || exit_rot_shfl_grev);
-  Bool terminate_left_shift  = is_left_shift_op   && (exit_shift_ones || exit_rot_shfl_grev);
+                                                      exit_shift_ones || exit_rot_grev);
+  Bool terminate_left_shift  = is_left_shift_op   && (exit_shift_ones || exit_rot_grev);
 
-  Bool terminate_grev        = exit_rot_shfl_grev && (rg_operation == GREV);
-  Bool terminate_shfl        = exit_rot_shfl_grev && ((rg_operation == SHFL) || 
-                                                      (rg_operation == UNSHFL));
+  Bool terminate_grev        = exit_rot_grev      && (rg_operation == GREV);
+  Bool terminate_shfl        = exit_shfl || exit_unshfl;
   Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
 
@@ -232,7 +232,7 @@ module mkBitManipIter (BitManip_IFC);
       $display("   control    -- %h", rg_control);
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
-      $display("   terminating - %b", terminate_right_shift);
+      $display("   terminating - %b", terminate_grev);
       rg_cycle <= rg_cycle + 1;
     `endif
     if (terminate_grev) rg_state <= S_Idle;
@@ -284,7 +284,7 @@ module mkBitManipIter (BitManip_IFC);
       $display("   control    -- %h", rg_control);
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
-      $display("   terminating - %b", terminate_right_shift);
+      $display("   terminating - %b", terminate_shfl);
       rg_cycle <= rg_cycle + 1;
     `endif
     if (terminate_shfl) rg_state <= S_Idle;
@@ -292,14 +292,14 @@ module mkBitManipIter (BitManip_IFC);
       rg_control <= rg_control >> 1;
       rg_state   <= fv_shflNextState(rg_state, (rg_operation == SHFL));
 
-     let shuffle = (rg_state == S_Stage_1)  ? fv_shuffleStage(rg_res, shfl_left_s1,  shfl_right_s1,  1) :
-                   (rg_state == S_Stage_2)  ? fv_shuffleStage(rg_res, shfl_left_s2,  shfl_right_s2,  2) :
-                   (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
-                   (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
-                   `ifdef RV64
-                   (S_Stage_16) ? fv_ShuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
-                   `endif
-                   rg_res;  // safe defalut??
+      let shuffle = (rg_state == S_Stage_1)  ? fv_shuffleStage(rg_res, shfl_left_s1,  shfl_right_s1,  1) :
+                    (rg_state == S_Stage_2)  ? fv_shuffleStage(rg_res, shfl_left_s2,  shfl_right_s2,  2) :
+                    (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
+                    (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
+                    `ifdef RV64
+                    (rg_state == S_Stage_16) ? fv_ShuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
+                    `endif
+                    rg_res;  // safe defalut??
 
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
     end
@@ -324,7 +324,7 @@ module mkBitManipIter (BitManip_IFC);
       $display("   control    -- %h", rg_control);
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
-      $display("   terminating - %b", terminate_right_shift);
+      $display("   terminating - %b", terminate_bext_bdep);
       rg_cycle <= rg_cycle + 1;
     `endif
     if (terminate_bext_bdep) rg_state <= S_Idle;
