@@ -8,8 +8,8 @@ PROJ_NAME = Bluespec Sources
 
 XLEN        ?= 32
 TEST_COUNT  ?= 16
-TEST_VERBOSE = on
-HW_DIAG      = on
+#TEST_VERBOSE = on
+#HW_DIAG      = on
 
 BSC ?= bsc
 
@@ -57,16 +57,12 @@ ModuleTb:
 
 .PHONY: rebuild
 rebuild:
-	make full-clean
+	make clean
 	make ModuleTb 
 	
 .PHONY: clean
 clean:
 	rm -rf $(TB_RESIDUES)
-
-.PHONY: full-clean
-full-clean: clean
-	rm -rf $(TB) $(TB).so
 
 .PHONY: help
 help:
@@ -78,7 +74,7 @@ help:
 	@echo "     ModuleTb {XLEN=[32,64]} {TEST_COUNT=int}"
 	@echo "              {TEST_VERBOSE=on} {HW_DIAG=on}"
 	@echo " "
-	@echo "       Builds bluesim test bench and .so for a given Module
+	@echo "       Builds bluesim test bench and .so for a given Module"
 	@echo " "
 	@echo "   ************ ALIASES ************* "
 	@echo " "
