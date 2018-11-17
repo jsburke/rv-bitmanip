@@ -9,18 +9,19 @@ PROJ_NAME = Bluespec Sources
 XLEN        ?= 32
 TEST_COUNT  ?= 16
 TEST_VERBOSE = on
+HW_DIAG      = on
 
 BSC ?= bsc
 
 BSC_DEFINES = -D RV$(XLEN)
 
 BLUESIM_DEFINES  = -D TEST_COUNT=$(TEST_COUNT)
-BLUESIM_DEFINES += -D HW_DIAG
+
 ifdef TEST_VERBOSE
-  BLUESIM_DEFINES += -D TEST_VERBOSE
-  ifdef HW_DBG
-    BLUESIM_DEFINES += -D HW_DBG
-  endif
+BLUESIM_DEFINES += -D TEST_VERBOSE
+endif
+ifdef HW_DIAG
+BLUESIM_DEFINES += -D HW_DIAG
 endif
 
 BLUESIM_S1 = -u -sim
@@ -75,7 +76,7 @@ help:
 	@echo "     Targets"
 	@echo " "
 	@echo "     ModuleTb {XLEN=[32,64]} {TEST_COUNT=int}"
-	@echo "              {TEST_VERBOSE=on} {HW_DBG=on}"
+	@echo "              {TEST_VERBOSE=on} {HW_DIAG=on}"
 	@echo " "
 	@echo "       Builds bluesim test bench and .so for a given Module
 	@echo " "
