@@ -28,6 +28,8 @@ Integer log_xlen = valueOf(LOG_XLEN);
 typedef Bit #(XLEN)     BitXL;
 typedef Bit #(LOG_XLEN) BitXLog;
 
+BitXL bitxl_zero = 0;
+
 /////////////////////////////////////////////////
 //                                             //
 //  Grev and Shuffle Masks and Functions       //
@@ -194,7 +196,7 @@ interface BitManip_IFC;
   (* always_ready *)
   method Action kill;
 
-  (* always_ready *) method Bool   valid_get;
+  (* always_ready *) method Bool   is_busy;
   (* always_ready *) method BitXL  value_get;
 endinterface: BitManip_IFC
 
@@ -216,7 +218,7 @@ function BitXL fv_control_init (BitManipOp op, BitXL arg0, BitXL arg1);
     ROL     : return arg1[(log_xlen - 1) : 0];
     GREV    : return arg1[(log_xlen - 1) : 0];
     SHFL    : return arg1[(log_xlen - 2) : 0];
-    UNSHFL  : return arg1[(log_xlen - 2) : 0];
+    UNSHFL  : return reverseBits(arg1) >> (xlen - 4);  
     BEXT    : return arg1;
     BDEP    : return arg1;
     default : return 0; // expecting andc, want this to be poor behaving

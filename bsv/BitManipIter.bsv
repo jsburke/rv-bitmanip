@@ -127,13 +127,13 @@ module mkBitManipIter (BitManip_IFC);
   Bool exit_bext_bdep      = (rg_control == 0) || (rg_setter == 0) &&
                              ((rg_operation == BEXT) || (rg_operation == BDEP)); 
 
-  Bool exit_shfl           = (rg_operation == SHFL)   && ((rg_state == S_Stage_1) || (rg_control == 0));
+/*  Bool exit_shfl           = (rg_operation == SHFL)   && ((rg_state == S_Stage_1) || (rg_control == 0));
   Bool exit_unshfl         = (rg_operation == UNSHFL) && ((rg_control == 0) ||
                              `ifdef RV64
                              (rg_state     == S_Stage_16));
                              `else
                              (rg_state     == S_Stage_8));
-                             `endif 
+                             `endif */
 
   // andc not handled here
 
@@ -142,7 +142,8 @@ module mkBitManipIter (BitManip_IFC);
   Bool terminate_left_shift  = is_left_shift_op   && (exit_shift_ones || exit_rot_grev);
 
   Bool terminate_grev        = exit_rot_grev      && (rg_operation == GREV);
-  Bool terminate_shfl        = exit_shfl || exit_unshfl;
+  Bool terminate_shfl        = (rg_control == 0)  && ((rg_operation == SHFL) || 
+                                                     (rg_operation == UNSHFL)); 
   Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
 
@@ -154,7 +155,7 @@ module mkBitManipIter (BitManip_IFC);
   //                     //
   /////////////////////////
 
-  // contol sigs for rl_right_shifts
+  // control sigs for rl_right_shifts
   Bool is_zero_count = (rg_operation == CLZ)  || (rg_operation == CTZ);
   Bool is_pcnt_inc   = (rg_operation == PCNT) && (unpack(rg_control[0]));
   Bool is_ror_sro    = (rg_operation == ROR)  || (rg_operation == SRO);
@@ -280,7 +281,7 @@ module mkBitManipIter (BitManip_IFC);
       $display("   Cycles     -- %d", rg_cycle);
       $display(" ");
       $display("   res        -- %h", rg_res);
-      $display("   control    -- %h", rg_control);
+      $display("   control    -- %b", rg_control[4:0]); // get all germane bits regardless of xlen
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
       $display("   terminating - %b", terminate_shfl);
@@ -368,9 +369,9 @@ module mkBitManipIter (BitManip_IFC);
     rg_state <= S_Idle;
   endmethod: kill
 
-  method Bool valid_get;
-    return result_valid;
-  endmethod: valid_get
+  method Bool is_busy;
+    return (rg_state != S_Idle);
+  endmethod: is_busy
 
   method BitXL value_get;
     return rg_res;

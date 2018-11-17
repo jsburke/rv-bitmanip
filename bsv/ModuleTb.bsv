@@ -160,7 +160,7 @@ module mkModuleTb (Empty);
 
 
   rule tb_dut_wait (rg_state == Dut_Wait);
-    if (dut.valid_get) begin
+    if (!dut.is_busy) begin
       rg_state   <= Dut_Return;
       rg_dut_res <= dut.value_get;
     end
