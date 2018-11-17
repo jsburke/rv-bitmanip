@@ -9,19 +9,17 @@ PROJ_NAME = Bluespec Sources
 XLEN        ?= 32
 TEST_COUNT  ?= 16
 #TEST_VERBOSE = on
-#HW_DIAG      = on
 
 BSC ?= bsc
 
 BSC_DEFINES = -D RV$(XLEN)
 
-BLUESIM_DEFINES  = -D TEST_COUNT=$(TEST_COUNT)
-
+BLUESIM_DEFINES = -D TEST_COUNT=$(TEST_COUNT)
 ifdef TEST_VERBOSE
-BLUESIM_DEFINES += -D TEST_VERBOSE
-endif
-ifdef HW_DIAG
-BLUESIM_DEFINES += -D HW_DIAG
+  BLUESIM_DEFINES += -D TEST_VERBOSE
+  ifdef HW_DBG
+    BLUESIM_DEFINES += -D HW_DBG
+  endif
 endif
 
 BLUESIM_S1 = -u -sim
@@ -37,9 +35,13 @@ VERIMAN     = $(VERILOG_LIB)/main.v
 ##                                             ##
 #################################################
 
-TB     = ModuleTb
+TB     = genericTb
 BSV_TB = $(TB).bsv
 
+INSNS  = clz ctz pcnt andc slo sro rol ror grev shfl unshfl bext bdep
+
+TB_BINARIES = $(addsuffix Tb, $(INSNS))
+TB_SHARED   = $(addsuffix .so, $(TB_BINARIES))
 TB_RESIDUES = *.bo *.ba *.cxx *.h *.o
 
 #################################################
@@ -49,20 +51,33 @@ TB_RESIDUES = *.bo *.ba *.cxx *.h *.o
 #################################################
 
 .PHONY: default
-default: ModuleTb
+default: all
 
-ModuleTb:
-	$(BSC) $(BSC_DEFINES) $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
-	$(BSC) $(BLUESIM_S2) mk$(TB) -o $(TB) *.ba
+.PRECIOUS: $(TB_BINARIES) $(TB_SHARED)
+
+%Tb:
+	$(BSC) $(BSC_DEFINES) -D TEST_$* $(BLUESIM_DEFINES) $(BLUESIM_S1) $(BSV_TB)
+	$(BSC) $(BLUESIM_S2) mkGenericTb -o $(TB) *.ba
+	mv $(TB) $@
+	mv $(TB).so $@.so
+
+.PHONY: all
+all: 
+	make $(TB_BINARIES)
+	make clean
 
 .PHONY: rebuild
 rebuild:
-	make clean
-	make ModuleTb 
+	make full-clean
+	make all
 	
 .PHONY: clean
 clean:
 	rm -rf $(TB_RESIDUES)
+
+.PHONY: full-clean
+full-clean: clean
+	rm -rf $(TB_BINARIES) $(TB_SHARED) *.so
 
 .PHONY: help
 help:
@@ -71,15 +86,18 @@ help:
 	@echo " "
 	@echo "     Targets"
 	@echo " "
-	@echo "     (default) "
-	@echo "     ModuleTb {XLEN=[32,64]} {TEST_COUNT=int}"
-	@echo "              {TEST_VERBOSE=on} {HW_DIAG=on}"
+	@echo "     [INSN]Tb {XLEN=[32,64]} {TEST_COUNT=int}"
+	@echo "              {TEST_VERBOSE=on} {HW_DBG=on}"
 	@echo " "
-	@echo "       Builds bluesim test bench and .so"
+	@echo "       Builds bluesim test bench and .so for INSN"
 	@echo " "
 	@echo "   ************ ALIASES ************* "
 	@echo " "
+	@echo "     all (default) --- build bluesim Tb for all insns"
+	@echo " "
 	@echo "     clean ----------- delete bsc generated files"
+	@echo " "
+	@echo "     full-clean ------ clean and delete binaries and .so"
 	@echo " "
 	@echo "     rebuild --------- full-clean then all"
 	@echo " "

@@ -103,11 +103,20 @@ import metaTb        :: *;
   import BitManipShuffle :: *;
   String res_file = bram_locate("shfl");
   `define RS2_PRESENT
-  `define DUT_IFC BitManip_IFC #(2,0)
+  `define DUT_IFC BitManip_IFC #(2,1)
   `define DUT_MODULE mkShuffleIter
   `define DUT_PORT_COUNT 2
   `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
   `define DUT_SELECT 0 
+`elsif TEST_unshfl
+  import BitManipShuffle :: *;
+  String res_file = bram_locate("unshfl");
+  `define RS2_PRESENT
+  `define DUT_IFC BitManip_IFC #(2,1)
+  `define DUT_MODULE mkShuffleIter
+  `define DUT_PORT_COUNT 2
+  `define DUT_PORT_ASSIGN v_args[0] = op_0; v_args[1] = op_1;
+  `define DUT_SELECT 1 
 `elsif TEST_bext
   import BitManipPack :: *;
   String res_file = bram_locate("bext");

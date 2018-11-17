@@ -66,7 +66,7 @@ xlen_t grev(xlen_t rs1, xlen_t rs2){
   return x;
 }
 
-static xlen_t shfl(xlen_t rs1, xlen_t rs2){
+xlen_t shfl(xlen_t rs1, xlen_t rs2){
   xlen_t x = rs1;
   if(rs2 & 8) x = shuffle_stage(x, 0x00FF0000, 0x0000FF00, 8);
   if(rs2 & 4) x = shuffle_stage(x, 0x0F000F00, 0x00F000F0, 4);
@@ -75,7 +75,7 @@ static xlen_t shfl(xlen_t rs1, xlen_t rs2){
   return x;
 }
 
-static xlen_t unshfl(xlen_t rs1, xlen_t rs2){
+xlen_t unshfl(xlen_t rs1, xlen_t rs2){
   xlen_t x = rs1;
   if(rs2 & 1) x = shuffle_stage(x, 0x44444444, 0x22222222, 1);
   if(rs2 & 2) x = shuffle_stage(x, 0x30303030, 0x0C0C0C0C, 2);
@@ -98,7 +98,7 @@ xlen_t grev(xlen_t rs1, xlen_t rs2){
   return x;
 }
 
-static xlen_t shfl(xlen_t rs1, xlen_t rs2){
+xlen_t shfl(xlen_t rs1, xlen_t rs2){
   xlen_t x = rs1;
   if(rs2 & 16) x = shuffle_stage(x, 0x0000FFFF00000000LL, 0x00000000FFFF0000LL, 16);
   if(rs2 &  8) x = shuffle_stage(x, 0x00FF000000FF0000LL, 0x0000FF000000FF00LL,  8);
@@ -108,7 +108,7 @@ static xlen_t shfl(xlen_t rs1, xlen_t rs2){
   return x;
 }
 
-static xlen_t unshfl(xlen_t rs1, xlen_t rs2){
+xlen_t unshfl(xlen_t rs1, xlen_t rs2){
   xlen_t x = rs1;
   if(rs2 &  1) x = shuffle_stage(x, 0x4444444444444444LL, 0x2222222222222222LL,  1);
   if(rs2 &  2) x = shuffle_stage(x, 0x3030303030303030LL, 0x0C0C0C0C0C0C0C0CLL,  2);
@@ -119,11 +119,6 @@ static xlen_t unshfl(xlen_t rs1, xlen_t rs2){
 }
 
 #endif
-
-xlen_t shuffle(xlen_t rs1, xlen_t rs2){
-  if(rs2 & 1) return unshfl(rs1, (rs2 >> 1));
-  else        return shfl  (rs1, (rs2 >> 1));
-}
 
 xlen_t bext(xlen_t rs1, xlen_t rs2){
   xlen_t r = 0;
