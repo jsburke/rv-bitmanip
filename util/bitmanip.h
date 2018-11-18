@@ -7,10 +7,12 @@
 #define XLEN 32
 typedef uint32_t xlen_t;
 #define PR_HEX PRIx32
+#define SC_DEC SCNu32
 #elif  RV64
 #define XLEN 64
 typedef uint64_t xlen_t;
 #define PR_HEX PRIx64
+#define SC_DEC SCNu64
 #else
 #error "RV32 or RV64 must be declared"
 #endif
