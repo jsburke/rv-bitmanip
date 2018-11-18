@@ -36,4 +36,21 @@ xlen_t grev  (xlen_t rs1, xlen_t rs2);
 xlen_t shfl  (xlen_t rs1, xlen_t rs2);
 xlen_t unshfl(xlen_t rs1, xlen_t rs2);
 
+#ifdef RV64
+// 32 bit insns for 64bit mode
+xlen_t clzw (xlen_t rs1);
+xlen_t ctzw (xlen_t rs1);
+xlen_t pcntw(xlen_t rs1);
+
+xlen_t slow (xlen_t rs1, xlen_t rs2);
+xlen_t srow (xlen_t rs1, xlen_t rs2);
+xlen_t rolw (xlen_t rs1, xlen_t rs2);
+xlen_t rorw (xlen_t rs1, xlen_t rs2);
+xlen_t bextw(xlen_t rs1, xlen_t rs2);
+xlen_t bdepw(xlen_t rs1, xlen_t rs2);
+
+xlen_t shflw  (xlen_t rs1, xlen_t rs2);
+xlen_t unshflw(xlen_t rs1, xlen_t rs2);
+#endif
+
 #endif //BITMANIP_H

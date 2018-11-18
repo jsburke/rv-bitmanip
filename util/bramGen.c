@@ -159,5 +159,52 @@ int main(int argc, char *argv[]){
     res[i] = unshfl(rs1[i], rs2[i]);
   xlen_hex_write("./unshfl.hex", res, no_entries);
 
+  #ifdef RV64
+  for(int i = 0; i < no_entries; i++)
+    res[i] = clzw(rs1[i]);
+  xlen_hex_write("./clzw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = ctzw(rs1[i]);
+  xlen_hex_write("./ctzw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = pcntw(rs1[i]);
+  xlen_hex_write("./pcntw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = slow(rs1[i], rs2[i]);
+  xlen_hex_write("./slow.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = srow(rs1[i], rs2[i]);
+  xlen_hex_write("./srow.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = rolw(rs1[i], rs2[i]);
+  xlen_hex_write("./rolw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = rorw(rs1[i], rs2[i]);
+  xlen_hex_write("./rorw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = bextw(rs1[i], rs2[i]);
+  xlen_hex_write("./bextw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = bdepw(rs1[i], rs2[i]);
+  xlen_hex_write("./bdepw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = shflw(rs1[i], rs2[i]);
+  xlen_hex_write("./shflw.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = unshflw(rs1[i], rs2[i]);
+  xlen_hex_write("./unshflw.hex", res, no_entries);
+
+  #endif
+
   return 0;
 }
