@@ -14,12 +14,25 @@ CFLAGS += -Wswitch-default -Wunreachable-code
 ifdef UTIL_DBG
   # gdb and -O3 or -Ofast sounds like a nightmare...
 C_OPT   = -O0
-CFLAGS  = -g
+CFLAGS += -g
 endif
 
   # compress everything for easy use in recie
 CC_FULL = $(CC) $(C_OPT) $(CFLAGS)
 
+#################################################
+##                                             ##
+##  Disassembling                              ##
+##                                             ##
+#################################################
+
+DD = objdump
+D_FLAGS = -D
+ifdef UTIL_DBG
+D_FLAGS += -g
+endif
+
+DD_FULL = $(DD) $(D_FLAGS)
 #################################################
 ##                                             ##
 ##  Source Files                               ##
@@ -51,8 +64,12 @@ bramGen%: bitmanip%.o
 repl%: bitmanip%.o
 	$(CC_FULL) -DRV$* -o $@ $^ repl.c
 
+%.dump: %
+	$(DD_FULL) $^ > $@
+
+
 .PHONY: all
-all: bramGen32 bramGen64 repl32 repl64
+all: bramGen32 bramGen64 repl32 repl64 bramGen32.dump bramGen64.dump repl32.dump repl64.dump  
 
 .PHONY: rebuild
 rebuild:
@@ -61,7 +78,7 @@ rebuild:
 	
 .PHONY: clean
 clean:
-	rm -rf $(OBJS)
+	rm -rf $(OBJS) *.dump
 
 .PHONY: help
 help:
