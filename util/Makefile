@@ -31,7 +31,7 @@ SOBJ = bitmanip.c
 HDR  = bitmanip.h
 
 OBJ_DEP = $(SOBJ) $(HDR)
-OBJS    = bitmanip32.o bitmanip64.o bramGen32 bramGen64
+OBJS    = bitmanip*.o bramGen32 repl32 bramGen64 repl64
 
 #################################################
 ##                                             ##
@@ -42,17 +42,17 @@ OBJS    = bitmanip32.o bitmanip64.o bramGen32 bramGen64
 .PHONY: default
 default: all
 
-# changes to bramGen.c seem more likely
-.PRECIOUS: $(OBJS)
-
 bitmanip%.o: $(OBJ_DEP)
 	$(CC_FULL) -DRV$* $(SOBJ) -c -o $@
 
 bramGen%: bitmanip%.o
 	$(CC_FULL) -DRV$* -o $@ $^ bramGen.c  
 
+repl%: bitmanip%.o
+	$(CC_FULL) -DRV$* -o $@ $^ repl.c
+
 .PHONY: all
-all: bramGen32 bramGen64
+all: bramGen32 bramGen64 repl32 repl64
 
 .PHONY: rebuild
 rebuild:
@@ -73,6 +73,8 @@ help:
 	@echo "     bitmanip[32,64].o --- make [32,64] bit insn C funcs"
 	@echo " "
 	@echo "     bramGen[32,64]    --- make bram generation program"
+	@echo " "
+	@echo "     repl[32,64]       --- make repls for quick bitmanip calcs"
 	@echo " "
 	@echo "   ************ ALIASES ************"
 	@echo " "
