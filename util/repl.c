@@ -174,7 +174,6 @@ void main(){
       i++;
     }
 
-//    for(i = 0; i < ARGS_COUNT; i ++) printf("\n cli_nums[%d] = %" PR_HEX, i, cli_nums[i]);
     eval_print(insn, cli_nums);
 
   } // end of repl loop
