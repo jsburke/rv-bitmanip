@@ -51,17 +51,17 @@ insn_t insn_key(char *insn_str){
   printf("\ninsn key : %s\n", insn_str);
 
 #ifdef RV64 // OP-32 instructions
-  if(strncmp(insn_str, "clzw",    3) == 0) return CLZW;
-  if(strncmp(insn_str, "ctzw",    3) == 0) return CTZW;
-  if(strncmp(insn_str, "pcntw",   4) == 0) return PCNTW;
-  if(strncmp(insn_str, "slow",    3) == 0) return SLOW;
-  if(strncmp(insn_str, "srow",    3) == 0) return SROW;
-  if(strncmp(insn_str, "rorw",    3) == 0) return RORW;
-  if(strncmp(insn_str, "rolw",    3) == 0) return ROLW;
-  if(strncmp(insn_str, "shflw",   4) == 0) return SHFLW;
-  if(strncmp(insn_str, "unshflw", 6) == 0) return UNSHFLW;
-  if(strncmp(insn_str, "bextw",   4) == 0) return BEXTW;
-  if(strncmp(insn_str, "bdepw",   4) == 0) return CLZW;
+  if(strncmp(insn_str, "clzw",    4) == 0) return CLZW;
+  if(strncmp(insn_str, "ctzw",    4) == 0) return CTZW;
+  if(strncmp(insn_str, "pcntw",   5) == 0) return PCNTW;
+  if(strncmp(insn_str, "slow",    4) == 0) return SLOW;
+  if(strncmp(insn_str, "srow",    4) == 0) return SROW;
+  if(strncmp(insn_str, "rorw",    4) == 0) return RORW;
+  if(strncmp(insn_str, "rolw",    4) == 0) return ROLW;
+  if(strncmp(insn_str, "shflw",   5) == 0) return SHFLW;
+  if(strncmp(insn_str, "unshflw", 7) == 0) return UNSHFLW;
+  if(strncmp(insn_str, "bextw",   5) == 0) return BEXTW;
+  if(strncmp(insn_str, "bdepw",   5) == 0) return CLZW;
 #endif
   if(strncmp(insn_str, "clz",    3)  == 0) return CLZ;
   if(strncmp(insn_str, "ctz",    3)  == 0) return CTZ;
