@@ -128,7 +128,7 @@ void eval_print(insn_t insn, xlen_t *nums){
   }
 }
 
-void main(){
+int main(){
 
   insn_t insn;         // operation to perform
 //  xlen_t scratch      [VAR_COUNT] = {0};
@@ -161,7 +161,12 @@ void main(){
 
     printf("\n > ");
     cli_count = getline(&cli_letters, &cli_sz, stdin);
-   
+  
+    if(cli_count > REPL_LEN){
+      printf("\n  Prior command was longer than repl buffer.");
+      continue;
+    }
+ 
     fflush(stdin);
 
     token = strtok(cli_letters, " ");
@@ -177,5 +182,5 @@ void main(){
     eval_print(insn, cli_nums);
 
   } // end of repl loop
-  // end of main
+  return 0;
 }
