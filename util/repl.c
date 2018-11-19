@@ -170,7 +170,7 @@ void main(){
     int i = 0;
     while((i < ARGS_COUNT)){
       if((token = strtok(NULL, " ")) == NULL) break;
-      cli_nums[i] = strtol(token, NULL, 0);
+      cli_nums[i] = strtoull(token, NULL, 0);
       i++;
     }
 
