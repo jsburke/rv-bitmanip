@@ -11,7 +11,10 @@ const int bitness = 32;
 const int bitness = 64;
 #endif
 
-#define REPL_LEN 256
+#define REPL_LEN   256
+#define VAR_COUNT  16
+#define RS_COUNT   3
+#define ARGS_COUNT 16
 
 void str_lower(char *s){
   for(;*s;++s) *s = tolower(*s);
@@ -44,11 +47,14 @@ typedef enum insn {INVALID,
                    BEXTW,
                    BDEPW,
 #endif
+//                   STORE_MULT,
+//                   STORE,
+//                   PRINT,
                    EXIT} insn_t;
 
 insn_t insn_key(char *insn_str){
-  str_lower(insn_str);
-  printf("\ninsn key : %s\n", insn_str);
+
+  str_lower(insn_str); // make our life with strncmp a bit simpler
 
 #ifdef RV64 // OP-32 instructions
   if(strncmp(insn_str, "clzw",    4) == 0) return CLZW;
@@ -78,22 +84,61 @@ insn_t insn_key(char *insn_str){
   if(strncmp(insn_str, "andc",   4)  == 0) return ANDC;
   if(strncmp(insn_str, "exit",   4)  == 0) return EXIT;
 
+  // scratch mem controls
+//  if(strncmp(insn_str, "store_m", 7) == 0) return STORE_MULT;
+//  if(strncmp(insn_str, "store",   5) == 0) return STORE;
+//  if(strncmp(insn_str, "print",   5) == 0) return PRINT;
+
   return INVALID;
+}
+
+void eval_print(insn_t insn, xlen_t *nums){
+  xlen_t res;
+  if(insn == INVALID) printf("\n  Invalid Operation");
+  else if(insn == EXIT) printf("\n Exiting\n");
+  else {
+    res = (insn == CLZ)      ? clz(nums[0]) :
+          (insn == CTZ)      ? ctz(nums[0]) :
+          (insn == PCNT)     ? pcnt(nums[0]) :
+          (insn == SRO)      ? sro(nums[0], nums[1]) :
+          (insn == SLO)      ? slo(nums[0], nums[1]) :
+          (insn == ROR)      ? ror(nums[0], nums[1]) :
+          (insn == ROL)      ? rol(nums[0], nums[1]) :
+          (insn == GREV)     ? grev(nums[0], nums[1]) :
+          (insn == SHFL)     ? shfl(nums[0], nums[1]) :
+          (insn == UNSHFL)   ? unshfl(nums[0], nums[1]) :
+          (insn == BEXT)     ? bext(nums[0], nums[1]) :
+          (insn == BDEP)     ? bdep(nums[0], nums[1]) :
+#ifdef RV64
+          (insn == CLZW)     ? clzw(nums[0]) :
+          (insn == CTZW)     ? ctzw(nums[0]) :
+          (insn == PCNTW)    ? pcntw(nums[0]) :
+          (insn == SROW)     ? srow(nums[0], nums[1]) :
+          (insn == SLOW)     ? slow(nums[0], nums[1]) :
+          (insn == RORW)     ? rorw(nums[0], nums[1]) :
+          (insn == ROLW)     ? rolw(nums[0], nums[1]) :
+          (insn == SHFLW)    ? shflw(nums[0], nums[1]) :
+          (insn == UNSHFLW)  ? unshflw(nums[0], nums[1]) :
+          (insn == BEXTW)    ? bextw(nums[0], nums[1]) :
+          (insn == BDEPW)    ? bdepw(nums[0], nums[1]) :
+#endif
+                               andc(nums[0], nums[1]);
+  
+    printf("\n   %0" PR_HEX, res);
+  }
 }
 
 void main(){
 
-  insn_t insn = INVALID;
-
-  int word;
-
+  insn_t insn;         // operation to perform
+//  xlen_t scratch      [VAR_COUNT] = {0};
+  xlen_t cli_nums     [ARGS_COUNT];
+ 
   char  *cli_letters = (char *) malloc(REPL_LEN * sizeof(char));
   size_t cli_sz = REPL_LEN;
   size_t cli_count;
  
   char *token;
- 
-  xlen_t rs1, rs2;
 
   printf("**********************************\n");
   printf("*                                *\n");
@@ -108,31 +153,30 @@ void main(){
   printf("*      given the two inputs.     *\n");
   printf("*      Some ops ignore rs2.      *\n");
   printf("*                                *\n");
-  printf("**********************************\n\n");
+  printf("**********************************\n");
 
   while(insn != EXIT){
-    printf(" >  ");
+
+    insn = INVALID; //prefill
+
+    printf("\n > ");
     cli_count = getline(&cli_letters, &cli_sz, stdin);
-    word = 0;
    
     fflush(stdin);
 
     token = strtok(cli_letters, " ");
     insn = insn_key(token);
-    
 
-/*    while((token = strtok_r(cli_mirror, " ", &cli_mirror))){
-      printf("\ntoken = %s", token);
-      switch(word){
-        case 0 : insn = insn_key(token);
-                 break;
-        case 1 : rs1  = strtol(token, NULL, 10);
-                 break;
-        case 2 : rs1  = strtol(token, NULL, 10);
-                 break;
-      }
-    word++;
-    }*/
-  }
+    int i = 0;
+    while((i < ARGS_COUNT)){
+      if((token = strtok(NULL, " ")) == NULL) break;
+      cli_nums[i] = strtol(token, NULL, 0);
+      i++;
+    }
+
+//    for(i = 0; i < ARGS_COUNT; i ++) printf("\n cli_nums[%d] = %" PR_HEX, i, cli_nums[i]);
+    eval_print(insn, cli_nums);
+
+  } // end of repl loop
   // end of main
 }
