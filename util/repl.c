@@ -31,29 +31,54 @@ typedef enum insn {INVALID,
                    BEXT,
                    BDEP,
                    ANDC,
+#ifdef RV64  // OP-32 instructions
+                   CLZW,
+                   CTZW,
+                   PCNTW,
+                   SROW,
+                   SLOW,
+                   RORW,
+                   ROLW,
+                   SHFLW,
+                   UNSHFLW,
+                   BEXTW,
+                   BDEPW,
+#endif
                    EXIT} insn_t;
 
 insn_t insn_key(char *insn_str){
-  insn_t res = INVALID;
   str_lower(insn_str);
   printf("\ninsn key : %s\n", insn_str);
 
-  if(strncmp(insn_str, "clz",    3)    == 0) res = CLZ;
-  if(strncmp(insn_str, "ctz",    3)    == 0) res = CTZ;
-  if(strncmp(insn_str, "pcnt",   4)   == 0) res = PCNT;
-  if(strncmp(insn_str, "slo",    3)    == 0) res = SLO;
-  if(strncmp(insn_str, "sro",    3)    == 0) res = SRO;
-  if(strncmp(insn_str, "ror",    3)    == 0) res = ROR;
-  if(strncmp(insn_str, "rol",    3)    == 0) res = ROL;
-  if(strncmp(insn_str, "grev",   4)   == 0) res = GREV;
-  if(strncmp(insn_str, "shfl",   4)   == 0) res = SHFL;
-  if(strncmp(insn_str, "unshfl", 6) == 0) res = UNSHFL;
-  if(strncmp(insn_str, "bext",   4)   == 0) res = BEXT;
-  if(strncmp(insn_str, "bdep",   4)   == 0) res = CLZ;
-  if(strncmp(insn_str, "andc",   4)   == 0) res = ANDC;
-  if(strncmp(insn_str, "exit",   4)   == 0) res = EXIT;
+#ifdef RV64 // OP-32 instructions
+  if(strncmp(insn_str, "clzw",    3) == 0) return CLZW;
+  if(strncmp(insn_str, "ctzw",    3) == 0) return CTZW;
+  if(strncmp(insn_str, "pcntw",   4) == 0) return PCNTW;
+  if(strncmp(insn_str, "slow",    3) == 0) return SLOW;
+  if(strncmp(insn_str, "srow",    3) == 0) return SROW;
+  if(strncmp(insn_str, "rorw",    3) == 0) return RORW;
+  if(strncmp(insn_str, "rolw",    3) == 0) return ROLW;
+  if(strncmp(insn_str, "shflw",   4) == 0) return SHFLW;
+  if(strncmp(insn_str, "unshflw", 6) == 0) return UNSHFLW;
+  if(strncmp(insn_str, "bextw",   4) == 0) return BEXTW;
+  if(strncmp(insn_str, "bdepw",   4) == 0) return CLZW;
+#endif
+  if(strncmp(insn_str, "clz",    3)  == 0) return CLZ;
+  if(strncmp(insn_str, "ctz",    3)  == 0) return CTZ;
+  if(strncmp(insn_str, "pcnt",   4)  == 0) return PCNT;
+  if(strncmp(insn_str, "slo",    3)  == 0) return SLO;
+  if(strncmp(insn_str, "sro",    3)  == 0) return SRO;
+  if(strncmp(insn_str, "ror",    3)  == 0) return ROR;
+  if(strncmp(insn_str, "rol",    3)  == 0) return ROL;
+  if(strncmp(insn_str, "grev",   4)  == 0) return GREV;
+  if(strncmp(insn_str, "shfl",   4)  == 0) return SHFL;
+  if(strncmp(insn_str, "unshfl", 6)  == 0) return UNSHFL;
+  if(strncmp(insn_str, "bext",   4)  == 0) return BEXT;
+  if(strncmp(insn_str, "bdep",   4)  == 0) return CLZ;
+  if(strncmp(insn_str, "andc",   4)  == 0) return ANDC;
+  if(strncmp(insn_str, "exit",   4)  == 0) return EXIT;
 
-  return res;
+  return INVALID;
 }
 
 void main(){
