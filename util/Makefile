@@ -44,7 +44,9 @@ SOBJ = bitmanip.c
 HDR  = bitmanip.h
 
 OBJ_DEP = $(SOBJ) $(HDR)
-OBJS    = bitmanip*.o bramGen32 repl32 bramGen64 repl64
+BIN     = bramGen32 bramGen64 repl32 repl64
+DUMPS   = $(addsuffix .dump,$(BIN)) 
+OBJS    = $(BIN) $(DUMPS) 
 
 #################################################
 ##                                             ##
@@ -67,9 +69,12 @@ repl%: bitmanip%.o
 %.dump: %
 	$(DD_FULL) $^ > $@
 
-
 .PHONY: all
-all: bramGen32 bramGen64 repl32 repl64 bramGen32.dump bramGen64.dump repl32.dump repl64.dump  
+all: bramGen32 bramGen64 repl32 repl64 
+
+.PHONY: dumps
+dumps:
+	make $(DUMPS)
 
 .PHONY: rebuild
 rebuild:
@@ -78,7 +83,7 @@ rebuild:
 	
 .PHONY: clean
 clean:
-	rm -rf $(OBJS) *.dump
+	rm -rf $(OBJS)
 
 .PHONY: help
 help:
