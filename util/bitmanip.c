@@ -12,9 +12,6 @@ static xlen_t clz_generic(xlen_t rs1, int xlen){
     if(rs1 >> (XLEN - 1)) return count;
     rs1 <<= 1;
   }
-/*  for(int count = 0; count < xlen; count++)
-    if((rs1 << count) >> (xlen - 1))
-      return count;*/
   return xlen;
 }
 
