@@ -28,7 +28,7 @@ import BitManipMeta :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-function IterState fv_state_init(BitManipOp op, Bool arg1_lsb);
+function IterState fv_state_init(BitManipOp op);
   case(op) matches
     CLZ      : return S_Calc;
     CTZ      : return S_Calc;
@@ -356,7 +356,7 @@ module mkBitManipIter (BitManip_IFC);
     rg_setter   <= arg0;
 
     rg_operation <= op_sel;
-    rg_state     <= fv_state_init (op_sel, unpack(arg1[0])); 
+    rg_state     <= fv_state_init (op_sel); 
 
     `ifdef HW_DIAG
     rg_cycle     <= 0;  // init for diagnostic build

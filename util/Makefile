@@ -14,12 +14,25 @@ CFLAGS += -Wswitch-default -Wunreachable-code
 ifdef UTIL_DBG
   # gdb and -O3 or -Ofast sounds like a nightmare...
 C_OPT   = -O0
-CFLAGS  = -g
+CFLAGS += -g
 endif
 
   # compress everything for easy use in recie
 CC_FULL = $(CC) $(C_OPT) $(CFLAGS)
 
+#################################################
+##                                             ##
+##  Disassembling                              ##
+##                                             ##
+#################################################
+
+DD = objdump
+D_FLAGS = -D
+ifdef UTIL_DBG
+D_FLAGS += -g
+endif
+
+DD_FULL = $(DD) $(D_FLAGS)
 #################################################
 ##                                             ##
 ##  Source Files                               ##
@@ -31,7 +44,9 @@ SOBJ = bitmanip.c
 HDR  = bitmanip.h
 
 OBJ_DEP = $(SOBJ) $(HDR)
-OBJS    = bitmanip32.o bitmanip64.o bramGen32 bramGen64
+BIN     = bramGen32 bramGen64 repl32 repl64
+DUMPS   = $(addsuffix .dump,$(BIN)) 
+OBJS    = $(BIN) $(DUMPS) 
 
 #################################################
 ##                                             ##
@@ -42,17 +57,24 @@ OBJS    = bitmanip32.o bitmanip64.o bramGen32 bramGen64
 .PHONY: default
 default: all
 
-# changes to bramGen.c seem more likely
-.PRECIOUS: $(OBJS)
-
 bitmanip%.o: $(OBJ_DEP)
 	$(CC_FULL) -DRV$* $(SOBJ) -c -o $@
 
 bramGen%: bitmanip%.o
 	$(CC_FULL) -DRV$* -o $@ $^ bramGen.c  
 
+repl%: bitmanip%.o
+	$(CC_FULL) -DRV$* -o $@ $^ repl.c
+
+%.dump: %
+	$(DD_FULL) $^ > $@
+
 .PHONY: all
-all: bramGen32 bramGen64
+all: bramGen32 bramGen64 repl32 repl64 
+
+.PHONY: dumps
+dumps:
+	make $(DUMPS)
 
 .PHONY: rebuild
 rebuild:
@@ -73,6 +95,8 @@ help:
 	@echo "     bitmanip[32,64].o --- make [32,64] bit insn C funcs"
 	@echo " "
 	@echo "     bramGen[32,64]    --- make bram generation program"
+	@echo " "
+	@echo "     repl[32,64]       --- make repls for quick bitmanip calcs"
 	@echo " "
 	@echo "   ************ ALIASES ************"
 	@echo " "
