@@ -226,26 +226,22 @@ xlen_t bdepw(xlen_t rs1, xlen_t rs2){
   return bdep_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 0x00000000FFFFFFFFLL, 32);
 }
 
-xlen_t shflw(xlen_t rs1, xlen_t rs2){
+
+// leaving (un)shflw operations commented because it was a fun exercize
+// and may help someone's understanding in the future
+//
+// uncommenting these and re-enabling in the repl will show that they
+// are covered by (un)shfl so long as the only bits set in rs2 are of the four lowest
+/*xlen_t shflw(xlen_t rs1, xlen_t rs2){
   xlen_t x     = rs1 & 0x00000000FFFFFFFFLL;
   int    shamt = rs2 & 15;
-
-  if(shamt & 8) x = shuffle_stage(x, 0x0000000000FF0000LL, 0x000000000000FF00LL, 8);
-  if(shamt & 4) x = shuffle_stage(x, 0x000000000F000F00LL, 0x0000000000F000F0LL, 4);
-  if(shamt & 2) x = shuffle_stage(x, 0x0000000030303030LL, 0x000000000C0C0C0CLL, 2);
-  if(shamt & 1) x = shuffle_stage(x, 0x0000000044444444LL, 0x0000000022222222LL, 1);
-  return x;
+  return shfl(x, shamt);
 }
 
 xlen_t unshflw(xlen_t rs1, xlen_t rs2){
   xlen_t x     = rs1 & 0x00000000FFFFFFFFLL;
   int    shamt = rs2 & 15;
-
-  if(shamt & 1) x = shuffle_stage(x, 0x0000000044444444LL, 0x0000000022222222LL, 1);
-  if(shamt & 2) x = shuffle_stage(x, 0x0000000030303030LL, 0x000000000C0C0C0CLL, 2);
-  if(shamt & 4) x = shuffle_stage(x, 0x000000000F000F00LL, 0x0000000000F000F0LL, 4);
-  if(shamt & 8) x = shuffle_stage(x, 0x0000000000FF0000LL, 0x000000000000FF00LL, 8);
-  return x;
-}
+  return unshfl(x, shamt);
+}*/
 
 #endif

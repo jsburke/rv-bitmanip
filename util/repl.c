@@ -42,8 +42,9 @@ typedef enum insn {INVALID,
                    SLOW,
                    RORW,
                    ROLW,
-                   SHFLW,
-                   UNSHFLW,
+// see bitmanip.c for (un)shflw notes
+//                   SHFLW,
+//                   UNSHFLW,
                    BEXTW,
                    BDEPW,
 #endif
@@ -64,8 +65,8 @@ insn_t insn_key(char *insn_str){
   if(strncmp(insn_str, "srow",    4) == 0) return SROW;
   if(strncmp(insn_str, "rorw",    4) == 0) return RORW;
   if(strncmp(insn_str, "rolw",    4) == 0) return ROLW;
-  if(strncmp(insn_str, "shflw",   5) == 0) return SHFLW;
-  if(strncmp(insn_str, "unshflw", 7) == 0) return UNSHFLW;
+//  if(strncmp(insn_str, "shflw",   5) == 0) return SHFLW;
+//  if(strncmp(insn_str, "unshflw", 7) == 0) return UNSHFLW;
   if(strncmp(insn_str, "bextw",   5) == 0) return BEXTW;
   if(strncmp(insn_str, "bdepw",   5) == 0) return BDEPW;
 #endif
@@ -117,8 +118,8 @@ void eval_print(insn_t insn, xlen_t *nums){
           (insn == SLOW)     ? slow(nums[0], nums[1]) :
           (insn == RORW)     ? rorw(nums[0], nums[1]) :
           (insn == ROLW)     ? rolw(nums[0], nums[1]) :
-          (insn == SHFLW)    ? shflw(nums[0], nums[1]) :
-          (insn == UNSHFLW)  ? unshflw(nums[0], nums[1]) :
+//          (insn == SHFLW)    ? shflw(nums[0], nums[1]) :
+//          (insn == UNSHFLW)  ? unshflw(nums[0], nums[1]) :
           (insn == BEXTW)    ? bextw(nums[0], nums[1]) :
           (insn == BDEPW)    ? bdepw(nums[0], nums[1]) :
 #endif

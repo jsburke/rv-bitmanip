@@ -49,8 +49,9 @@ xlen_t rorw (xlen_t rs1, xlen_t rs2);
 xlen_t bextw(xlen_t rs1, xlen_t rs2);
 xlen_t bdepw(xlen_t rs1, xlen_t rs2);
 
-xlen_t shflw  (xlen_t rs1, xlen_t rs2);
-xlen_t unshflw(xlen_t rs1, xlen_t rs2);
+// see comments in bitmanip.c for (un)shflw
+//xlen_t shflw  (xlen_t rs1, xlen_t rs2);
+//xlen_t unshflw(xlen_t rs1, xlen_t rs2);
 #endif
 
 #endif //BITMANIP_H

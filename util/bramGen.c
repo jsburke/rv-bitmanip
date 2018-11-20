@@ -196,13 +196,15 @@ int main(int argc, char *argv[]){
     res[i] = bdepw(rs1[i], rs2[i]);
   xlen_hex_write("./bdepw.hex", res, no_entries);
 
-  for(int i = 0; i < no_entries; i++)
+// see bitmanip.c for (un)shflw notes
+
+/*  for(int i = 0; i < no_entries; i++)
     res[i] = shflw(rs1[i], rs2[i]);
   xlen_hex_write("./shflw.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = unshflw(rs1[i], rs2[i]);
-  xlen_hex_write("./unshflw.hex", res, no_entries);
+  xlen_hex_write("./unshflw.hex", res, no_entries);*/
 
   #endif
 
