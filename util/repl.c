@@ -67,7 +67,7 @@ insn_t insn_key(char *insn_str){
   if(strncmp(insn_str, "shflw",   5) == 0) return SHFLW;
   if(strncmp(insn_str, "unshflw", 7) == 0) return UNSHFLW;
   if(strncmp(insn_str, "bextw",   5) == 0) return BEXTW;
-  if(strncmp(insn_str, "bdepw",   5) == 0) return CLZW;
+  if(strncmp(insn_str, "bdepw",   5) == 0) return BDEPW;
 #endif
   if(strncmp(insn_str, "clz",    3)  == 0) return CLZ;
   if(strncmp(insn_str, "ctz",    3)  == 0) return CTZ;
@@ -80,7 +80,7 @@ insn_t insn_key(char *insn_str){
   if(strncmp(insn_str, "shfl",   4)  == 0) return SHFL;
   if(strncmp(insn_str, "unshfl", 6)  == 0) return UNSHFL;
   if(strncmp(insn_str, "bext",   4)  == 0) return BEXT;
-  if(strncmp(insn_str, "bdep",   4)  == 0) return CLZ;
+  if(strncmp(insn_str, "bdep",   4)  == 0) return BDEP;
   if(strncmp(insn_str, "andc",   4)  == 0) return ANDC;
   if(strncmp(insn_str, "exit",   4)  == 0) return EXIT;
 
