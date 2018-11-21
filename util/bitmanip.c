@@ -189,41 +189,46 @@ xlen_t unshfl(xlen_t rs1, xlen_t rs2){
 }
 
 // OP-32 insns
+xlen_t upper_32 = 0xFFFFFFFF00000000LL;
+xlen_t lower_32 = 0x00000000FFFFFFFFLL; 
+
 xlen_t clzw(xlen_t rs1){
   return clz_generic(rs1 << 32, 32);
 }
 
 xlen_t ctzw(xlen_t rs1){
-  return ctz_generic(rs1 & 0x00000000FFFFFFFFLL, 32);
+  return ctz_generic(rs1 & lower_32, 32);
 }
 
-
 xlen_t pcntw(xlen_t rs1){
-  return pcnt_generic(rs1 & 0x00000000FFFFFFFFLL, 32);
+  return pcnt_generic(rs1 & lower_32, 32);
 }
 
 xlen_t slow(xlen_t rs1, xlen_t rs2){
-  return slo_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 31, 32);
+  return lower_32 & slo_generic(rs1 & lower_32, rs2 & 31, 32);
 }
 
 xlen_t srow(xlen_t rs1, xlen_t rs2){
-  return sro_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 31, 32);
+  xlen_t sro_raw = sro_generic(rs1 & lower_32, rs2 & 31, 32);
+  return ((sro_raw & upper_32) >> 32) | (sro_raw & lower_32);
 }
 
 xlen_t rolw(xlen_t rs1, xlen_t rs2){
-  return rol_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 31, 32);
+  xlen_t rol_raw = rol_generic(rs1 & lower_32, rs2 & 31, 32);
+  return ((rol_raw & upper_32) >> 32) | (rol_raw & lower_32);
 }
 
 xlen_t rorw(xlen_t rs1, xlen_t rs2){
-  return ror_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 31, 32);
+  xlen_t ror_raw = ror_generic(rs1 & lower_32, rs2 & 31, 32);
+  return ((ror_raw & upper_32) >> 32) | (ror_raw & lower_32);
 }
 
 xlen_t bextw(xlen_t rs1, xlen_t rs2){
-  return bext_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 0x00000000FFFFFFFFLL, 32);
+  return bext_generic(rs1 & lower_32, rs2 & lower_32, 32);
 }
 
 xlen_t bdepw(xlen_t rs1, xlen_t rs2){
-  return bdep_generic(rs1 & 0x00000000FFFFFFFFLL, rs2 & 0x00000000FFFFFFFFLL, 32);
+  return bdep_generic(rs1 & lower_32, rs2 & lower_32, 32);
 }
 
 
@@ -233,13 +238,13 @@ xlen_t bdepw(xlen_t rs1, xlen_t rs2){
 // uncommenting these and re-enabling in the repl will show that they
 // are covered by (un)shfl so long as the only bits set in rs2 are of the four lowest
 /*xlen_t shflw(xlen_t rs1, xlen_t rs2){
-  xlen_t x     = rs1 & 0x00000000FFFFFFFFLL;
+  xlen_t x     = rs1 & lower_32;
   int    shamt = rs2 & 15;
   return shfl(x, shamt);
 }
 
 xlen_t unshflw(xlen_t rs1, xlen_t rs2){
-  xlen_t x     = rs1 & 0x00000000FFFFFFFFLL;
+  xlen_t x     = rs1 & lower_32;
   int    shamt = rs2 & 15;
   return unshfl(x, shamt);
 }*/
