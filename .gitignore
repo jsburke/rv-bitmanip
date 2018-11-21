@@ -22,7 +22,11 @@
 xbitmanip-draft.pdf
 bramGen32
 bramGen64
+repl32
+repl64
 /tb32
 /tb64
 /veri32
 /veri64
+/archive/*.h
+/bsv/*.h
