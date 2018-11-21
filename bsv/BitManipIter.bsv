@@ -127,14 +127,6 @@ module mkBitManipIter (BitManip_IFC);
   Bool exit_bext_bdep      = (rg_control == 0) || (rg_setter == 0) &&
                              ((rg_operation == BEXT) || (rg_operation == BDEP)); 
 
-/*  Bool exit_shfl           = (rg_operation == SHFL)   && ((rg_state == S_Stage_1) || (rg_control == 0));
-  Bool exit_unshfl         = (rg_operation == UNSHFL) && ((rg_control == 0) ||
-                             `ifdef RV64
-                             (rg_state     == S_Stage_16));
-                             `else
-                             (rg_state     == S_Stage_8));
-                             `endif */
-
   // andc not handled here
 
   Bool terminate_right_shift = is_right_shift_op  && (exit_zero_count || exit_ones_count ||
