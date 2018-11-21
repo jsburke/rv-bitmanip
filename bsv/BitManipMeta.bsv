@@ -225,4 +225,27 @@ function BitXL fv_control_init (BitManipOp op, BitXL arg0, BitXL arg1);
   endcase
 endfunction
 
+function IterState fv_state_init(BitManipOp op);
+  case(op) matches
+    CLZ      : return S_Calc;
+    CTZ      : return S_Calc;
+    PCNT     : return S_Calc;
+    SRO      : return S_Calc;
+    SLO      : return S_Calc;
+    ROR      : return S_Calc;
+    ROL      : return S_Calc;
+    GREV     : return S_Stage_1;
+    `ifdef RV32  // this shuffle portion will likely get messy...
+    SHFL     : return S_Stage_8;
+    `elsif RV64
+    SHFL     : return S_Stage_16;
+    `endif
+    UNSHFL   : return S_Stage_1;
+    BEXT     : return S_Calc;
+    BDEP     : return S_Calc;
+    ANDC     : return S_Idle; // andc not managed here
+    default  : return S_Idle;
+  endcase
+endfunction: fv_state_init
+
 endpackage: BitManipMeta
