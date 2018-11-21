@@ -41,6 +41,17 @@ String unshfl_file  = bram_locate("unshfl");
 String bext_file    = bram_locate("bext"); 
 String bdep_file    = bram_locate("bdep"); 
 
+`ifdef RV64
+String clzw_file    = bram_locate("clzw"); 
+String ctzw_file    = bram_locate("ctzw"); 
+String pcntw_file   = bram_locate("pcntw"); 
+String srow_file    = bram_locate("srow"); 
+String slow_file    = bram_locate("slow"); 
+String rorw_file    = bram_locate("rorw"); 
+String rolw_file    = bram_locate("rolw"); 
+String bextw_file   = bram_locate("bextw"); 
+String bdepw_file   = bram_locate("bdepw");
+`endif
 
 typedef `TEST_COUNT BRAM_ENTRIES;
 typedef TLog #(BRAM_ENTRIES) LOG_BRAM_ENTRIES;
