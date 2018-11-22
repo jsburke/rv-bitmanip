@@ -212,10 +212,11 @@ module mkModuleTb (Empty);
 
     dut.args_put(arg0,
                  arg1,
+                 rg_operation
                  `ifdef RV64
-                 rg_32_bit,
+                 ,rg_32_bit
                  `endif
-                 rg_operation);
+                 );
 
     rg_state <= Dut_Wait;
   endrule: tb_dut_init
