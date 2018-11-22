@@ -198,7 +198,7 @@ module mkBitManipIter (BitManip_IFC);
       $display("   control    -- %h", rg_control);
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
-      $display("   terminating - %b", terminate_Left_shift);
+      $display("   terminating - %b", terminate_left_shift);
       rg_cycle <= rg_cycle + 1;
     `endif
     if (terminate_left_shift) rg_state <= S_Idle;
