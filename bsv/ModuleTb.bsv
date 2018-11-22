@@ -7,7 +7,6 @@ package ModuleTb;
 /////////////////////////////////////////////////
 
 import BRAMCore     :: *;
-import Vector       :: *;
 
 /////////////////////////////////////////////////
 //                                             //
@@ -28,6 +27,7 @@ import BitManipIter :: *;  // likely to be ifdeffed as other modules are made
 // fn mainly to neaten rules
 function BitManipOp fv_nextOp(BitManipOp op);
   case (op) matches
+    ANDC    : return CLZ;
     CLZ     : return CTZ;
     CTZ     : return PCNT;
     PCNT    : return SRO;
@@ -39,11 +39,29 @@ function BitManipOp fv_nextOp(BitManipOp op);
     SHFL    : return UNSHFL;
     UNSHFL  : return BEXT;
     BEXT    : return BDEP;
+    `ifdef RV32
     BDEP    : return ANDC;
-    ANDC    : return CLZ;
+    `elsif 
+    BDEP    : return CLZW;
+    CLZW    : return CTZW;
+    CTZW    : return PCNTW;
+    PCNTW   : return SROW;
+    SROW    : return SLOW;
+    SLOW    : return RORW;
+    RORW    : return ROLW;
+    ROLW    : return BEXTW;
+    BEXTW   : return BDEPW;
+    BDEPW   : return ANDC;
+    `endif
     default : return CLZ; // ensures we kickoff in CLZ
   endcase
 endfunction: fv_nextOp
+
+`ifdef RV32
+BitManipOp final_operation = BDEP;
+`elsif RV64
+BitManipOp final_operation = BDEPW;
+`endif
 
 typedef enum {Op_Init,
               Mem_Init,
@@ -59,6 +77,9 @@ module mkModuleTb (Empty);
   Reg #(TbState)    rg_state       <- mkReg(Op_Init);
   Reg #(BitManipOp) rg_operation   <- mkReg(ANDC); // init to dummy state for fn ease
   Reg #(Bool)       rg_was_failure <- mkReg(False);
+  `ifdef RV64
+  Reg #(Bool)       rg_32_bit      <- mkReg(False);
+  `endif
 
   Reg #(BitXL)      rg_rs1         <- mkRegU;
   Reg #(BitXL)      rg_rs2         <- mkRegU;
@@ -81,6 +102,18 @@ module mkModuleTb (Empty);
   BRAM_PORT #(BramEntry, BitXL) bext   <- mkBRAMCore1Load(bram_entries, False, bext_file  , False);
   BRAM_PORT #(BramEntry, BitXL) bdep   <- mkBRAMCore1Load(bram_entries, False, bdep_file  , False);
 
+  `ifdef RV64
+  BRAM_PORT #(BramEntry, BitXL) clzw   <- mkBRAMCore1Load(bram_entries, False, clzw_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) ctzw   <- mkBRAMCore1Load(bram_entries, False, ctzw_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) pcntw  <- mkBRAMCore1Load(bram_entries, False, pcntw_file , False);
+  BRAM_PORT #(BramEntry, BitXL) srow   <- mkBRAMCore1Load(bram_entries, False, srow_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) slow   <- mkBRAMCore1Load(bram_entries, False, slow_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) rorw   <- mkBRAMCore1Load(bram_entries, False, rorw_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) rolw   <- mkBRAMCore1Load(bram_entries, False, rolw_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) bextw  <- mkBRAMCore1Load(bram_entries, False, bextw_file , False);
+  BRAM_PORT #(BramEntry, BitXL) bdepw  <- mkBRAMCore1Load(bram_entries, False, bdepw_file , False);
+  `endif
+
   BitManip_IFC dut <- mkBitManipIter;
 
   ///////////////////////////
@@ -95,6 +128,9 @@ module mkModuleTb (Empty);
     `endif 
 
     rg_operation <= fv_nextOp(rg_operation);
+    `ifdef
+    rg_32_bit    <= (rg_operation == BDEP) ? True : False;
+    `endif
     rg_state     <= Mem_Init;
   endrule: tb_op_init
 
@@ -109,18 +145,29 @@ module mkModuleTb (Empty);
     rs2.put   (False, rg_bram_offset, 0);
 
     case (rg_operation) matches
-      CLZ    : clz.put   (False, rg_bram_offset, 0);
-      CTZ    : ctz.put   (False, rg_bram_offset, 0);
-      PCNT   : pcnt.put  (False, rg_bram_offset, 0);
-      SRO    : sro.put   (False, rg_bram_offset, 0);
-      SLO    : slo.put   (False, rg_bram_offset, 0);
-      ROR    : ror.put   (False, rg_bram_offset, 0);
-      ROL    : rol.put   (False, rg_bram_offset, 0);
-      GREV   : grev.put  (False, rg_bram_offset, 0);
-      SHFL   : shfl.put  (False, rg_bram_offset, 0);
-      UNSHFL : unshfl.put(False, rg_bram_offset, 0);
-      BEXT   : bext.put  (False, rg_bram_offset, 0);
-      BDEP   : bdep.put  (False, rg_bram_offset, 0);
+      CLZ    : clz.put    (False, rg_bram_offset, 0);
+      CTZ    : ctz.put    (False, rg_bram_offset, 0);
+      PCNT   : pcnt.put   (False, rg_bram_offset, 0);
+      SRO    : sro.put    (False, rg_bram_offset, 0);
+      SLO    : slo.put    (False, rg_bram_offset, 0);
+      ROR    : ror.put    (False, rg_bram_offset, 0);
+      ROL    : rol.put    (False, rg_bram_offset, 0);
+      GREV   : grev.put   (False, rg_bram_offset, 0);
+      SHFL   : shfl.put   (False, rg_bram_offset, 0);
+      UNSHFL : unshfl.put (False, rg_bram_offset, 0);
+      BEXT   : bext.put   (False, rg_bram_offset, 0);
+      BDEP   : bdep.put   (False, rg_bram_offset, 0);
+      `ifdef RV64
+      CLZW   : clzw.put   (False, rg_bram_offset, 0);
+      CTZW   : ctzw.put   (False, rg_bram_offset, 0);
+      PCNTW  : pcntw.put  (False, rg_bram_offset, 0);
+      SROW   : srow.put   (False, rg_bram_offset, 0);
+      SLOW   : slow.put   (False, rg_bram_offset, 0);
+      RORW   : rorw.put   (False, rg_bram_offset, 0);
+      ROLW   : rolw.put   (False, rg_bram_offset, 0);
+      BEXTW  : bextw.put  (False, rg_bram_offset, 0);
+      BDEPW  : bdepw.put  (False, rg_bram_offset, 0);
+      `endif
     endcase
 
     rg_state <= Dut_Init;
@@ -148,11 +195,27 @@ module mkModuleTb (Empty);
               (rg_operation == UNSHFL) ? unshfl.read :
               (rg_operation == BEXT)   ? bext.read   :
               (rg_operation == BDEP)   ? bdep.read   :
+              `ifdef RV64
+              (rg_operation == CLZW)   ? clzw.read   :
+              (rg_operation == CTZW)   ? ctzw.read   :
+              (rg_operation == PCNTW)  ? pcntw.read  :
+              (rg_operation == SROW)   ? srow.read   :
+              (rg_operation == SLOW)   ? slow.read   :
+              (rg_operation == RORW)   ? rorw.read   :
+              (rg_operation == ROLW)   ? rolw.read   :
+              (rg_operation == BEXTW)  ? bextw.read  :
+              (rg_operation == BDEPW)  ? bdepw.read  :
+              `endif
               0; 
 
     rg_rd <= res;
 
-    dut.args_put(arg0, arg1, rg_operation);
+    dut.args_put(arg0,
+                 arg1,
+                 `ifdef RV64
+                 rg_32_bit,
+                 `endif
+                 rg_operation);
 
     rg_state <= Dut_Wait;
   endrule: tb_dut_init
@@ -166,7 +229,12 @@ module mkModuleTb (Empty);
     end
   endrule: tb_dut_wait
 
-
+  `ifdef RV32
+  Bool rs2_useful = !((rg_operation == CLZ)  || (rg_operation == CTZ)  || (rg_operation == PCNT));
+  `elsif RV64
+  Bool rs2_useful = !((rg_operation == CLZ)  || (rg_operation == CTZ)  || (rg_operation == PCNT) ||
+                      (rg_operation == CLZW) || (rg_operation == CTZW) || (rg_operation == PCNTW));
+  `endif
 
   rule tb_dut_return (rg_state == Dut_Return);
     let fail = rg_dut_res != rg_rd;
@@ -177,9 +245,8 @@ module mkModuleTb (Empty);
     else      $display("  --- PASS ------");
 
               $display("   rs1     : %h", rg_rs1);
-    if (!((rg_operation == CLZ) || (rg_operation == CTZ) || (rg_operation == PCNT))) begin //rs1 only
+    if (rs2_useful) 
               $display("   rs2     : %h", rg_rs2);
-    end
 
     if (fail) $display("expected   : %h", rg_rd); 
               $display("calculated : %h", rg_dut_res);
@@ -188,7 +255,7 @@ module mkModuleTb (Empty);
     rg_bram_offset <= rg_bram_offset + 1;
 
     if (rg_bram_offset != fromInteger(bram_limit)) rg_state <= Mem_Init;
-    else if (rg_operation != BDEP)                 rg_state <= Op_Init;
+    else if (rg_operation != final_operation)      rg_state <= Op_Init;
     else                                           rg_state <= Tb_Exit;
   endrule: tb_dut_return
 
