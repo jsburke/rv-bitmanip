@@ -125,6 +125,10 @@ module mkModuleTb (Empty);
   rule tb_op_init (rg_state == Op_Init);
     `ifdef TEST_VERBOSE
     $display("----- Begin Tests for ", fshow(fv_nextOp(rg_operation)));
+    `ifdef RV64
+    if(rg_32_bit) $display("----- 32 bit mode -----");
+    else          $display("----- 64 bit mode -----");
+    `endif
     `endif 
 
     rg_operation <= fv_nextOp(rg_operation);
