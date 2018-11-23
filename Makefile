@@ -15,7 +15,7 @@ XLEN ?= 32# set default to 32 or 64 bit
 ##                                             ##
 #################################################
 
-TEST_COUNT ?= 32    # Number of tests to run
+TEST_COUNT ?= 16    # Number of tests to run
 
 TB_DIR  = $(PROJ_HOME)/tb$(XLEN)
 BSC_FLAGS = XLEN=$(XLEN) TEST_COUNT=$(TEST_COUNT)
@@ -23,6 +23,7 @@ BSC_FLAGS = XLEN=$(XLEN) TEST_COUNT=$(TEST_COUNT)
 #HW_DBG = on # enables nice debug prints in HW simulation (archive dir only)
 TEST_VERBOSE = on # enables info to come out of tests
 #HW_DIAG      = on # enables stat prints, cycle reg in bit manip modules
+TB_HARD_FAIL = on
 
 ifdef TEST_VERBOSE
 BSC_FLAGS += TEST_VERBOSE=on
@@ -37,6 +38,9 @@ endif
 BSV = $(PROJ_HOME)/bsv
 ifdef HW_DIAG
 BSC_FLAGS += HW_DIAG=on
+endif
+ifdef TB_HARD_FAIL
+BSC_FLAGS += TB_HARD_FAIL=on
 endif
 
 #################################################
@@ -133,11 +137,12 @@ test-all: $(TB_DIR)
 .PHONY: all
 all:
 	make utils
-	make bram
-#	make bram XLEN=64
-	make ModuleTb
-#	$(MAKE) -C $(BSV) clean
-#	make ModuleTb XLEN=64
+#	make bram
+	make bram XLEN=64
+#	make ModuleTb
+	$(MAKE) -C $(BSV) clean
+	make ModuleTb XLEN=64
+	$(MAKE) -C $(BSV) clean
 
 .PHONY: clean
 clean:

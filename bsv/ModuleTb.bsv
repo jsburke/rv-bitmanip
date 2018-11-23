@@ -68,6 +68,9 @@ typedef enum {Op_Init,
               Dut_Init,
               Dut_Wait,
               Dut_Return,
+              `ifdef TB_HARD_FAIL
+              Tb_Hard_Fail,
+              `endif
               Tb_Exit} TbState deriving (Eq, Bits, FShow);
 
 (* synthesize *)
@@ -259,6 +262,10 @@ module mkModuleTb (Empty);
     
     rg_bram_offset <= rg_bram_offset + 1;
 
+    `ifdef TB_HARD_FAIL
+    if(fail) rg_state <= Tb_Hard_Fail;
+    else
+    `endif
     if (rg_bram_offset != fromInteger(bram_limit)) rg_state <= Mem_Init;
     else if (rg_operation != final_operation)      rg_state <= Op_Init;
     else                                           rg_state <= Tb_Exit;
@@ -273,6 +280,13 @@ module mkModuleTb (Empty);
     $finish(0);
   endrule: tb_exit
 
+
+  `ifdef TB_HARD_FAIL
+  rule tb_hard_fail (rg_state == Tb_Hard_Fail);
+    $display("--- Exiting on Failure ---");
+    $finish(0);
+  endrule: tb_hard_fail
+  `endif
 
 
 endmodule: mkModuleTb

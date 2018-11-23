@@ -10,6 +10,7 @@ XLEN        ?= 32
 TEST_COUNT  ?= 16
 #TEST_VERBOSE = on
 #HW_DIAG      = on
+#TB_HARD_FAIL = on
 
 BSC ?= bsc
 
@@ -22,6 +23,9 @@ BLUESIM_DEFINES += -D TEST_VERBOSE
 endif
 ifdef HW_DIAG
 BLUESIM_DEFINES += -D HW_DIAG
+endif
+ifdef TB_HARD_FAIL
+BLUESIM_DEFINES += -D TB_HARD_FAIL
 endif
 
 BLUESIM_S1 = -u -sim
