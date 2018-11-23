@@ -41,7 +41,7 @@ function BitManipOp fv_nextOp(BitManipOp op);
     BEXT    : return BDEP;
     `ifdef RV32
     BDEP    : return ANDC;
-    `elsif 
+    `else 
     BDEP    : return CLZW;
     CLZW    : return CTZW;
     CTZW    : return PCNTW;
