@@ -345,13 +345,16 @@ module mkBitManipIter (BitManip_IFC);
                          `endif
                           ) if (rg_state == S_Idle);
 
-    rg_res     <= fv_result_init  (op_sel, arg0);
+    let res_init     = fv_result_init  (op_sel, arg0);
     `ifdef RV32
-    rg_control <= fv_control_init (op_sel, arg0, arg1);
-    `elsif
-    rg_control <= fv_control_init (op_sel, arg0, arg1, is_32bit);
+    let control_init = fv_control_init (op_sel, arg0, arg1);
+    `elsif RV64
+    let control_init = fv_control_init (op_sel, arg0, arg1, is_32bit);
     `endif
 
+    rg_res     <= res_init; 
+    rg_control <= control_init;
+ 
     // assigning the below in a slightly sloppy fashion since
     // only the pack operations utilize them (grev uses seed)
     rg_seed     <= 1;
@@ -366,6 +369,21 @@ module mkBitManipIter (BitManip_IFC);
 
     `ifdef HW_DIAG
     rg_cycle     <= 0;  // init for diagnostic build
+    $display("--------------------------------------");
+    $display("   BitManipIter Arg Put               ");
+    $display("   Operation: ", fshow(op_sel));
+    `ifdef RV64
+    if(!is_32bit)
+      $display("   64 bit mode ");
+    else
+      $display("   32 bit mode ");
+    $display(" ");
+    $display("     Res     init : %h", res_init);
+    $display("     Control init : %h", control_init);
+    $display("     Seed always inits to 1");
+    $display("     Setter  init : %h", arg0);
+    $display("--------------------------------------");
+    `endif
     `endif
 
   endmethod: args_put
