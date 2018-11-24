@@ -134,8 +134,6 @@ module mkBitManipIter (BitManip_IFC);
   Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
 
-  Bool result_valid          = terminate_right_shift || terminate_left_shift || terminate_grev ||
-                               terminate_shfl        || terminate_bext_bdep;
   /////////////////////////
   //                     //
   // Rules               //
@@ -345,10 +343,11 @@ module mkBitManipIter (BitManip_IFC);
                          `endif
                           ) if (rg_state == S_Idle);
 
-    let res_init     = fv_result_init  (op_sel, arg0);
     `ifdef RV32
+    let res_init     = fv_result_init  (op_sel, arg0);
     let control_init = fv_control_init (op_sel, arg0, arg1);
     `elsif RV64
+    let res_init     = fv_result_init  (op_sel, arg0, is_32bit);
     let control_init = fv_control_init (op_sel, arg0, arg1, is_32bit);
     `endif
 

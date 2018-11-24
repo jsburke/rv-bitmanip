@@ -213,14 +213,22 @@ endinterface: BitManip_IFC
 
 // functions to set registers in the modules on args_put
 // question: put these in BitManipIter.bsv???
-function BitXL fv_result_init (BitManipOp op, BitXL arg0);
+function BitXL fv_result_init (BitManipOp op,
+                               BitXL arg0
+                               `ifdef RV64
+                               ,Bool is_32_bit
+                               `endif
+                               );
+
   `ifdef RV32
-  let is_zero_init = (op == CLZ)  || (op == CTZ)  || (op == PCNT)  || (op == BEXT)  || (op == BDEP);  
+    let is_zero_init = (op == CLZ)  || (op == CTZ)  || (op == PCNT)  || (op == BEXT)  || (op == BDEP);  
+    return (is_zero_init) ? 0 : arg0; // not super worried about how andc behaves here...
   `elsif RV64
-  let is_zero_init = (op == CLZ)  || (op == CTZ)  || (op == PCNT)  || (op == BEXT)  || (op == BDEP) ||
-                      (op == CLZW) || (op == CTZW) || (op == PCNTW) || (op == BEXTW) || (op == BDEPW) ;  
+    let is_zero_init = (op == CLZ)  || (op == CTZ)  || (op == PCNT)  || (op == BEXT)  || (op == BDEP) ||
+                       (op == CLZW) || (op == CTZW) || (op == PCNTW) || (op == BEXTW) || (op == BDEPW) ;  
+    return (is_zero_init) ? 0 : (is_32_bit) ? (arg0 & lower_32) : arg0;
   `endif
-  return (is_zero_init) ? 0 : arg0; // not super worried about how andc behaves here...
+
 endfunction: fv_result_init
 
 `ifdef RV64
