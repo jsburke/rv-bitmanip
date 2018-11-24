@@ -43,25 +43,10 @@ function BitManipOp fv_nextOp(BitManipOp op);
     BDEP    : return ANDC;
     `else 
     BDEP    : return CLZ;//W;
-/*    CLZW    : return CTZW;
-    CTZW    : return PCNTW;
-    PCNTW   : return SROW;
-    SROW    : return SLOW;
-    SLOW    : return RORW;
-    RORW    : return ROLW;
-    ROLW    : return BEXTW;
-    BEXTW   : return BDEPW;
-    BDEPW   : return ANDC;*/
     `endif
     default : return CLZ; // ensures we kickoff in CLZ
   endcase
 endfunction: fv_nextOp
-
-`ifdef RV32
-BitManipOp final_operation = BDEP;
-`elsif RV64
-BitManipOp final_operation = BDEPW;
-`endif
 
 typedef enum {Op_Init,
               Mem_Init,
