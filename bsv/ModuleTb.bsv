@@ -106,15 +106,18 @@ module mkModuleTb (Empty);
   BRAM_PORT #(BramEntry, BitXL) bdep   <- mkBRAMCore1Load(bram_entries, False, bdep_file  , False);
 
   `ifdef RV64
-  BRAM_PORT #(BramEntry, BitXL) clz32  <- mkBRAMCore1Load(bram_entries, False, clzw_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) ctz32  <- mkBRAMCore1Load(bram_entries, False, ctzw_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) pcnt32 <- mkBRAMCore1Load(bram_entries, False, pcntw_file , False);
-  BRAM_PORT #(BramEntry, BitXL) sro32  <- mkBRAMCore1Load(bram_entries, False, srow_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) slo32  <- mkBRAMCore1Load(bram_entries, False, slow_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) ror32  <- mkBRAMCore1Load(bram_entries, False, rorw_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) rol32  <- mkBRAMCore1Load(bram_entries, False, rolw_file  , False);
-  BRAM_PORT #(BramEntry, BitXL) bext32 <- mkBRAMCore1Load(bram_entries, False, bextw_file , False);
-  BRAM_PORT #(BramEntry, BitXL) bdep32 <- mkBRAMCore1Load(bram_entries, False, bdepw_file , False);
+  BRAM_PORT #(BramEntry, BitXL) clz32    <- mkBRAMCore1Load(bram_entries, False, clz32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) ctz32    <- mkBRAMCore1Load(bram_entries, False, ctz32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) pcnt32   <- mkBRAMCore1Load(bram_entries, False, pcnt32_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) sro32    <- mkBRAMCore1Load(bram_entries, False, sro32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) slo32    <- mkBRAMCore1Load(bram_entries, False, slo32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) ror32    <- mkBRAMCore1Load(bram_entries, False, ror32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) rol32    <- mkBRAMCore1Load(bram_entries, False, rol32_file   , False);
+  BRAM_PORT #(BramEntry, BitXL) grev32   <- mkBRAMCore1Load(bram_entries, False, grev32_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) shfl32   <- mkBRAMCore1Load(bram_entries, False, shfl32_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) unshfl32 <- mkBRAMCore1Load(bram_entries, False, unshfl32_file, False);
+  BRAM_PORT #(BramEntry, BitXL) bext32   <- mkBRAMCore1Load(bram_entries, False, bext32_file  , False);
+  BRAM_PORT #(BramEntry, BitXL) bdep32   <- mkBRAMCore1Load(bram_entries, False, bdep32_file  , False);
   `endif
 
   BitManip_IFC dut <- mkBitManipIter;
@@ -172,34 +175,21 @@ module mkModuleTb (Empty);
     end
     else begin
       case (rg_operation) matches
-        CLZ    : clz32.put  (False, rg_bram_offset, 0);
-        CTZ    : ctz32.put  (False, rg_bram_offset, 0);
-        PCNT   : pcnt32.put (False, rg_bram_offset, 0);
-        SRO    : sro32.put  (False, rg_bram_offset, 0);
-        SLO    : slo32.put  (False, rg_bram_offset, 0);
-        ROR    : ror32.put  (False, rg_bram_offset, 0);
-        ROL    : rol32.put  (False, rg_bram_offset, 0);
-//        GREV   : grev.put   (False, rg_bram_offset, 0);  // no W insn, but should still test
-//        SHFL   : shfl.put   (False, rg_bram_offset, 0);  // in case we can run a 32 bit mode
-//        UNSHFL : unshfl.put (False, rg_bram_offset, 0);  // in a RV64 proc??
-        BEXT   : bext32.put (False, rg_bram_offset, 0);
-        BDEP   : bdep32.put (False, rg_bram_offset, 0);
+        CLZ    : clz32.put    (False, rg_bram_offset, 0);
+        CTZ    : ctz32.put    (False, rg_bram_offset, 0);
+        PCNT   : pcnt32.put   (False, rg_bram_offset, 0);
+        SRO    : sro32.put    (False, rg_bram_offset, 0);
+        SLO    : slo32.put    (False, rg_bram_offset, 0);
+        ROR    : ror32.put    (False, rg_bram_offset, 0);
+        ROL    : rol32.put    (False, rg_bram_offset, 0);
+        GREV   : grev32.put   (False, rg_bram_offset, 0);  // no W insn, but should still test
+        SHFL   : shfl32.put   (False, rg_bram_offset, 0);  // in case we can run a 32 bit mode
+        UNSHFL : unshfl32.put (False, rg_bram_offset, 0);  // in a RV64 proc??
+        BEXT   : bext32.put   (False, rg_bram_offset, 0);
+        BDEP   : bdep32.put   (False, rg_bram_offset, 0);
       endcase
     end
     `endif
-
-/*      `ifdef RV64
-      CLZW   : clzw.put   (False, rg_bram_offset, 0);
-      CTZW   : ctzw.put   (False, rg_bram_offset, 0);
-      PCNTW  : pcntw.put  (False, rg_bram_offset, 0);
-      SROW   : srow.put   (False, rg_bram_offset, 0);
-      SLOW   : slow.put   (False, rg_bram_offset, 0);
-      RORW   : rorw.put   (False, rg_bram_offset, 0);
-      ROLW   : rolw.put   (False, rg_bram_offset, 0);
-      BEXTW  : bextw.put  (False, rg_bram_offset, 0);
-      BDEPW  : bdepw.put  (False, rg_bram_offset, 0);
-      `endif
-    endcase */
 
     rg_state <= Dut_Init;
   endrule: tb_mem_init
@@ -229,18 +219,19 @@ module mkModuleTb (Empty);
               (rg_operation == BDEP)   ? bdep.read   :
               0;
     `elsif RV64
-    let res = ((rg_operation == CLZ)    && (!rg_32_bit)) ? clz.read    :
-              ((rg_operation == CTZ)    && (!rg_32_bit)) ? ctz.read    :
-              ((rg_operation == PCNT)   && (!rg_32_bit)) ? pcnt.read   :
-              ((rg_operation == SRO)    && (!rg_32_bit)) ? sro.read    :
-              ((rg_operation == SLO)    && (!rg_32_bit)) ? slo.read    :
-              ((rg_operation == ROR)    && (!rg_32_bit)) ? ror.read    :
-              ((rg_operation == ROL)    && (!rg_32_bit)) ? rol.read    :
-              ((rg_operation == GREV)   && (!rg_32_bit)) ? grev.read   :
-              ((rg_operation == SHFL)   && (!rg_32_bit)) ? shfl.read   :
-              ((rg_operation == UNSHFL) && (!rg_32_bit)) ? unshfl.read :
-              ((rg_operation == BEXT)   && (!rg_32_bit)) ? bext.read   :
-              ((rg_operation == BDEP)   && (!rg_32_bit)) ? bdep.read   :
+    let res = ((rg_operation == CLZ)    && (!rg_32_bit)) ? clz.read      :
+              ((rg_operation == CTZ)    && (!rg_32_bit)) ? ctz.read      :
+              ((rg_operation == PCNT)   && (!rg_32_bit)) ? pcnt.read     :
+              ((rg_operation == SRO)    && (!rg_32_bit)) ? sro.read      :
+              ((rg_operation == SLO)    && (!rg_32_bit)) ? slo.read      :
+              ((rg_operation == ROR)    && (!rg_32_bit)) ? ror.read      :
+              ((rg_operation == ROL)    && (!rg_32_bit)) ? rol.read      :
+              ((rg_operation == GREV)   && (!rg_32_bit)) ? grev.read     :
+              ((rg_operation == SHFL)   && (!rg_32_bit)) ? shfl.read     :
+              ((rg_operation == UNSHFL) && (!rg_32_bit)) ? unshfl.read   :
+              ((rg_operation == BEXT)   && (!rg_32_bit)) ? bext.read     :
+              ((rg_operation == BDEP)   && (!rg_32_bit)) ? bdep.read     :
+              //  64 bit above              32 bit below
               ((rg_operation == CLZ)    &&  (rg_32_bit)) ? clz32.read    :
               ((rg_operation == CTZ)    &&  (rg_32_bit)) ? ctz32.read    :
               ((rg_operation == PCNT)   &&  (rg_32_bit)) ? pcnt32.read   :
@@ -248,9 +239,9 @@ module mkModuleTb (Empty);
               ((rg_operation == SLO)    &&  (rg_32_bit)) ? slo32.read    :
               ((rg_operation == ROR)    &&  (rg_32_bit)) ? ror32.read    :
               ((rg_operation == ROL)    &&  (rg_32_bit)) ? rol32.read    :
-//              ((rg_operation == GREV)   &&  (rg_32_bit)) ? grev.read   :
-//              ((rg_operation == SHFL)   &&  (rg_32_bit)) ? shfl.read   :
-//              ((rg_operation == UNSHFL) &&  (rg_32_bit)) ? unshfl.read :
+              ((rg_operation == GREV)   &&  (rg_32_bit)) ? grev32.read   :
+              ((rg_operation == SHFL)   &&  (rg_32_bit)) ? shfl32.read   :
+              ((rg_operation == UNSHFL) &&  (rg_32_bit)) ? unshfl32.read :
               ((rg_operation == BEXT)   &&  (rg_32_bit)) ? bext32.read   :
               ((rg_operation == BDEP)   &&  (rg_32_bit)) ? bdep32.read   :
               0;
@@ -278,12 +269,7 @@ module mkModuleTb (Empty);
     end
   endrule: tb_dut_wait
 
-//  `ifdef RV32
   Bool rs2_useful = !((rg_operation == CLZ)  || (rg_operation == CTZ)  || (rg_operation == PCNT));
-//  `elsif RV64
-//  Bool rs2_useful = !((rg_operation == CLZ)  || (rg_operation == CTZ)  || (rg_operation == PCNT) ||
-//                      (rg_operation == CLZW) || (rg_operation == CTZW) || (rg_operation == PCNTW));
-//  `endif
 
   `ifdef RV32
   Bool inc_op = rg_operation != BDEP;
