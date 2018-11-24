@@ -52,6 +52,12 @@ xlen_t bdepw(xlen_t rs1, xlen_t rs2);
 // see comments in bitmanip.c for (un)shflw
 //xlen_t shflw  (xlen_t rs1, xlen_t rs2);
 //xlen_t unshflw(xlen_t rs1, xlen_t rs2);
+
+// see notes in bitmanip.c
+// used in bramGen, not invoked in repl64
+xlen_t grev_32  (xlen_t rs1, xlen_t rs2);
+xlen_t shfl_32  (xlen_t rs1, xlen_t rs2);
+xlen_t unshfl_32(xlen_t rs1, xlen_t rs2);
 #endif
 
 #endif //BITMANIP_H

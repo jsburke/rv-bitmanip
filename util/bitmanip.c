@@ -249,4 +249,17 @@ xlen_t unshflw(xlen_t rs1, xlen_t rs2){
   return unshfl(x, shamt);
 }*/
 
+// 32 bit mode grev and shfl in RV64
+// not real insns, mainly for testing ease
+xlen_t grev_32(xlen_t rs1, xlen_t rs2){
+  return grev(rs1 & lower_32, rs2 & 31);
+}
+
+xlen_t shfl_32(xlen_t rs1, xlen_t rs2){
+  return shfl(rs1 & lower_32, rs2 & 15);
+}
+
+xlen_t unshfl_32(xlen_t rs1, xlen_t rs2){
+  return unshfl(rs1 & lower_32, rs2 & 15);
+}
 #endif
