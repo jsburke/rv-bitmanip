@@ -260,8 +260,8 @@ function BitXL fv_control_init (BitManipOp op,
       ROR     : return arg1[(log_xlen - 1) : 0];
       ROL     : return arg1[(log_xlen - 1) : 0];
       GREV    : return arg1[(log_xlen - 1) : 0];
-      SHFL    : return reverseBits(arg1) >> (xlen - 4);   
-      UNSHFL  : return arg1[(log_xlen - 2) : 0];
+      SHFL    : return reverseBits(arg1) >> (xlen - 4);  // need - 5 in RV64 
+      UNSHFL  : return arg1[(log_xlen - 2) : 0];         // how to generalize??
       BEXT    : return arg1;
       BDEP    : return arg1;
       default : return 0; // expecting andc, want this to be poor behaving
