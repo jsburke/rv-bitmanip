@@ -22,7 +22,7 @@ BSC_FLAGS = XLEN=$(XLEN) TEST_COUNT=$(TEST_COUNT)
 
 #HW_DBG = on # enables nice debug prints in HW simulation (archive dir only)
 TEST_VERBOSE = on # enables info to come out of tests
-#HW_DIAG      = on # enables stat prints, cycle reg in bit manip modules
+HW_DIAG      = on # enables stat prints, cycle reg in bit manip modules
 TB_HARD_FAIL = on
 
 ifdef TEST_VERBOSE
@@ -137,12 +137,12 @@ test-all: $(TB_DIR)
 .PHONY: all
 all:
 	make utils
-#	make bram
-	make bram XLEN=64
-#	make ModuleTb
+	make bram
+#	make bram XLEN=64
+	make ModuleTb
 	$(MAKE) -C $(BSV) clean
-	make ModuleTb XLEN=64
-	$(MAKE) -C $(BSV) clean
+#	make ModuleTb XLEN=64
+#	$(MAKE) -C $(BSV) clean
 
 .PHONY: clean
 clean:
