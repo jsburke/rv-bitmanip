@@ -42,15 +42,18 @@ String bext_file    = bram_locate("bext");
 String bdep_file    = bram_locate("bdep"); 
 
 `ifdef RV64
-String clzw_file    = bram_locate("clzw"); 
-String ctzw_file    = bram_locate("ctzw"); 
-String pcntw_file   = bram_locate("pcntw"); 
-String srow_file    = bram_locate("srow"); 
-String slow_file    = bram_locate("slow"); 
-String rorw_file    = bram_locate("rorw"); 
-String rolw_file    = bram_locate("rolw"); 
-String bextw_file   = bram_locate("bextw"); 
-String bdepw_file   = bram_locate("bdepw");
+String clz32_file    = bram_locate("clz32"); 
+String ctz32_file    = bram_locate("ctz32"); 
+String pcnt32_file   = bram_locate("pcnt32"); 
+String sro32_file    = bram_locate("sro32"); 
+String slo32_file    = bram_locate("slo32"); 
+String ror32_file    = bram_locate("ror32"); 
+String rol32_file    = bram_locate("rol32"); 
+String grev32_file   = bram_locate("grev32"); 
+String shfl32_file   = bram_locate("shfl32"); 
+String unshfl32_file = bram_locate("unshfl32"); 
+String bext32_file   = bram_locate("bext32"); 
+String bdep32_file   = bram_locate("bdep32");
 `endif
 
 typedef `TEST_COUNT BRAM_ENTRIES;
