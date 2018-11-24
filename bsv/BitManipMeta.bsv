@@ -282,7 +282,11 @@ function BitXL fv_control_init (BitManipOp op,
   `endif
 endfunction
 
-function IterState fv_state_init(BitManipOp op);
+function IterState fv_state_init(BitManipOp op
+                                 `ifdef RV64
+                                 ,Bool is_32_bit
+                                 `endif
+                                 );
   case(op) matches
     CLZ      : return S_Calc;
     CTZ      : return S_Calc;
@@ -292,10 +296,10 @@ function IterState fv_state_init(BitManipOp op);
     ROR      : return S_Calc;
     ROL      : return S_Calc;
     GREV     : return S_Stage_1;
-    `ifdef RV32  // this shuffle portion will likely get messy...
+    `ifdef RV32  
     SHFL     : return S_Stage_8;
     `elsif RV64
-    SHFL     : return S_Stage_16;
+    SHFL     : return (is_32_bit) ? S_Stage_8 : S_Stage_16;
     `endif
     UNSHFL   : return S_Stage_1;
     BEXT     : return S_Calc;

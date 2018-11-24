@@ -206,7 +206,8 @@ module mkBitManipIter (BitManip_IFC);
       let new_lsb = (rg_operation == ROL) ? reverseBits(rg_res & msb_set) : lsb_set;
       `elsif RV64
       let rol_shamt = (rg_32_bit) ? 32 : 0;
-      let new_lsb = (rg_operation == ROL) ? (reverseBits(rg_res & msb_set) >> rol_shamt) : lsb_set;
+      let rol_msb = (rg_32_bit) ? msb_set_32 : msb_set;
+      let new_lsb = (rg_operation == ROL) ? (reverseBits(rg_res & rol_msb) >> rol_shamt) : lsb_set;
       `endif
 
       rg_res     <= ((rg_res << 1) | new_lsb);
@@ -293,7 +294,7 @@ module mkBitManipIter (BitManip_IFC);
                     (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
                     (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
                     `ifdef RV64
-                    (rg_state == S_Stage_16) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
+                    ((rg_state == S_Stage_16) && !rg_32_bit) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
                     `endif
                     rg_res;  // safe defalut??
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
@@ -346,9 +347,11 @@ module mkBitManipIter (BitManip_IFC);
     `ifdef RV32
     let res_init     = fv_result_init  (op_sel, arg0);
     let control_init = fv_control_init (op_sel, arg0, arg1);
+    let state_init   = fv_state_init (op_sel);   
     `elsif RV64
     let res_init     = fv_result_init  (op_sel, arg0, is_32bit);
     let control_init = fv_control_init (op_sel, arg0, arg1, is_32bit);
+    let state_init   = fv_state_init (op_sel, is_32bit);   
     `endif
 
     rg_res     <= res_init; 
@@ -360,7 +363,7 @@ module mkBitManipIter (BitManip_IFC);
     rg_setter   <= arg0;
 
     rg_operation <= op_sel;
-    rg_state     <= fv_state_init (op_sel); 
+    rg_state     <= state_init; 
 
     `ifdef RV64
     rg_32_bit    <= is_32bit;
