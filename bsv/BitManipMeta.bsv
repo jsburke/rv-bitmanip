@@ -235,7 +235,7 @@ function BitXL fv_control_init (BitManipOp op,
                                 `endif
                                 );
   `ifdef RV64
-  if(is_32_bit) begin  // "W" operations
+  if(is_32_bit) begin
     case (op) matches
       CLZ     : return reverseBits(arg0) >> 32;
       CTZ     : return arg0 & lower_32;
@@ -244,9 +244,12 @@ function BitXL fv_control_init (BitManipOp op,
       SLO     : return arg1[(log_xlen - 2) : 0];
       ROR     : return arg1[(log_xlen - 2) : 0];
       ROL     : return arg1[(log_xlen - 2) : 0];
+      GREV    : return arg1[(log_xlen - 2) : 0];
+      SHFL    : return reverseBits(arg1) >> (xlen - 4);
+      UNSHFL  : return arg1[(log_xlen - 2) : 0];       
       BEXT    : return arg1 & lower_32;
       BDEP    : return arg1 & lower_32;
-      default : return 0; // expecting andc, want this to be poor behaving
+      default : return 0;
     endcase
   end
   else begin
@@ -260,8 +263,8 @@ function BitXL fv_control_init (BitManipOp op,
       ROR     : return arg1[(log_xlen - 1) : 0];
       ROL     : return arg1[(log_xlen - 1) : 0];
       GREV    : return arg1[(log_xlen - 1) : 0];
-      SHFL    : return reverseBits(arg1) >> (xlen - 4);  // need - 5 in RV64 
-      UNSHFL  : return arg1[(log_xlen - 2) : 0];         // how to generalize??
+      SHFL    : return reverseBits(arg1) >> (xlen - (log_xlen - 1));
+      UNSHFL  : return arg1[(log_xlen - 2) : 0];
       BEXT    : return arg1;
       BDEP    : return arg1;
       default : return 0; // expecting andc, want this to be poor behaving
