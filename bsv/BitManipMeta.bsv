@@ -202,27 +202,98 @@ endinterface: BitManip_IFC
 
 // functions to set registers in the modules on args_put
 // question: put these in BitManipIter.bsv???
-function BitXL fv_result_init (BitManipOp op, BitXL arg0);
-  let is_zero_init = (op == CLZ) || (op == CTZ) || (op == PCNT) || (op == BEXT) || (op == BDEP);
-  return (is_zero_init) ? 0 : arg0; // not super worried about how andc behaves here...
+function BitXL fv_result_init (BitManipOp op,
+                               BitXL arg0
+                               `ifdef RV64
+                               ,Bool is_32_bit
+                               `endif
+                               );
+
+    let is_zero_init = (op == CLZ)  || (op == CTZ)  || (op == PCNT)  || (op == BEXT)  || (op == BDEP);  
+  `ifdef RV32
+    return (is_zero_init) ? 0 : arg0; // not super worried about how andc behaves here...
+  `elsif RV64
+    return (is_zero_init) ? 0 : (is_32_bit) ? (arg0 & lower_32) : arg0;
+  `endif
+
 endfunction: fv_result_init
 
-function BitXL fv_control_init (BitManipOp op, BitXL arg0, BitXL arg1);
-  case (op) matches
-    CLZ     : return reverseBits(arg0);
-    CTZ     : return arg0;
-    PCNT    : return arg0;
-    SRO     : return arg1[(log_xlen - 1) : 0];
-    SLO     : return arg1[(log_xlen - 1) : 0];
-    ROR     : return arg1[(log_xlen - 1) : 0];
-    ROL     : return arg1[(log_xlen - 1) : 0];
-    GREV    : return arg1[(log_xlen - 1) : 0];
-    SHFL    : return reverseBits(arg1) >> (xlen - 4);   
-    UNSHFL  : return arg1[(log_xlen - 2) : 0];
-    BEXT    : return arg1;
-    BDEP    : return arg1;
-    default : return 0; // expecting andc, want this to be poor behaving
-  endcase
+`ifdef RV64
+BitXL lower_32 = 64'h0000_0000__FFFF_FFFF;
+`endif
+
+function BitXL fv_control_init (BitManipOp op, 
+                                BitXL      arg0,
+                                BitXL      arg1
+                                `ifdef RV64
+                               ,Bool       is_32_bit
+                                `endif
+                                );
+  `ifdef RV64
+  if(is_32_bit) begin
+    case (op) matches
+      CLZ     : return reverseBits(arg0) >> 32;
+      CTZ     : return arg0 & lower_32;
+      PCNT    : return arg0 & lower_32;
+      SRO     : return arg1[(log_xlen - 2) : 0];
+      SLO     : return arg1[(log_xlen - 2) : 0];
+      ROR     : return arg1[(log_xlen - 2) : 0];
+      ROL     : return arg1[(log_xlen - 2) : 0];
+      GREV    : return arg1[(log_xlen - 2) : 0];
+      SHFL    : return reverseBits(arg1) >> (xlen - 4);
+      UNSHFL  : return arg1[(log_xlen - 2) : 0];       
+      BEXT    : return arg1 & lower_32;
+      BDEP    : return arg1 & lower_32;
+      default : return 0;
+    endcase
+  end
+  else begin
+  `endif
+    case (op) matches
+      CLZ     : return reverseBits(arg0);
+      CTZ     : return arg0;
+      PCNT    : return arg0;
+      SRO     : return arg1[(log_xlen - 1) : 0];
+      SLO     : return arg1[(log_xlen - 1) : 0];
+      ROR     : return arg1[(log_xlen - 1) : 0];
+      ROL     : return arg1[(log_xlen - 1) : 0];
+      GREV    : return arg1[(log_xlen - 1) : 0];
+      SHFL    : return reverseBits(arg1) >> (xlen - (log_xlen - 1));
+      UNSHFL  : return arg1[(log_xlen - 2) : 0];
+      BEXT    : return arg1;
+      BDEP    : return arg1;
+      default : return 0; // expecting andc, want this to be poor behaving
+    endcase
+  `ifdef RV64
+  end
+  `endif
 endfunction
+
+function IterState fv_state_init(BitManipOp op
+                                 `ifdef RV64
+                                 ,Bool is_32_bit
+                                 `endif
+                                 );
+  case(op) matches
+    CLZ      : return S_Calc;
+    CTZ      : return S_Calc;
+    PCNT     : return S_Calc;
+    SRO      : return S_Calc;
+    SLO      : return S_Calc;
+    ROR      : return S_Calc;
+    ROL      : return S_Calc;
+    GREV     : return S_Stage_1;
+    `ifdef RV32  
+    SHFL     : return S_Stage_8;
+    `elsif RV64
+    SHFL     : return (is_32_bit) ? S_Stage_8 : S_Stage_16;
+    `endif
+    UNSHFL   : return S_Stage_1;
+    BEXT     : return S_Calc;
+    BDEP     : return S_Calc;
+    ANDC     : return S_Idle; // andc not managed here
+    default  : return S_Idle;
+  endcase
+endfunction: fv_state_init
 
 endpackage: BitManipMeta

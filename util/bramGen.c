@@ -162,50 +162,62 @@ int main(int argc, char *argv[]){
   #ifdef RV64
   for(int i = 0; i < no_entries; i++)
     res[i] = clzw(rs1[i]);
-  xlen_hex_write("./clzw.hex", res, no_entries);
+  xlen_hex_write("./clz32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = ctzw(rs1[i]);
-  xlen_hex_write("./ctzw.hex", res, no_entries);
+  xlen_hex_write("./ctz32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = pcntw(rs1[i]);
-  xlen_hex_write("./pcntw.hex", res, no_entries);
+  xlen_hex_write("./pcnt32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = slow(rs1[i], rs2[i]);
-  xlen_hex_write("./slow.hex", res, no_entries);
+  xlen_hex_write("./slo32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = srow(rs1[i], rs2[i]);
-  xlen_hex_write("./srow.hex", res, no_entries);
+  xlen_hex_write("./sro32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = rolw(rs1[i], rs2[i]);
-  xlen_hex_write("./rolw.hex", res, no_entries);
+  xlen_hex_write("./rol32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = rorw(rs1[i], rs2[i]);
-  xlen_hex_write("./rorw.hex", res, no_entries);
+  xlen_hex_write("./ror32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = bextw(rs1[i], rs2[i]);
-  xlen_hex_write("./bextw.hex", res, no_entries);
+  xlen_hex_write("./bext32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = bdepw(rs1[i], rs2[i]);
-  xlen_hex_write("./bdepw.hex", res, no_entries);
+  xlen_hex_write("./bdep32.hex", res, no_entries);
 
 // see bitmanip.c for (un)shflw notes
 
 /*  for(int i = 0; i < no_entries; i++)
     res[i] = shflw(rs1[i], rs2[i]);
-  xlen_hex_write("./shflw.hex", res, no_entries);
+  xlen_hex_write("./shfl32.hex", res, no_entries);
 
   for(int i = 0; i < no_entries; i++)
     res[i] = unshflw(rs1[i], rs2[i]);
-  xlen_hex_write("./unshflw.hex", res, no_entries);*/
+  xlen_hex_write("./unshfl32.hex", res, no_entries);*/
 
+  // mainly for ease in testing
+  for(int i = 0; i < no_entries; i++)
+    res[i] = grev_32(rs1[i], rs2[i]);
+  xlen_hex_write("./grev32.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = shfl_32(rs1[i], rs2[i]);
+  xlen_hex_write("./shfl32.hex", res, no_entries);
+
+  for(int i = 0; i < no_entries; i++)
+    res[i] = unshfl_32(rs1[i], rs2[i]);
+  xlen_hex_write("./unshfl32.hex", res, no_entries);
   #endif
 
   return 0;

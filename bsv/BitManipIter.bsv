@@ -28,29 +28,6 @@ import BitManipMeta :: *;
 //                                             //
 /////////////////////////////////////////////////
 
-function IterState fv_state_init(BitManipOp op);
-  case(op) matches
-    CLZ      : return S_Calc;
-    CTZ      : return S_Calc;
-    PCNT     : return S_Calc;
-    SRO      : return S_Calc;
-    SLO      : return S_Calc;
-    ROR      : return S_Calc;
-    ROL      : return S_Calc;
-    GREV     : return S_Stage_1;
-    `ifdef RV32  // this shuffle portion will likely get messy...
-    SHFL     : return S_Stage_8;
-    `elsif RV64
-    SHFL     : return S_Stage_16;
-    `endif
-    UNSHFL   : return S_Stage_1;
-    BEXT     : return S_Calc;
-    BDEP     : return S_Calc;
-    ANDC     : return S_Idle; // andc not managed here
-    default  : return S_Idle;
-  endcase
-endfunction: fv_state_init
-
 module mkBitManipIter (BitManip_IFC);
 
   Reg #(BitXL)      rg_res       <- mkRegU;  // we'll accumulate a result here
@@ -71,6 +48,9 @@ module mkBitManipIter (BitManip_IFC);
   // module operative control registers
   Reg #(IterState)  rg_state     <- mkReg(S_Idle);
   Reg #(BitManipOp) rg_operation <- mkRegU;
+  `ifdef RV64
+  Reg #(Bool)       rg_32_bit    <- mkRegU;
+  `endif
 
   `ifdef HW_DIAG
   Reg #(int)        rg_cycle     <- mkReg(0);
@@ -85,6 +65,14 @@ module mkBitManipIter (BitManip_IFC);
   BitXL   minus_1 = '1;
   BitXL   msb_set = (1 << (xlen - 1));
   BitXL   lsb_set = 1;
+  `ifdef RV32
+  BitXL   res_saturation = 32;
+  `elsif RV64
+  BitXL   lower_32 = 64'h0000_0000__FFFF_FFFF;
+  BitXL   upper_32 = 64'hFFFF_FFFF__0000_0000;
+  BitXL   res_saturation = (rg_32_bit) ? 32 : 64;
+  BitXL   msb_set_32     = 64'h0000_0000__8000_0000;
+  `endif
 
   Bool is_right_shift_op = (rg_operation == CLZ)  ||
                            (rg_operation == CTZ)  ||
@@ -107,15 +95,22 @@ module mkBitManipIter (BitManip_IFC);
 
   // NB: some exit conditions are honestly early exit (ie: grev, shuffles)
   //             exit          if bit we see is 1    OR  result saturates at XLEN
-  Bool exit_zero_count     = ((unpack(rg_control[0])) || (rg_res == fromInteger(xlen))) && 
+  Bool exit_zero_count     = ((unpack(rg_control[0])) || (rg_res == res_saturation)) && 
                              ((rg_operation == CLZ) || (rg_operation == CTZ));
 
   //             exit         if rs1 becomes 0 OR  result saturates
-  Bool exit_ones_count     = ((rg_control == 0) || (rg_res == fromInteger(xlen))) &&
+  Bool exit_ones_count     = ((rg_control == 0) || (rg_res == res_saturation)) &&
                               (rg_operation == PCNT);
 
+  `ifdef RV32
+  Bool res_is_minus_1      = (rg_res == minus_1);
+  `elsif RV64
+  Bool res_is_minus_1      = ((rg_32_bit)  && (rg_res == lower_32)) ||
+                             ((!rg_32_bit) && (rg_res == minus_1));
+  `endif
+
   //             exit         if res saturates   OR  control is depleted
-  Bool exit_shift_ones     = (rg_res == minus_1) || (rg_control == 0) &&
+  Bool exit_shift_ones     = (res_is_minus_1) || (rg_control == 0) &&
                              ((rg_operation == SRO) || (rg_operation == SLO));
 
   //             exit         when control depletes
@@ -139,8 +134,6 @@ module mkBitManipIter (BitManip_IFC);
   Bool terminate_bext_bdep   = exit_bext_bdep     && ((rg_operation == BEXT) || 
                                                       (rg_operation == BDEP));
 
-  Bool result_valid          = terminate_right_shift || terminate_left_shift || terminate_grev ||
-                               terminate_shfl        || terminate_bext_bdep;
   /////////////////////////
   //                     //
   // Rules               //
@@ -170,7 +163,13 @@ module mkBitManipIter (BitManip_IFC);
     if (terminate_right_shift) rg_state <= S_Idle;
     else begin
       // for ROR, we steal the lsb, otherwise we only care for SRO
+      `ifdef RV32
       let new_msb = (rg_operation == ROR) ? reverseBits(rg_res & lsb_set) : msb_set;
+      `elsif RV64
+      let ror_shamt = (rg_32_bit) ? 32 : 0;
+      let sro_msb   = (rg_32_bit) ? msb_set_32 : msb_set;
+      let new_msb   = (rg_operation == ROR) ? (reverseBits(rg_res & lsb_set) >> ror_shamt) : sro_msb;
+      `endif
 
       // increment rg_res if zero counts are going or pcnt has a set bit
       // use earlier new_mb for sro and ror
@@ -197,13 +196,19 @@ module mkBitManipIter (BitManip_IFC);
       $display("   control    -- %h", rg_control);
       $display("   seed       -- %h", rg_seed);
       $display("   setter     -- %h", rg_setter);
-      $display("   terminating - %b", terminate_right_shift);
+      $display("   terminating - %b", terminate_left_shift);
       rg_cycle <= rg_cycle + 1;
     `endif
     if (terminate_left_shift) rg_state <= S_Idle;
     else begin
       // see note above for new_msb, and think backwards for new_lsb
+      `ifdef RV32
       let new_lsb = (rg_operation == ROL) ? reverseBits(rg_res & msb_set) : lsb_set;
+      `elsif RV64
+      let rol_shamt = (rg_32_bit) ? 32 : 0;
+      let rol_msb = (rg_32_bit) ? msb_set_32 : msb_set;
+      let new_lsb = (rg_operation == ROL) ? (reverseBits(rg_res & rol_msb) >> rol_shamt) : lsb_set;
+      `endif
 
       rg_res     <= ((rg_res << 1) | new_lsb);
       rg_control <= rg_control - 1;
@@ -289,7 +294,7 @@ module mkBitManipIter (BitManip_IFC);
                     (rg_state == S_Stage_4)  ? fv_shuffleStage(rg_res, shfl_left_s4,  shfl_right_s4,  4) :
                     (rg_state == S_Stage_8)  ? fv_shuffleStage(rg_res, shfl_left_s8,  shfl_right_s8,  8) :
                     `ifdef RV64
-                    (rg_state == S_Stage_16) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
+                    ((rg_state == S_Stage_16) && !rg_32_bit) ? fv_shuffleStage(rg_res, shfl_left_s16, shfl_right_s16, 16) :
                     `endif
                     rg_res;  // safe defalut??
       rg_res     <= (unpack(rg_control[0])) ? shuffle : rg_res;
@@ -339,19 +344,48 @@ module mkBitManipIter (BitManip_IFC);
                          `endif
                           ) if (rg_state == S_Idle);
 
-    rg_res     <= fv_result_init  (op_sel, arg0);
-    rg_control <= fv_control_init (op_sel, arg0, arg1);
+    `ifdef RV32
+    let res_init     = fv_result_init  (op_sel, arg0);
+    let control_init = fv_control_init (op_sel, arg0, arg1);
+    let state_init   = fv_state_init (op_sel);   
+    `elsif RV64
+    let res_init     = fv_result_init  (op_sel, arg0, is_32bit);
+    let control_init = fv_control_init (op_sel, arg0, arg1, is_32bit);
+    let state_init   = fv_state_init (op_sel, is_32bit);   
+    `endif
 
+    rg_res     <= res_init; 
+    rg_control <= control_init;
+ 
     // assigning the below in a slightly sloppy fashion since
     // only the pack operations utilize them (grev uses seed)
     rg_seed     <= 1;
     rg_setter   <= arg0;
 
     rg_operation <= op_sel;
-    rg_state     <= fv_state_init (op_sel); 
+    rg_state     <= state_init; 
+
+    `ifdef RV64
+    rg_32_bit    <= is_32bit;
+    `endif
 
     `ifdef HW_DIAG
     rg_cycle     <= 0;  // init for diagnostic build
+    $display("--------------------------------------");
+    $display("   BitManipIter Arg Put               ");
+    $display("   Operation: ", fshow(op_sel));
+    `ifdef RV64
+    if(!is_32bit)
+      $display("   64 bit mode ");
+    else
+      $display("   32 bit mode ");
+    $display(" ");
+    $display("     Res     init : %h", res_init);
+    $display("     Control init : %h", control_init);
+    $display("     Seed always inits to 1");
+    $display("     Setter  init : %h", arg0);
+    $display("--------------------------------------");
+    `endif
     `endif
 
   endmethod: args_put
@@ -365,7 +399,11 @@ module mkBitManipIter (BitManip_IFC);
   endmethod: is_busy
 
   method BitXL value_get;
+    `ifdef RV32
     return rg_res;
+    `elsif RV64
+    return (rg_32_bit) ? (rg_res & lower_32) : rg_res;
+    `endif
   endmethod: value_get
 
 endmodule: mkBitManipIter
